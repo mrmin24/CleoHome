@@ -1,0 +1,110 @@
+var app = require('express')();
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
+var db = require('./dbhandler');
+
+var lastId = 0;
+var timer1;
+
+
+
+io.on('connection', function(socket){
+  console.log('Client connected');
+  //var data = 'Alarm';
+  
+  socket.on('register',function(data){
+    getLast("'"+data+"'",function(result){
+        
+        if(result.length > 0)
+        {
+           lastId = result[0]['Id']; 
+       socket.emit('Event', result[0]);
+        }
+       
+        setListen("'"+data+"'",lastId,function(result){
+        for(var i in result){
+           // lastId = result[i]['Id'];
+         socket.emit('Event', result[i]);
+        }
+        
+        
+    });
+    
+  });
+    });
+    
+ socket.on('disconnect',function(){
+     
+     clearInterval(timer1);
+     
+     console.log('Client Disconnected');
+     
+     if(!this.sockets)
+     {
+         
+         console.log('All clients disconnected');
+     }
+     
+ });   
+    
+});
+  
+  
+  
+ /* 
+ 
+app.get('/', function(req, res){
+  res.sendFile(__dirname + '/index.html');
+});
+
+*/
+
+
+http.listen(44602, function(){
+  console.log('listening on *:44602');
+});
+
+
+function setListen(type,lastId,callback,timer1){
+    
+   timer1 =  setInterval(function() {
+        
+        db.getdata('Event_Log',{Select: 'Id, Event, Time',whereClause:'Type = ' + type + ' AND Id > '+ lastId},function(err,data_receive){
+                        if (err) {
+                        // error handling code goes here
+                            console.log("ERROR : ",err);            
+                        } else {            
+                        // code to execute on data retrieval
+                          if(data_receive.length > 0){
+                          lastId = data_receive[0]['Id'];
+                          }
+                          callback(data_receive);
+                          
+                        }
+                       
+                   });
+        
+     
+        console.log('test');
+    } ,1000);
+    
+    
+}
+
+function getLast(type,callback){
+    
+    db.getLast('Event_Log',{Select: 'Id,Event,Time',whereClause:'Type = ' + type},function(err,result){
+        if (err) 
+        {
+         // error handling code goes here
+            console.log("ERROR : ",err);            
+            }
+            else {            
+        // code to execute on data retrieval
+                callback(result);
+        }
+        
+    });
+    
+    
+}

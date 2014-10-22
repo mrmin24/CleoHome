@@ -1,0 +1,11 @@
+{
+  "name": "CleoHome",
+  "version": "0.0.1",
+  "description": "Cleopatra Home Automation",
+  "dependencies": {
+      
+      "express": "4.3.1",
+    "socket.io": "1.0.2"
+    "forever": "0.11.1"
+  }
+}
