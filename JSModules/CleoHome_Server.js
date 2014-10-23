@@ -1,6 +1,10 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+var routes = require('./routes');
+var router = express.Router();
+
 var db = require('./dbhandler');
 
 var eventio = require('socket.io-client');
@@ -10,21 +14,14 @@ var alarmio = require('socket.io-client');
 var alarmsocket = alarmio.connect('http://localhost:44601');
 
 var port = 80;
+var path = require('path'); 
+
 
 
 function start() {
     
+setupexpress();    
 
-http.listen(port, function(){
-  console.log('listening on port:'+ port.toString());
-});
-
-
- 
-
-app.get('/', function(req, res){
-  res.sendFile(__dirname + '/index.html');
-});
 
 
 
@@ -234,7 +231,34 @@ function getAlarmStatus(){
     
 }
 
-
+function setupexpress(){
+    app.set('views', __dirname + '/views');
+    app.engine('html', require('ejs').renderFile);
+    app.set('view engine', 'ejs');
+     
+   
+    
+    
+    http.listen(port, function(){
+      console.log('listening on port:'+ port.toString());
+    });
+    
+    
+    
+    
+    // home page route (http://localhost:8080)
+    router.get('/', routes.index);
+    
+    app.use(express.static(path.join(__dirname, 'public')));
+    // apply the routes to our application
+    app.use('/', router);
+    
+    
+    
+    app.use(function(req, res){
+    res.send(404);
+  });
+}
 
 
 exports.start = start;
