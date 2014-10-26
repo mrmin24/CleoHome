@@ -10,123 +10,80 @@
     </head>
     
     <body>
-        <div id="header"></div>
-        <div id="menu">
-            <ul>
-                <li>
-                    <a href="news" target="iframe_1">Home</a>
-                </li>
-                <li>
-                    <a href="news" target="iframe_1">Alarm</a>
-                </li>
-                <li>
-                    <a href="news" target="iframe_1">Events</a>
-                </li>
-            </ul>
-        </div>
-        <div id="zonediv">
-            <div class="float_left" class="zonedivs">
-                <label id="labelzone001">
-                    <input type="radio" id="zone001" name="zone1" value="all">Zone1</label>
-                <label id="labelzone002">
-                    <input type="radio" id="zone002" name="zone2" value="false">Zone2</label>
-                <label id="labelzone003">
-                    <input type="radio" id="zone003" name="zone3" value="true">Zone3</label>
-                <label id="labelzone004">
-                    <input type="radio" id="zone004" name="zone4" value="all">Zone4</label>
-                <br>
-            </div>
-            <div class="float_left" class="zonedivs">
-                <label id="labelzone005">
-                    <input type="radio" id="zone005" name="zone5" value="false">Zone5</label>
-                <label id="labelzone006">
-                    <input type="radio" id="zone006" name="zone6" value="true">Zone6</label>
-                <label id="labelzone007">
-                    <input type="radio" id="zone007" name="zone7" value="all">Zone7</label>
-                <label id="labelzone008">
-                    <input type="radio" id="zone008" name="zone8" value="false">Zone8</label>
-                <br>
-            </div>
-            <div class="float_left" class="zonedivs">
-                <label id="labelzone009">
-                    <input type="radio" id="zone009" name="zone9" value="true">Zone9</label>
-                <label id="labelzone010">
-                    <input type="radio" id="zone010" name="zone10" value="all">Zone10</label>
-                <label id="labelzone011">
-                    <input type="radio" id="zone011" name="zone11" value="false">Zone11</label>
-                <label id="labelzone012">
-                    <input type="radio" id="zone012" name="zone12" value="true">Zone12</label>
-                <br>
-            </div>
-            <div class="float_left" class="zonedivs">
-                <label id="labelzone013">
-                    <input type="radio" id="zone013" name="zone13" value="all">Zone13</label>
-                <label id="labelzone014">
-                    <input type="radio" id="zone014" name="zone14" value="false">Zone14</label>
-                <label id="labelzone015">
-                    <input type="radio" id="zone015" name="zone15" value="true">Zone15</label>
-                <label id="labelzone016">
-                    <input type="radio" id="zone016" name="zone16" value="all">Zone16</label>
-                <br>
-            </div>
-            <div class="float_left" class="zonedivs">
-                <label id="labelzone017">
-                    <input type="radio" id="zone017" name="zone17" value="false">Zone17</label>
-                <label id="labelzone018">
-                    <input type="radio" id="zone018" name="zone18" value="true">Zone18</label>
-                <label id="labelzone019">
-                    <input type="radio" id="zone019" name="zone19" value="all">Zone19</label>
-                <label id="labelzone020">
-                    <input type="radio" id="zone020" name="zone20" value="false">Zone20</label>
-                <br>
-            </div>
-            <div class="float_left" class="zonedivs">
-                <label id="labelzone021">
-                    <input type="radio" id="zone021" name="zone21" value="true">Zone 21</label>
-                <label id="labelzone022">
-                    <input type="radio" id="zone022" name="zone22" value="all">Zone 22</label>
-                <label id="labelzone023">
-                    <input type="radio" id="zone023" name="zone23" value="false">Zone 23</label>
-                <label id="labelzone024">
-                    <input type="radio" id="zone024" name="zone24" value="true">Zone 24</label>
-                <br>
-            </div>
-            <div class="float_left" class="zonedivs">
-                <label id="labelzone025">
-                    <input type="radio" id="zone025" name="zone25" value="all">Zone 25</label>
-                <label id="labelzone026">
-                    <input type="radio" id="zone026" name="zone26" value="false">Zone 26</label>
-                <label id="labelzone027">
-                    <input type="radio" id="zone027" name="zone27" value="true">Zone 27</label>
-                <br>
-                <label id="partition1">Unknown</label>
-                <br>
-                <br>
-            </div>
-        </div>
-        <div id="centrecontainer">
-            <div id="frame1div">
-                <iframe id="iframe_1" name="iframe_1"></iframe>
-            </div>
-            <div id="events">
-                <h2>Events</h2>
-                <ul id="messages"></ul>
-                <div id="EventsFiltersDiv">
-                    <h3>Event Filters</h3>
-                    <label id="Checkbox1" class="inline">
-                        <input type="checkbox" id="checkbox1" name="checkbox1" checked>Zones</label>
-                    <label id="Checkbox2" class="inline">
-                        <input type="checkbox" id="checkbox2" name="checkbox2">Partition</label>
-                    <label id="Checkbox3" class="inline">
-                        <input type="checkbox" id="checkbox3" name="checkbox3">Spare</label>
+        <div class="container col-sm-12" >
+            <nav class="nav navbar-default navbar-inverse" role="navigation">
+                <div class="container-fluid">
+                    <div class="navbar-header" >
+                        <a class="navbar-brand" href="/">CleoHome</a>
+                    </div>
+                    <div class="navbar-collapse collapse" id="navbar-collapse-1">
+                         <ul class="nav navbar-nav"  >
+                            <li class="active">
+                                <a href="news" target="iframe_1">Home</a>
+                            </li>
+                            <li>
+                                <a href="news" target="iframe_1">Alarm</a>
+                            </li>
+                            <li>
+                                <a href="news" target="iframe_1">Events</a>
+                            </li>
+                        </ul>
+                    </div> <!-- navbar-collapse-->
+                </div> <!-- container-fluid-->
+            </nav>
+           
+           
+                <div class="panel panel-default col-sm-10">
+                    <div class="panel-heading">Alarm Zones</div>
+                    <div class="panel-body" id="zone_container">
+                        
+                       <!-- labels automatically get added here by script-->
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div id="statusbar"></div>
-        <form action="">
-            <input id="m" autocomplete="off" />
-            <button>Send</button>
-        </form>
+             
+                 
+                        
+                <div class="panel panel-default col-sm-2" >
+                    <div class="panel-heading">Partition Status</div>
+               
+                    <div class="panel-body">
+                        <label id="partition1">Unknown</label>  <!-- partition not automatic at this stage-->
+                    </div>
+                </div>
+            
+            
+            
+                <div class="panel panel-default col-sm-4 ">
+                    <div class="panel-heading"><span class="col-md-3">Events</span>
+                        
+                            <label id="Checkbox1" class="inline">
+                                <input type="checkbox" id="checkbox1" name="checkbox1" checked>Zones</label>
+                            <label id="Checkbox2" class="inline">
+                                <input type="checkbox" id="checkbox2" name="checkbox2">Partition</label>
+                            <label id="Checkbox3" class="inline">
+                                <input type="checkbox" id="checkbox3" name="checkbox3">Spare</label>
+                    </div>
+               
+                    <div class="panel-body " id="event_container">
+                       <!--<ul id="messages"></ul>-->
+                       <br>
+                       
+                    </div>
+                </div>
+            
+                    
+                    
+            
+            <div id="statusbar"></div>
+            <form action="">
+                <input id="m" autocomplete="off" />
+                <button>Send</button>
+            </form>
+        
+        
+        
+        < /div>
+        
         <script src="/socket.io/socket.io.js"></script>
         <script type="text/javascript" src="/jquery/jquery-2.1.1.min.js"></script>
         <script src="/bootstrap/js/bootstrap.min.js"></script>
