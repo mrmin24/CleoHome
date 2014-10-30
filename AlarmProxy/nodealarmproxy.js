@@ -25,7 +25,7 @@ exports.initConfig = function(initconfig) {
 
 	actual = net.connect({port: config.actualport, host:config.actualhost}, function() {
 		//console.log('Alarm connected');
-		 logdata('Alarm connected');
+		 logdata('{"Status":"Alarm connected"}');
 	});
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -112,17 +112,17 @@ exports.initConfig = function(initconfig) {
 		var loginStatus = data.substring(3, 4);
 		if (loginStatus == '0') {
 			//console.log('Incorrect Password :(');
-			 logdata('Incorrect Password :(');
+			 logdata('{"Status":"Incorrect Password :("}');
 		} else if (loginStatus == '1') {
 			//console.log('successfully logged in!  getting current data...');
-			 logdata('successfully logged in!  getting current data...');
+			 logdata('{"Status":"successfully logged in!  getting current data..."}');
 			sendcommand(actual,'001');
 		} else if (loginStatus == '2') {
 			//console.log();
-			 logdata('Request for Password Timed Out :(');
+			 logdata('{"Status:"Request for Password Timed Out :("}');
 		} else if (loginStatus == '3') {
 			//console.log('login requested... sending response...');
-			 logdata('login requested... sending response...');
+			 logdata('{"Status":"login requested... sending response..."}');
 			sendcommand(actual,'005'+config.password);
 		
 		}
@@ -250,7 +250,7 @@ exports.initConfig = function(initconfig) {
 	});
 	actual.on('end', function() {
 		//console.log('Alarm disconnected');
-		 logdata('Alarm disconnected');
+		 logdata('{"Status":"Alarm disconnected"}');
 	});
 
 	return eventEmitter;

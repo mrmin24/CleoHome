@@ -51,7 +51,7 @@ exports.getdata = function(table,data,callback) {
 
    pool.getConnection(function(err, connection){
     
-    //console.log(data);
+    console.log(data.whereClause);
    
     connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause, [table], function(err, result) {
       
@@ -62,6 +62,7 @@ exports.getdata = function(table,data,callback) {
              callback(err,null);
             }
             else {
+                // console.log(data.whereClause);
              callback(null,result);
             }
             

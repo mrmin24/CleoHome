@@ -95,14 +95,14 @@ function setListen(type,lastId,callback){
    
    timer1 =  setInterval(function() {
         
-        db.getdata('Event_Log',{Select: 'Id, Event, Time',whereClause:'Type = ' + type + ' AND Id > '+ lastId},function(err,data_receive){
+        db.getdata('Event_Log',{Select: 'Id,Type, Event, Time',whereClause:'Type = ' + type + ' AND Id > '+ lastId},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
                             console.log("ERROR : ",err);            
                         } else {            
                         // code to execute on data retrieval
                           if(data_receive.length > 0){
-                          lastId = data_receive[data_receive.length-1]['Id'];
+                            lastId = data_receive[data_receive.length-1]['Id'];
                           }
                           callback(data_receive);
                           
@@ -119,7 +119,7 @@ function setListen(type,lastId,callback){
 
 function getLast(type,callback){
     
-    db.getLast('Event_Log',{Select: 'Id,Event,Time',whereClause:'Type = ' + type},function(err,result){
+    db.getLast('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:'Type = ' + type},function(err,result){
         if (err) 
         {
          // error handling code goes here

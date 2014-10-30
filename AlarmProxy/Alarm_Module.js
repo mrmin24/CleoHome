@@ -198,7 +198,7 @@ function logdata(data) {
        }
        else
 		{
-		    log.logger('Alarm', data.pre + ' ' + data.post);
+		    log.logger('Alarm', {Status: data.pre + ' ' + data.post});
 		}
 		
 	} 

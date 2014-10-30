@@ -52,6 +52,22 @@ io.on('connection', function(socket){
      alarmsocket.disconnect(); 
       
   });
+  
+  socket.on('getEvents',function(data){
+    
+    
+   // console.log(data);
+    
+    getEvents(data['numEvents']);
+    
+    
+    
+});
+  
+  
+
+
+
   /*
   socket.on('AlarmConnect',function(){
        console.log('connect requested');
@@ -126,13 +142,35 @@ eventsocket.on('connect', function() {
     
     eventsocket.on('Event',function(data){
         
-        if(data['Event'].indexOf('Partition') > -1) {
+    if(data['Event'].indexOf('Partition') > -1) 
+    {
 
-        io.emit('AlarmPartitionEventHandler', data);
-    }
-    else{
+       var eventdata = JSON.parse(data['Event']);
         
-       io.emit('AlarmZoneEventHandler', data);
+         constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
+            if(eventstring)
+            {
+                var datatosend = {Type: type,Event:eventstring,Time:time};
+           
+                io.emit('AlarmPartitionEventHandler', datatosend);
+                
+    
+            }
+        });
+        }
+    else
+    {
+        var eventdata = JSON.parse(data['Event']);
+        
+        constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
+            if(eventstring)
+            {
+                var datatosend = {Type: type,Event:eventstring,Time:time};
+       
+                io.emit('AlarmZoneEventHandler', datatosend);
+                
+            }
+        });
     }
     });
 });
@@ -184,6 +222,7 @@ function getState(requiredState,callback){
                             console.log("ERROR : ",err);            
                         } else {            
                         // code to execute on data retrieval
+                        
                           callback(data_receive[0]['State']);
                         }
                        
@@ -193,7 +232,8 @@ function getState(requiredState,callback){
     
 }
 
-function getAlarmStatus(){
+function getAlarmStatus()
+{
     
     db.getdata('Alarm_Items',{Select: 'Name,Current_State,Description,Alarm_Event',whereClause:"'Id' LIKE '%'"},function(err,data_receive){
                         if (err) {
@@ -202,22 +242,22 @@ function getAlarmStatus(){
                         } else {            
                         // code to execute on data retrieval
                            for(var i in data_receive){
-                            if(data_receive[i]['Name'].substring(0,4) =="Zone"){
-                             
-                             
-                                var data = {Zone: data_receive[i]['Name'].substring(5),Current_State: data_receive[i]['Current_State'],Description:data_receive[i]['Description'],Alarm_Event:data_receive[i]['Alarm_Event']};
+                                if(data_receive[i]['Name'].substring(0,4) == "Zone")
+                                {
+                                    var data = {Zone: data_receive[i]['Name'].substring(5),Current_State: data_receive[i]['Current_State'],Description:data_receive[i]['Description'],Alarm_Event:data_receive[i]['Alarm_Event']};
                                
-                                io.emit('AlarmZoneEvent',data);
+                                    io.emit('AlarmZoneStatusEvent',data);
                                 
-                            }else if(data_receive[i]['Name'].substring(0,9) =="Partition")
-                            {
-                                  getState(data_receive[i]['Current_State'],function(realState){
-                                var data = {Partition: data_receive[i]['Name'].substring(0,8)+'1',Current_State:realState };
-                                io.emit('AlarmPartitionEvent',data);
-                                  });
+                                }
+                                else if(data_receive[i]['Name'].substring(0,9) =="Partition")
+                                {
+                                    getState(data_receive[i]['Current_State'],function(realState){
+                                        var data = {Partition: data_receive[i]['Name'].substring(0,8)+'1',Current_State:realState };
+                                        io.emit('AlarmPartitionStatusEvent',data);
+                                    });
                                 
                                 
-                            }
+                                }
                                
                            }
                             
@@ -231,28 +271,104 @@ function getAlarmStatus(){
     
 }
 
+
+function getEvents(numEvents){
+    
+    db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Id LIKE '%' ORDER BY Id ASC LIMIT " + numEvents},function(err,data_receive){
+                        if (err) {
+                        // error handling code goes here
+                            console.log("ERROR : ",err);            
+                        } else {            
+                        // code to execute on data retrieval
+                           for(var i in data_receive){
+                                
+                                var eventData = JSON.parse(data_receive[i]['Event']);
+                                
+                                    
+                                    
+                                    
+                                    constructEvent(eventData,data_receive[i]['Time'],data_receive[i]['Type'],function(eventstring,alarm,time,type){
+                                        if(eventstring)
+                                        {  
+                                           var  data = {Event_Type: type,Event:eventstring,Time:time,Alarm:alarm};
+                                      
+                                            if(data)
+                                            {
+                                                io.emit('sendEvents',data);
+                                            }
+                                        }
+                                    
+                                    });
+                                
+                            }
+                               
+                           }
+                            
+                            return;
+                        
+                        });
+    
+
+    
+    
+}
+
+
+function constructEvent(eventData,time,type,callback){
+    
+    if(eventData['Zone'] && eventData['Current_State'])
+    {
+    
+        var state = null;
+        var Alarm = null;
+        getState(eventData['Current_State'],function(data){
+                            
+            state = data;
+           if(state == "Alarm")
+           {
+            var eventString = eventData['Zone'] + " - " + state;
+            callback(eventString,"Alarm",time,type);  
+            
+               
+           }
+           else
+           {
+            var eventString = eventData['Zone'] + " - " + state;
+            callback(eventString,null,time,type);
+           }                
+        });
+                        // code to execute on data retrieval
+        
+                    
+    }
+    else if(eventData['Status'])
+    {
+        
+         var eventString = eventData['Status'];
+         callback(eventString,null,time,type);
+    }
+    else
+    {
+        
+        callback(null,null,null,null);
+    }
+}
+
 function setupexpress(){
     app.set('views', __dirname + '/views');
     app.engine('html', require('ejs').renderFile);
     app.set('view engine', 'ejs');
      
    
-    
-    
     http.listen(port, function(){
       console.log('listening on port:'+ port.toString());
     });
-    
-    
-    
-    
     // home page route (http://localhost:8080)
     router.get('/', routes.index);
     
     app.use(express.static(path.join(__dirname, 'public')));
     // apply the routes to our application
     app.use('/', router);
-    
     
     
     app.use(function(req, res){

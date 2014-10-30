@@ -9,7 +9,7 @@ var io = require('socket.io')(http);
 
 
 exports.logger = function(type,event) {
-    console.log(event);
+    //console.log(event);
     var data = {Type: type, Event: event, Time: Date().toString()  };
     
    
