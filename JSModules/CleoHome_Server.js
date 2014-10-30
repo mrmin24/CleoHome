@@ -274,13 +274,13 @@ function getAlarmStatus()
 
 function getEvents(numEvents){
     
-    db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Id LIKE '%' ORDER BY Id ASC LIMIT " + numEvents},function(err,data_receive){
+    db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Id LIKE '%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
                             console.log("ERROR : ",err);            
                         } else {            
                         // code to execute on data retrieval
-                           for(var i in data_receive){
+                           for(var i = numEvents-1;i>=0;i--){
                                 
                                 var eventData = JSON.parse(data_receive[i]['Event']);
                                 
