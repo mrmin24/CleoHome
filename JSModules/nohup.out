@@ -4148,3 +4148,133 @@ Connected to Alarm Module
 Server registered for Alarm events
 Server registered for Alarm events
 Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+
+undefined:1
+[object Object]
+ ^
+SyntaxError: Unexpected token o
+    at Object.parse (native)
+    at Socket.<anonymous> (/var/lib/cloud9/Projects/CleoHome/JSModules/CleoHome_Server.js:163:30)
+    at Socket.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+    at Socket.onevent (/usr/local/lib/node_modules/socket.io-client/lib/socket.js:252:10)
+    at Socket.onpacket (/usr/local/lib/node_modules/socket.io-client/lib/socket.js:210:12)
+    at Manager.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
+    at Manager.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+    at Manager.ondecoded (/usr/local/lib/node_modules/socket.io-client/lib/manager.js:272:8)
+    at Decoder.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
+    at Decoder.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+Listening on 44601
+Listening on 44602
+listening on port:80
+Client connected
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm events
+Client Connected
+Sat, 01 Nov 2014 08:39:21 GMT express deprecated res.send(status): Use res.status(status).end() instead at CleoHome_Server.js:375:9
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Connected
+Client Connected
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+
+undefined:1
+[object Object]
+ ^
+SyntaxError: Unexpected token o
+    at Object.parse (native)
+    at Socket.<anonymous> (/var/lib/cloud9/Projects/CleoHome/JSModules/CleoHome_Server.js:163:30)
+    at Socket.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+    at Socket.onevent (/usr/local/lib/node_modules/socket.io-client/lib/socket.js:252:10)
+    at Socket.onpacket (/usr/local/lib/node_modules/socket.io-client/lib/socket.js:210:12)
+    at Manager.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
+    at Manager.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+    at Manager.ondecoded (/usr/local/lib/node_modules/socket.io-client/lib/manager.js:272:8)
+    at Decoder.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
+    at Decoder.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+Listening on 44601
+Listening on 44602
+listening on port:80
+Client connected
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm events
+State = 'Armed in Stay Mode'
+Client Connected
+Sun, 02 Nov 2014 18:57:47 GMT express deprecated res.send(status): Use res.status(status).end() instead at CleoHome_Server.js:375:9
+Client Disconnected
+All clients disconnected
+
+undefined:1
+[object Object]
+ ^
+SyntaxError: Unexpected token o
+    at Object.parse (native)
+    at Socket.<anonymous> (/var/lib/cloud9/Projects/CleoHome/JSModules/CleoHome_Server.js:163:30)
+    at Socket.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+    at Socket.onevent (/usr/local/lib/node_modules/socket.io-client/lib/socket.js:252:10)
+    at Socket.onpacket (/usr/local/lib/node_modules/socket.io-client/lib/socket.js:210:12)
+    at Manager.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
+    at Manager.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+    at Manager.ondecoded (/usr/local/lib/node_modules/socket.io-client/lib/manager.js:272:8)
+    at Decoder.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
+    at Decoder.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+Listening on 44601
+Listening on 44602
+listening on port:80
+Client connected
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Client Connected
+Server registered for Alarm events
+Server registered for Alarm events
+Sun, 02 Nov 2014 20:18:23 GMT express deprecated res.send(status): Use res.status(status).end() instead at CleoHome_Server.js:375:9
+State = 'Armed in Away Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+Client Disconnected
+All clients disconnected
+
+undefined:1
+[object Object]
+ ^
+SyntaxError: Unexpected token o
+    at Object.parse (native)
+    at Socket.<anonymous> (/var/lib/cloud9/Projects/CleoHome/JSModules/CleoHome_Server.js:163:30)
+    at Socket.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+    at Socket.onevent (/usr/local/lib/node_modules/socket.io-client/lib/socket.js:252:10)
+    at Socket.onpacket (/usr/local/lib/node_modules/socket.io-client/lib/socket.js:210:12)
+    at Manager.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
+    at Manager.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+    at Manager.ondecoded (/usr/local/lib/node_modules/socket.io-client/lib/manager.js:272:8)
+    at Decoder.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
+    at Decoder.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)

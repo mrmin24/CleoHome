@@ -63,6 +63,17 @@ io.on('connection', function(socket){
     
     
 });
+
+ socket.on('getLastAlarm',function(data){
+    
+    
+   // console.log(data);
+    
+    getLastAlarm();
+    
+    
+    
+});
   
   
 
@@ -301,6 +312,78 @@ function getEvents(numEvents){
                                     });
                                 
                             }
+                               
+                           }
+                            
+                            return;
+                        
+                        });
+    
+
+    
+    
+}
+
+
+function getLastAlarm(){
+    
+    db.getdata('Event_Log',{Select: 'Id',whereClause:"Event LIKE '%20%' ORDER BY Id DESC LIMIT 1"},function(err,data_receive){
+                        if (err) {
+                        // error handling code goes here
+                            console.log("ERROR : ",err);            
+                        } else {            
+                        // code to execute on data retrieval
+                        
+                        if(data_receive[0])
+                        {
+                        var newid = data_receive[0]['Id']-10;
+
+                          db.getdata('Event_Log',{Select: '*',whereClause:"Id > "+ newid +" limit 20"},function(err,data_receives){
+                        if (err) {
+                        // error handling code goes here
+                            console.log("ERROR : ",err);            
+                        } else {            
+                        // code to execute on data retrieval
+                        
+                        
+                           for(var i = 0;i<=data_receives.length-1;i++){
+                                
+                                var eventData = JSON.parse(data_receives[i]['Event']);
+                                
+                                    
+                                    
+                                    
+                                    constructEvent(eventData,data_receives[i]['Time'],data_receives[i]['Type'],function(eventstring,alarm,time,type){
+                                        if(eventstring)
+                                        {  
+                                           var  data = {Event_Type: type,Event:eventstring,Time:time,Alarm:alarm};
+                                      
+                                            if(data)
+                                            {
+                                                io.emit('lastAlarmEvents',data);
+                                            }
+                                        }
+                                    
+                                    });
+                                
+                            }
+                               
+                           }
+                            
+                            return;
+                        
+                        });
+                        }
+                        else
+                        {
+                            var  data = {Event_Type: "None",Event:"No alarm event found",Time:"None",Alarm:"None"};
+                                      
+                                            if(data)
+                                            {
+                                                io.emit('lastAlarmEvents',data);
+                                            }
+                            
+                        }
                                
                            }
                             

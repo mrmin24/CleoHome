@@ -70,6 +70,8 @@
          
      }
      
+     
+     
      socket.on('sendEvents',function(data){
          
          var rows = $('#event_container tr').length+1;
@@ -89,6 +91,37 @@
         
          
      });
+     
+     function showlastalarm(){
+        socket.emit('getLastAlarm',function(err,data){
+            
+             
+             
+         });
+         
+         
+     }
+     
+     socket.on('lastAlarmEvents',function(data){
+         
+         var rows = $('#event_container tr').length+1;
+         
+        if(data['Alarm'] == "Alarm")
+        { 
+            var newHtml = '<tr class = "danger"><td>'+ rows +'</td><td>'+data['Event_Type'] +'</td><td>'+ data['Event']+'</td><td>'+ data['Time'] +'</td></tr>';
+        }else
+        {
+            var newHtml = '<tr><td>'+ rows +'</td><td>'+data['Event_Type'] +'</td><td>'+ data['Event']+'</td><td>'+ data['Time'] +'</td></tr>';
+            
+        }
+        var radioFragment = document.getElementById('event_container');
+        radioFragment.innerHTML =  newHtml + radioFragment.innerHTML ;
+
+
+        
+         
+     });
+     
     
     socket.on('ConnectionStatus', function(data) {
        
