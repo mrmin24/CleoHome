@@ -4278,3 +4278,787 @@ SyntaxError: Unexpected token o
     at Manager.ondecoded (/usr/local/lib/node_modules/socket.io-client/lib/manager.js:272:8)
     at Decoder.<anonymous> (/usr/local/lib/node_modules/socket.io-client/node_modules/component-bind/index.js:21:15)
     at Decoder.Emitter.emit (/usr/local/lib/node_modules/socket.io-client/node_modules/component-emitter/index.js:134:20)
+Listening on 44601
+Listening on 44602
+listening on port:80
+Client connected
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm events
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+State = 'Armed in Stay Mode'
+Client Connected
+Mon, 03 Nov 2014 21:18:08 GMT express deprecated res.send(status): Use res.status(status).end() instead at CleoHome_Server.js:458:9
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Connected
+Client Connected
+Client Connected
+Client Connected
+Client Connected
+Client Connected
+Client Connected
+Client Connected
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+Client Connected
+Client Connected
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Connected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Connected
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+State = 'Armed in Stay Mode'
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+State = 'Armed in Stay Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+Client Connected
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+State = 'Armed in Away Mode'
+Client Connected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+State = 'Armed in Stay Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+State = 'Armed in Away Mode'
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+State = 'Armed in Away Mode'
+State = 'Armed in Away Mode'
+State = 'Armed in Stay Mode'
+State = 'Armed in Stay Mode'
+Client Connected
+State = 'Armed in Stay Mode'
+Listening on 44601
+Listening on 44602
+listening on port:80
+Client connected
+Client connected
+Client Connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm events
+State = 'Armed in Stay Mode'
+Client Connected
+Client Disconnected
+State = 'Armed in Stay Mode'
+State = 'Armed in Away Mode'
+Client Disconnected
+All clients disconnected
+Client Connected
+State = 'Armed in Away Mode'
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Fri, 07 Nov 2014 06:18:00 GMT express deprecated res.send(status): Use res.status(status).end() instead at CleoHome_Server.js:554:9
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Connected
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+State = 'Armed in Away Mode'
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Listening on 44601
+Listening on 44602
+listening on port:80
+Client connected
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm events
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+7
+Night mode
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Sat, 08 Nov 2014 06:32:53 GMT express deprecated res.send(status): Use res.status(status).end() instead at CleoHome_Server.js:566:9
+Client Disconnected
+All clients disconnected
+Client Connected
+Away mode
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Disarmed
+Away mode
+Disarmed
+Away mode
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+3
+Stay mode
+Disarmed
+Stay mode
+Stay mode
+Disarmed
+Client Disconnected
+All clients disconnected
+Client Connected
+Listening on 44601
+Listening on 44602
+listening on port:80
+Client connected
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm events
+Client Connected
+Client Disconnected
+All clients disconnected
+Sat, 08 Nov 2014 23:17:21 GMT express deprecated res.send(status): Use res.status(status).end() instead at CleoHome_Server.js:566:9
+Client Connected
+Client Connected
+Stay mode
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Away mode
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Away mode
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Connected
+Client Disconnected
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Connected
+Client Disconnected
+Listening on 44601
+Listening on 44602
+listening on port:80
+[ '5053CD', '', '' ]
+[ '5000052A', '', '5051CB', '', '' ]
+Client connected
+Client connected
+[ '50000126',
+  '',
+  '61000128',
+  '',
+  '61000229',
+  '',
+  '6100032A',
+  '',
+  '6100042B',
+  '',
+  '6100052C',
+  '',
+  '6100062D',
+  '',
+  '6100072E',
+  '',
+  '6100082F',
+  '',
+  '61000930',
+  '',
+  '61001028',
+  '',
+  '' ]
+[ '61001129',
+  '',
+  '6100122A',
+  '',
+  '6100132B',
+  '',
+  '6100142C',
+  '',
+  '6100152D',
+  '',
+  '6100162E',
+  '',
+  '6100172F',
+  '',
+  '61001830',
+  '',
+  '61001931',
+  '',
+  '61002029',
+  '',
+  '6100212A',
+  '',
+  '' ]
+Client Connected
+Connected to Event Handler
+Connected to Alarm Module
+[ '6100222B',
+  '',
+  '6100232C',
+  '',
+  '6100242D',
+  '',
+  '6100252E',
+  '',
+  '6100262F',
+  '',
+  '61002730',
+  '',
+  '61002831',
+  '',
+  '61002932',
+  '',
+  '6100302A',
+  '',
+  '6100312B',
+  '',
+  '6100322C',
+  '',
+  '' ]
+Server registered for Alarm events
+Server registered for Alarm events
+[ '6100332D',
+  '',
+  '6100342E',
+  '',
+  '6100352F',
+  '',
+  '61003630',
+  '',
+  '61003731',
+  '',
+  '61003832',
+  '',
+  '61003933',
+  '',
+  '6100402B',
+  '',
+  '6100412C',
+  '',
+  '6100422D',
+  '',
+  '6100432E',
+  '',
+  '' ]
+[ '6100442F',
+  '',
+  '61004530',
+  '',
+  '61004631',
+  '',
+  '61004732',
+  '',
+  '61004833',
+  '',
+  '61004934',
+  '',
+  '6100502C',
+  '',
+  '6100512D',
+  '',
+  '6100522E',
+  '',
+  '6100532F',
+  '',
+  '61005430',
+  '',
+  '' ]
+[ '61005531',
+  '',
+  '61005632',
+  '',
+  '61005733',
+  '',
+  '61005834',
+  '',
+  '61005935',
+  '',
+  '6100602D',
+  '',
+  '6100612E',
+  '',
+  '6100622F',
+  '',
+  '61006330',
+  '',
+  '61006431',
+  '',
+  '6501CC',
+  '',
+  '6732D2',
+  '',
+  '' ]
+[ '6733D3',
+  '',
+  '6734D4',
+  '',
+  '6735D5',
+  '',
+  '6736D6',
+  '',
+  '6737D7',
+  '',
+  '6738D8',
+  '',
+  '8411CE',
+  '',
+  '8412CF',
+  '',
+  '8413D0',
+  '',
+  '8414D1',
+  '',
+  '8415D2',
+  '',
+  '8416D3',
+  '',
+  '8417D4',
+  '',
+  '8418D5',
+  '',
+  '' ]
+[ '51081FF', '', '' ]
+49
+Client Disconnected
+All clients disconnected
+[ '50000025', '', '' ]

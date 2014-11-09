@@ -45,33 +45,79 @@
             <div class = "row">
             
             
-                <div class = "col-xs-7 col-lg-12" id="Alarm_Panel"> 
+                <div class = "col-xs-12 " id="Alarm_Panel"> 
                 
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h2 class = "panel-title col-xs-2">Alarm</h2>
-                            <span>Partition Status: </span><label id="partition1">Unknown</label>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            <span >
+                                <span><label id="bypass" class = "label label-default">Bypass</label></span>
+                                <span><label id="memory" class = "label label-default">Memory</label></span>
+                                <span> <label id="armed" class = "label label-default">Armed</label></span>
+                                <span> <label  id="partition1" class = "label label-default">Ready</label></span>
+                            </span>
                         </div>
                         <div class="panel-body" id="zone_container">
-                                
-                               <!-- labels automatically get added here by script-->
+                            <div id = "alarm_controls" class="well hidden">
+                                    
+                                            
+                                            
+                                    
+                                    <!--<label id = "event_dropdown_btn" class="hidden">-->
+                                    <div class="btn-toolbar" role="toolbar">
+                                        <div class="btn-group">
+                                            <span>
+                                                <button class="btn btn-danger" type="button" id="Away_Arm_Btn" onclick = "armDisarmAlarm('Away')" >Away Arm </button>
+                                            </span>
+                                            
+                                            <span>
+                                                <button class="btn btn-warning" type="button" id="Stay_Arm_Btn"  onclick = "armDisarmAlarm('Stay')"  >Stay Arm </button>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-success" type="button" id="Disarm_Btn" onclick = "armDisarmAlarm('Disarm')" >Disarm </button>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-primary" type="button" id="Night_Arm_Btn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
+                                            </span>
+                                            
+                                           <!-- </label>-->
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="btn-group">
+                                            <span>
+                                                <button class="btn btn-primary" type="button" id="Bypass_Btn" onclick = "bypassAlarm()" >Bypass </button>
+                                            </span>
+                                            
+                                           
+                                        </div>
+                                    </div>
+                            </div> <!-- <well>-->
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
                         </div>
                     </div>
                     
                 </div>
                 
-                <div class = "col-xs-5 col-lg-3"  id="Event_Panel">
+                <div class = "col-xs-12 col-md-6"  id="Event_Panel">
                     <div class="panel panel-default " >
                         <div class="panel-heading">
                             <h2 class = "panel-title col-xs-3  col-lg-4" id = "Event_Panel_Title">Events</h2>
                             <br>
                             <span>
                                 <label id="Checkbox1" class="checkbox-inline" >
-                                    <input type="checkbox" id="checkbox1" name="checkbox1" checked>Zones</label>
+                                    <input type="checkbox" id="checkbox1" name="checkbox1">Zones</label>
                                 <label id="Checkbox2" class="checkbox-inline">
                                     <input type="checkbox" id="checkbox2" name="checkbox2">Partition</label>
                                 <label id="Checkbox3" class="checkbox-inline">
-                                    <input type="checkbox" id="checkbox3" name="checkbox3">Spare</label>
+                                    <input type="checkbox" id="checkbox3" name="checkbox3" checked>Important</label>
                             </span>
                                 
                             
@@ -104,11 +150,13 @@
                                 
                                 <!--<label id = "event_dropdown_btn" class="hidden">-->
                                 <span>
-                                    <button class="btn btn-default" type="button" id="Num_Event_Btn" onclick = "showevents()" > Show Events </button>
+                                    <button class="btn btn-primary" type="button" id="Num_Event_Btn" onclick = "showAllEvents()" >All Events </button>
                                 </span>
-                                
                                 <span>
-                                    <button class="btn btn-default" type="button" id="Last_Alarm_Btn" onclick = "showlastalarm()" > Last Alarm </button>
+                                    <button class="btn btn-warning" type="button" id="Num_Event_Btn" onclick = "showImportantEvents()" >Important Events </button>
+                                </span>
+                                <span>
+                                    <button class="btn btn-danger" type="button" id="Last_Alarm_Btn" onclick = "showLastAlarm()" > Last Alarm </button>
                                 </span>
                                <!-- </label>-->
                                 </span>
@@ -138,6 +186,13 @@
                 </article>
                 
                 <article class = "tab-pane" id="Events">    <!-- Second Tab-->
+                
+                    
+                    
+                    
+                    
+                </article>  <!-- End second tab -->
+                <article class = "tab-pane" id="Alarm">    <!-- Third Tab-->
                 
                     
                     

@@ -3,3 +3,10 @@ h2{
 }
 
 #event_container{height:450px;overflow:scroll;}
+
+.fullwidth{
+    
+    width:100%;
+    border-style:solid;
+    font-weight:bold;
+}

@@ -176,7 +176,7 @@ exports.tpicommands = {
     'bytes':3,
     'post':'Acknowledged',
     'send':'',
-    'action':''
+    'action':'ack'
   },
   '501' : {
     'name':'Command Error',
@@ -184,7 +184,7 @@ exports.tpicommands = {
     'bytes':0,
     'post':'',
     'send':'',
-    'action':''
+    'action':'nack'
   },
   '502' : {
     'name':'System Error',
@@ -192,7 +192,7 @@ exports.tpicommands = {
     'bytes':3,
     'post':'has been detected.',
     'send':'',
-    'action':''
+    'action':'nack'
   },
   '505' : {
     'name':'Login Interaction',
@@ -208,7 +208,7 @@ exports.tpicommands = {
     'bytes':2,
     'post':'',
     'send':'',
-    'action':''
+    'action':'keypadState'
   },
   '511' : {
     'name':'Keypad LED FLASH State - Partition 1 Only',

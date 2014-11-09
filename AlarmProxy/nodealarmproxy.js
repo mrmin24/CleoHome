@@ -10,12 +10,16 @@ var alarmdata = {
 	partition:{},
 	user:{}
 };
+var password = '3572';
 
 var actual, server, config;
+var ackReceived = null;
+var ackStatus = null;
 
 exports.initConfig = function(initconfig) {
 
 	config = initconfig;
+	
 	if (!config.actualport) {
 		config.actualport = 4025;
 	}
@@ -68,7 +72,9 @@ exports.initConfig = function(initconfig) {
 						if (rec.action == 'forward') {
 							sendforward(dataslice[i].substring(0,dataslice[i].length-2));
 						}
-						sendcommand(c,rec.send);
+						sendcommand(c,rec.send,function(){
+						    
+						});
 					}
 				}
 			});
@@ -84,23 +90,31 @@ exports.initConfig = function(initconfig) {
 		var checkpassword = function (c,data) {
 			if (data.substring(3,data.length-2) == config.serverpassword) {
 				console.log('Correct Password! :)');
-				sendcommand(c,'5051');
+				sendcommand(c,'5051',function(){
+				    
+				});
 			} else {
 				console.log('Incorrect Password :(');
-				sendcommand(c,'5050');
+				sendcommand(c,'5050',function(){
+				    
+				});
 				c.end();
 			}
 		};
 
 		var sendforward = function (data) {
 			console.log('sendforward:',data);
-			sendcommand(actual,data);
+			sendcommand(actual,data,function(){
+			    
+			});
 		};
 
 		var broadcastresponse = function (response) {
 			if (connections.length > 0) {
 				for (var i = 0; i<connections.length; i++) {
-					sendcommand(connections[i],response);
+					sendcommand(connections[i],response,function(){
+					    
+					});
 				}
 			}
 		};
@@ -116,14 +130,18 @@ exports.initConfig = function(initconfig) {
 		} else if (loginStatus == '1') {
 			//console.log('successfully logged in!  getting current data...');
 			 logdata('{"Status":"successfully logged in!  getting current data..."}');
-			sendcommand(actual,'001');
+			sendcommand(actual,'001',function(){
+			    
+			});
 		} else if (loginStatus == '2') {
 			//console.log();
 			 logdata('{"Status:"Request for Password Timed Out :("}');
 		} else if (loginStatus == '3') {
 			//console.log('login requested... sending response...');
 			 logdata('{"Status":"login requested... sending response..."}');
-			sendcommand(actual,'005'+config.password);
+			sendcommand(actual,'005'+config.password,function(){
+			    
+			});
 		
 		}
 	}
@@ -159,7 +177,7 @@ exports.initConfig = function(initconfig) {
 				}
 			} else {
 			    	if (data.substring(0,3) == "652") {
-				eventEmitter.emit('data',{pre:tpi.pre,partition:data.substring(3,4),mode:data.substring(4,5),code:data.substring(0,3),post:tpi.post,send:tpi.send});
+				        eventEmitter.emit('data',{pre:tpi.pre,partition:data.substring(3,4),mode:data.substring(4,5),code:data.substring(0,3),post:tpi.post,send:tpi.send});
 			    	}
 			    	
 			   else
@@ -209,9 +227,10 @@ exports.initConfig = function(initconfig) {
 
 	actual.on('data', function(data) {
 		var dataslice = data.toString().replace(/[\n\r]/g, ',').split(',');
-
+        console.log(dataslice);
 		for (var i = 0; i<dataslice.length; i++) {
 			var datapacket = dataslice[i];
+			
 			if (datapacket !== '') {
 				var tpi = elink.tpicommands[datapacket.substring(0,3)];
 				if (tpi) {
@@ -235,6 +254,25 @@ exports.initConfig = function(initconfig) {
 						else if (tpi.action === 'loginresponse') {
 							loginresponse(datapacket);
 						}
+						else if (tpi.action === 'coderequired') {
+						    manualCommand('200'+ password);
+						}else if (tpi.action === 'ack'){
+						   
+						    ackReceived = datapacket.substring(3,6);
+						    ackStatus = true;
+						    
+						}
+						else if (tpi.action === 'nack'){
+						   
+						    ackReceived = datapacket.substring(3,6);
+						    ackStatus = false;
+						    
+						}else if(tpi.action === 'keypadState'){
+						    
+						    updateLedState(datapacket.substring(4,5));
+						}
+						
+						
 					/*	else{
 						     if(tpi.action === '') {
 						    generalresponse(tpi,datapacket);
@@ -256,7 +294,7 @@ exports.initConfig = function(initconfig) {
 	return eventEmitter;
 };
 
-function sendcommand(addressee,command) {
+function sendcommand(addressee,command,callback) {
 	var checksum = 0;
 	for (var i = 0; i<command.length; i++) {
 		checksum += command.charCodeAt(i);
@@ -265,12 +303,49 @@ function sendcommand(addressee,command) {
 	checksum = checksum.toString(16).slice(-2).toUpperCase();
 	
 	actual.write(command+checksum+'\r\n');
+	
+    acktimer1 =  setInterval(function() {
+    
+    if(ackReceived == command.substring(0,3)){
+        ackReceived = null;
+	
+    	if(ackStatus){
+    	    callback(true,false);
+    	    clearInterval(acktimer1);
+    	}else
+    	{
+    	    
+    	    callback(false,true);
+    	    clearInterval(acktimer1);
+    	}
+    }
+    	
+    },500);
+	
+	
 }
 
-exports.manualCommand = function(command) {
+exports.manualCommand = function(command,passwordRequired,callback) {
 	if (actual) {
-		sendcommand(actual,command);
+	    if(passwordRequired){
+		    sendcommand(actual,command+password,function(ack,nack){
+		        
+		        callback(ack,nack);
+		        
+		        
+		    });
+	    }
+	    else{
+	      sendcommand(actual,command,function(ack,nack){
+	          
+	          callback(ack,nack);
+	          
+	      });
+	        
+	    }
 	} else {
+	    
+	     callback(false,false);
 		//not initialized
 	}
 };
@@ -286,5 +361,15 @@ function logdata(data) {
       
       
 		
-	} 
+} 
     
+function getPass(){
+    
+    return config.alarmpassword;
+}
+
+function updateLedState(datapacket){
+    
+    eventEmitter.emit('keypadLedState',datapacket);
+    
+}

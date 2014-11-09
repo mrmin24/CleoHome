@@ -6,5 +6,6 @@ exports.port = 4025;
 exports.proxyEnabled = false;
 exports.zones = 27;
 exports.partitions = 1;
+
 //exports.app_id = ""; //smartthings app_id
 //exports.access_token = ""; //smartthings access_token

@@ -64,6 +64,17 @@ io.on('connection', function(socket){
     
 });
 
+ socket.on('getImportantEvents',function(data){
+    
+    
+   // console.log(data);
+    
+    getImportantEvents(data['numEvents']);
+    
+    
+    
+});
+
  socket.on('getLastAlarm',function(data){
     
     
@@ -74,7 +85,36 @@ io.on('connection', function(socket){
     
     
 });
+
+    socket.on('armDisarmAlarm',function(type){
+    
+    
+   
+    
+    alarmsocket.emit('armDisarm',type);
+    
+    
+    
+});
+
   
+ socket.on('bypassZone',function(zone,callback){
+    
+    
+   
+     alarmsocket.emit('bypassZones',zone,function(err,acks){
+         
+        
+       callback(err,acks);
+         
+         
+         
+     });
+    
+    
+    
+    
+}); 
   
 
 
@@ -153,36 +193,50 @@ eventsocket.on('connect', function() {
     
     eventsocket.on('Event',function(data){
         
-    if(data['Event'].indexOf('Partition') > -1) 
-    {
-
-       var eventdata = JSON.parse(data['Event']);
-        
-         constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
-            if(eventstring)
-            {
-                var datatosend = {Type: type,Event:eventstring,Time:time};
-           
-                io.emit('AlarmPartitionEventHandler', datatosend);
-                
+        if(data['Event'].indexOf('Partition') > -1) 
+        {
     
-            }
-        });
-        }
-    else
-    {
-        var eventdata = JSON.parse(data['Event']);
+           var eventdata = JSON.parse(data['Event']);
+            
+             constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
+                if(eventstring)
+                {
+                    var datatosend = {Type: type,Event:eventstring,Time:time};
+               
+                    io.emit('AlarmPartitionEventHandler', datatosend);
+                    
         
-        constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
-            if(eventstring)
-            {
-                var datatosend = {Type: type,Event:eventstring,Time:time};
-       
-                io.emit('AlarmZoneEventHandler', datatosend);
-                
-            }
-        });
-    }
+                }
+            });
+        }
+        else if(data['Event'].indexOf('Important') > -1)
+        {
+            var eventdata = JSON.parse(data['Event']);
+            
+            constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
+                if(eventstring)
+                {
+                    var datatosend = {Type: type,Event:eventstring,Time:time};
+           
+                    io.emit('ImportantEventHandler', datatosend);
+                    
+                }
+            });
+        }
+        else if(data['Event'].indexOf('Zone') > -1)
+        {
+            var eventdata = JSON.parse(data['Event']);
+            
+            constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
+                if(eventstring)
+                {
+                    var datatosend = {Type: type,Event:eventstring,Time:time};
+           
+                    io.emit('AlarmZoneEventHandler', datatosend);
+                    
+                }
+            });
+        }
     });
 });
 
@@ -211,6 +265,7 @@ alarmsocket.on('connect', function() {
        {
            getState(data['Current_State'],function(realState){
                
+               
            io.emit('AlarmPartitionEvent', {Partition: '1', Current_State: realState});   
                
            });
@@ -222,6 +277,54 @@ alarmsocket.on('connect', function() {
        }
         
     });
+    
+    
+    alarmsocket.on('keypadLedState',function(data){
+       
+       var bypass,memory,armed,ready;
+       var flag_bypass = 8,flag_memory = 4, flag_armed = 2,flag_ready = 1;
+       
+       
+       if(toHex(data['state']) & flag_bypass)
+       {
+          bypass = true;
+       }
+       else{
+           bypass = false;
+       }
+        
+        
+        if(toHex(data['state']) & flag_memory)
+       {
+          memory = true;
+       }
+       else{
+           memory = false;
+       }
+       
+       if(toHex(data['state']) & flag_armed)
+       {
+          armed = true;
+       }
+       else{
+           armed = false;
+       }
+       
+       if(toHex(data['state']) & flag_ready)
+       {
+          ready = true;
+       }
+       else{
+           ready = false;
+       }
+        console.log(toHex(data['state']));
+        
+        
+         io.emit("keypadLedState",{Bypass:bypass, Memory:memory,Armed:armed,Ready:ready});
+    });
+    
+    
+    
 });
 
 }
@@ -324,10 +427,73 @@ function getEvents(numEvents){
     
 }
 
+function getImportantEvents(numEvents){
+    
+    db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Event LIKE '%Important%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
+                        if (err) {
+                        // error handling code goes here
+                            console.log("ERROR : ",err);            
+                        }
+                        else 
+                        {            
+                            
+                        if(data_receive[0])
+                        {   
+                        // code to execute on data retrieval
+                           for(var i = numEvents-1;i>=0;i--){
+                             if(data_receive[i])
+                             {   
+                                var eventData = JSON.parse(data_receive[i]['Event']);
+                                
+                                    
+                                    
+                                    
+                                    constructEvent(eventData,data_receive[i]['Time'],data_receive[i]['Type'],function(eventstring,alarm,time,type){
+                                        if(eventstring)
+                                        {  
+                                           var  data = {Event_Type: type,Event:eventstring,Time:time,Alarm:alarm};
+                                      
+                                            if(data)
+                                            {
+                                                io.emit('sendImportantEvents',data);
+                                            }
+                                        }
+                                    
+                                    });
+                                
+                            }
+                           }
+                            
+                        }
+                        else
+                        {
+                                
+                                
+                          var  data = {Event_Type: "None",Event:"No important events found",Time:"None",Alarm:"None"};
+                                   
+                          if(data)
+                          {
+                            io.emit('sendImportantEvents',data);
+                          }
+                        }
+                            
+                               
+                           }
+                            
+                            return;
+                        
+                        });
+    
+
+    
+    
+}
+
+
 
 function getLastAlarm(){
     
-    db.getdata('Event_Log',{Select: 'Id',whereClause:"Event LIKE '%20%' ORDER BY Id DESC LIMIT 1"},function(err,data_receive){
+    db.getdata('Event_Log',{Select: 'Id',whereClause:"Event LIKE '%12%' ORDER BY Id DESC LIMIT 1"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
                             console.log("ERROR : ",err);            
@@ -430,6 +596,12 @@ function constructEvent(eventData,time,type,callback){
          var eventString = eventData['Status'];
          callback(eventString,null,time,type);
     }
+    else if(eventData['Important'])
+    {
+        
+         var eventString = eventData['Important'];
+         callback(eventString,null,time,type);
+    }
     else
     {
         
@@ -459,5 +631,14 @@ function setupexpress(){
   });
 }
 
+
+
+function toHex(str) {
+	var hex = '';
+	for(var i=0;i<str.length;i++) {
+		hex += ''+str.charCodeAt(i);
+	}
+	return hex;
+}
 
 exports.start = start;
