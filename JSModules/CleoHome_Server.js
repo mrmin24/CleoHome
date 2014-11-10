@@ -1,10 +1,20 @@
+var flash  = require('connect-flash');
 var express = require('express');
+var passport = require('passport');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var routes = require('./routes');
-var router = express.Router();
+//var routes = require('./routes');
+//var router = express.Router();
 
+var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var morgan = require('morgan');
+var logger = morgan('combined');
+require('./public/scripts/passport.js')(passport); // pass passport for configuration
+
+var path = require('path'); 
 var db = require('./dbhandler');
 
 var eventio = require('socket.io-client');
@@ -13,17 +23,37 @@ var eventsocket = eventio.connect('http://localhost:44602');
 var alarmio = require('socket.io-client');
 var alarmsocket = alarmio.connect('http://localhost:44601');
 
-var port = 80;
-var path = require('path'); 
+var port = 80;   
+
+   //  var morgan = require('morgan');
+    app.set('views', __dirname + '/views');
+    app.engine('html', require('ejs').renderFile);
+    app.set('view engine', 'ejs');
+     
+    app.use(cookieParser('qwertyyui'));
+    app.use(bodyParser());
+    //app.use(logger('dev')); // log every request to the console
+    app.use(session({ secret: 'qwertyuio' }));
+    app.use(flash());
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.use(express.static(path.join(__dirname, 'public')));
+
+
+
+
+require('./routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
+
+http.listen(port);
+
+
+
 
 
 
 function start() {
     
-setupexpress();    
-
-
-
+//setupexpress(); 
 
 
 io.on('connection', function(socket){
@@ -614,21 +644,34 @@ function setupexpress(){
     app.engine('html', require('ejs').renderFile);
     app.set('view engine', 'ejs');
      
+     
+     ////////////////////////////////////////////SETUP for PASSPORT AUTHENTICATION
+     
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    
-    http.listen(port, function(){
-      console.log('listening on port:'+ port.toString());
-    });
+   // http.listen(port, function(){
+  //    console.log('listening on port:'+ port.toString());
+  //  });
     // home page route (http://localhost:8080)
-    router.get('/', routes.index);
+  //  router.get('/', routes.index);
     
     app.use(express.static(path.join(__dirname, 'public')));
     // apply the routes to our application
-    app.use('/', router);
+  //  app.use('/', router);
     
     
-    app.use(function(req, res){
-    res.send(404);
-  });
+  //  app.use(function(req, res){
+ //   res.send(404);
+  //});
+  
+  
+  
+  
+  
+
+
 }
 
 

@@ -13,8 +13,8 @@ var connection = mysql.createConnection({
 //connection.query('CREATE TABLE Event_Log (Id INT NOT NULL AUTO_INCREMENT,Type VARCHAR(100) NOT NULL, Event VARCHAR(100) NOT NULL,' +
 //                 'Time VARCHAR(100) NOT NULL , PRIMARY KEY(Id))', 
                  
-connection.query('CREATE TABLE Alarm_Items (Id INT NOT NULL AUTO_INCREMENT,Name VARCHAR(100) NOT NULL UNIQUE ,Type INT NOT NULL, Description VARCHAR(100) NOT NULL UNIQUE,' +      //Alarm
-                'Current_State INT NOT NULL,Last_Trig INT,Alarm_Event VARCHAR(100), PRIMARY KEY(Id))',                
+//.query('CREATE TABLE Alarm_Items (Id INT NOT NULL AUTO_INCREMENT,Name VARCHAR(100) NOT NULL UNIQUE ,Type INT NOT NULL, Description VARCHAR(100) NOT NULL UNIQUE,' +      //Alarm
+//                'Current_State INT NOT NULL,Last_Trig INT,Alarm_Event VARCHAR(100), PRIMARY KEY(Id))',                
 
 //connection.query('CREATE TABLE Alarm_States(Id INT NOT NULL AUTO_INCREMENT,State VARCHAR(100) NOT NULL UNIQUE , PRIMARY KEY(Id))',                                     //Alarm
 
@@ -23,7 +23,15 @@ connection.query('CREATE TABLE Alarm_Items (Id INT NOT NULL AUTO_INCREMENT,Name 
 
 //connection.query('CREATE TABLE Alarm_Arm_Modes (Id INT NOT NULL AUTO_INCREMENT,Mode VARCHAR(100) NOT NULL UNIQUE , PRIMARY KEY(Id))',                                      //Alarm   ----- unused
                  
-
+connection.query('\
+CREATE TABLE `' + dbconfig.database + '`.`' + dbconfig.users_table + '` ( \
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT, \
+    `username` VARCHAR(20) NOT NULL, \
+    `password` CHAR(60) NOT NULL, \
+        PRIMARY KEY (`id`), \
+    UNIQUE INDEX `id_UNIQUE` (`id` ASC), \
+    UNIQUE INDEX `username_UNIQUE` (`username` ASC) \
+)');
                  
 function(err, result){
     // Case there is an error during the creation
