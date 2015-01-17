@@ -156,8 +156,8 @@
          var stringarr = data['Event'].split(" - ");
          var stringarr2 = data['Event'].split(" ");
          
-        console.log(stringarr[1]);
-        console.log(eventdata);
+        //console.log(stringarr[1]);
+       // console.log(eventdata);
          var watchwords = ['Opened','Armed','Disarmed','Alarm!','Door'];
          var notwatchwords = ['Main Partition LED State','Alarm Connection Status'];
          
@@ -457,6 +457,9 @@
       }else if(data['Current_State'] == "Armed in Away Mode"){
           $('#partition1').removeClass().addClass("label label-danger");
           
+      }else if(data['Current_State'] == "Ready"){
+          $('#partition1').removeClass().addClass("label label-success");
+          
       }
       
     
@@ -476,6 +479,9 @@
           
       }else if(data['Current_State'] == "Armed in Away Mode"){
           $('#partition1').removeClass("label-default label-success").addClass("label label-danger");
+          
+      }else if(data['Current_State'] == "Ready"){
+          $('#partition1').removeClass().addClass("label label-success");
           
       }
       

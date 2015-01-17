@@ -17,7 +17,7 @@ function start() {
 
     var io = require('socket.io').listen(port);
     if (io) {
-        console.log('Listening on ' + port.toString());
+        console.log('Alarm Module Listening on ' + port.toString());
     }
 
 

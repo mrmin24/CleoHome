@@ -156,7 +156,7 @@ module.exports = function(app, passport) {
 		}),
         function(req, res) {
             var  token;
-            var timeout = 1000 * 60 * 60 * 24 * config.data.xml.authentication.timeout[0];
+            var timeout = 1000 * 60 * 60 * 24 * config.data.xml.authentication[0].timeout[0];
    		            require('crypto').randomBytes(32, function(ex, buf) {
     	              token = buf.toString('hex');
 	    

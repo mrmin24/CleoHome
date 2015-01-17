@@ -24,13 +24,23 @@ var bypassedZones = [];
 var lastArmTime = null;
 
 
+var configure = require('../JSModules/GetConfig.js');
+var configure2 = configure.data.xml;
+
+
+
+
 var eventio = require('socket.io-client');
-var eventsocket = eventio.connect('http://localhost:44602');
+var eventsocket = eventio.connect('http://localhost:' + configure2.eventmodule[0].port[0]);
 
 var alarmio = require('socket.io-client');
-var alarmsocket = alarmio.connect('http://localhost:44601');
+var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0].port[0]);
 
-var port = 80;   
+
+
+
+
+var port = configure2.server[0].port[0];   
 var externalip = "127.0.0.1";
 
    //  var morgan = require('morgan');
@@ -70,9 +80,11 @@ var dnsinterval = setInterval(function() {
         
         	if(oldip != externalip)
         	{
-           
-		 updatedns(ip,function(){});
-		//sendemail("Your current IP is http://" + ip);   
+         if(configure2.server[0].dnsupdate[0] == 'true')  
+		    updatedns(ip,function(){});
+		 
+		 if(configure2.server[0].dnsemail[0] == 'true')  
+		    sendemail("Your current IP is http://" + ip);   
         	
 		}
 	
@@ -82,7 +94,7 @@ var dnsinterval = setInterval(function() {
         
      
        // console.log('test');
-    } ,1000*60*2);
+    } ,1000*60*configure2.server[0].dnsinterval[0]);
     
 
         
@@ -224,10 +236,10 @@ eventsocket.on('connect', function() {
     console.log('Connected to Event Handler');
    // io.emit('ConnectionStatus',{item: 'Event_Handler',status:'connected'});
     
-    eventsocket.emit('register',{type:'Alarm',client:'Server'},function(){
-    
+    eventsocket.emit('register',{type:'Alarm',client:'Server'});//,function(){});
+    //console.log("testing");
     eventsocket.on('Event',function(data){
-        
+         //console.log(data);
         if(data['Event'].indexOf('Partition') > -1) 
         {
     
@@ -266,8 +278,9 @@ eventsocket.on('connect', function() {
                 if(eventstring)
                 {
                     var datatosend = {Type: type,Event:eventstring,Time:time};
-           
+          
                     io.emit('AlarmZoneEventHandler', datatosend);
+                    
                     
                 }
             });
@@ -284,7 +297,7 @@ eventsocket.on('connect', function() {
      io.emit('ConnectionStatus',{item: 'Event_Handler',status:'Disconnected'});
     
     });
-});
+//});
 });
 
 
@@ -367,6 +380,7 @@ alarmsocket.on('connect', function() {
 		
        
         });
+        });
         
         alarmsocket.on('power',function(code){
              console.log("Sending Email");
@@ -418,8 +432,8 @@ alarmsocket.on('connect', function() {
              
         });
     
+   //});
     });
-});
 });
 
     
@@ -854,9 +868,9 @@ function sendemail(data){
      // send the message and get a callback with an error or details of the message that was sent
     email.server.send({
        text:    data + " at " + Date().toString(), 
-       from:    "Cleopatra <cleopatraserver@gmail.com>", 
-       to:      "Marius <mariusminny@gmail.com>",
-       cc:      "marius.minny@za.saabgroup.com",
+       from:    configure2.email[0].from[0], 
+       to:      configure2.email[0].to[0],
+       cc:      configure2.email[0].cc[0],
        subject: data
         }, function(err, message) { 
        // console.log(err || message); 

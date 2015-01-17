@@ -2,11 +2,58 @@ h2{
    color:#fff;
 }
 
-#event_container{height:450px;overflow:scroll;}
+ #event_container{overflow:scroll;} 
 
 .fullwidth{
     
     width:100%;
     border-style:solid;
     font-weight:bold;
+}
+
+.btn-purple{
+    background-color:#CC66FF;
+    color:white;
+}
+
+.bypass-warning{
+    color:#FF9933;
+}
+
+#alarm_blackout{
+    background-color:yellow;
+    z-index:9;
+    height:100%;
+    width:100%;
+    position:absolute;
+    opacity:0.5;
+    display:none;
+}
+
+#blackout{
+    background-color:grey;
+    z-index:10;
+    height:100%;
+    width:100%;
+    position:absolute;
+    display:none;
+    opacity:0.5;
+}
+
+#alarm_alert{
+     background-color:#FF0000;
+    z-index:10;
+    height:100%;
+    width:100%;
+    position:absolute;
+    display:none;
+    opacity:0.5;
+    
+    
+}
+
+#Alarm_Alert_Btn_Container{
+     display:none;
+    
+    
 }

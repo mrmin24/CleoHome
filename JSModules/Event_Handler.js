@@ -9,8 +9,10 @@
 //http.listen(44602, function(){
 //  console.log('listening on *:44602');
 //});
+var configure = require('./GetConfig.js');
+var configure2 = configure.data.xml;
 
-var port = 44602;
+var port = configure2.eventmodule[0].port[0];
 var db = require('./dbhandler');
 
 var lastId = 0;
@@ -20,7 +22,7 @@ function start() {
 
 var io = require('socket.io').listen(port);
 if(io)
-{ console.log('Listening on ' + port.toString());}
+{ console.log('Event Module Listening on ' + port.toString());}
 
 
 
@@ -51,7 +53,7 @@ io.sockets.on('connection', function(socket){
         for(var i in result){
          // lastId = result[i]['Id'];
          socket.emit('Event', result[i]);
-        // console.log(result[i]);
+        //console.log(result[i]);
         }
        socket.emit('connectstatus');
         
@@ -104,6 +106,7 @@ function setListen(type,lastId,callback){
                           if(data_receive.length > 0){
                             lastId = data_receive[data_receive.length-1]['Id'];
                           }
+                         // console.log(data_receive[0]);
                           callback(data_receive);
                           
                         }
@@ -111,7 +114,7 @@ function setListen(type,lastId,callback){
                    });
         
      
-       // console.log('test');
+        
     } ,1000);
     
     

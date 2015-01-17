@@ -57,7 +57,7 @@ exports.initConfig = function(initconfig) {
 		config.actualport = configure2.alarm[0].port[0];
 	}
 	if (!config.proxyenable) {
-		config.proxyenable = false;
+		config.proxyenable = configure2.alarm[0].proxyEnabled[0];
 	}
 	
 
@@ -138,7 +138,7 @@ exports.initConfig = function(initconfig) {
 		
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-	if (config.proxyenable) {
+	if (configure2.alarm[0].proxyEnabled[0] == 'true') {
 		if (!config.serverport) {
 			config.serverport = configure2.alarm[0].port[0];
 		}
@@ -257,7 +257,7 @@ exports.initConfig = function(initconfig) {
 		var initialUpdate = alarmdata.zone[zone] === undefined;
 		if (zone <= configure2.alarm[0].zones[0]) {
 			alarmdata.zone[zone] = {'send':tpi.send,'name':tpi.name,'code':data};
-			if (config.atomicEvents && !initialUpdate) {
+			if (configure2.alarm[0].atomicEvents[0] == 'true' && !initialUpdate) {
 				//eventEmitter.emit('zoneupdate', [zone, alarmdata.zone[zone]]);
 				
 				eventEmitter.emit('zoneupdate',{pre:tpi.pre,zone:data.substring(3,6),code:data.substring(0,3),post:tpi.post,send:tpi.send});
@@ -272,7 +272,7 @@ exports.initConfig = function(initconfig) {
 		var initialUpdate = alarmdata.partition[partition] === undefined;
 		if (partition <= config.partitions) {
 			alarmdata.partition[partition] = {'send':tpi.send,'name':tpi.name,'code':data};
-			if (config.atomicEvents && !initialUpdate) {
+			if (configure2.alarm[0].atomicEvents[0] == 'true' && !initialUpdate) {
 				//eventEmitter.emit('partitionupdate', [partition, alarmdata.partition[partition]]);
 				if (data.substring(0,3) == "652") {
 						eventEmitter.emit('partitionupdate',{pre:tpi.pre,partition:data.substring(3,4),code:data.substring(0,3),mode:data.substring(4,5),post:tpi.post,send:tpi.send});
@@ -298,7 +298,7 @@ exports.initConfig = function(initconfig) {
 		var initialUpdate = alarmdata.user[user] === undefined;
 		if (partition <= configure2.alarm[0].partitions[0]) {
 			alarmdata.user[user] = {'send':tpi.send,'name':tpi.name,'code':data};
-			if (configure2.alarm[0].atomicEvents[0] && !initialUpdate) {
+			if (configure2.alarm[0].atomicEvents[0] == 'true' && !initialUpdate) {
 				eventEmitter.emit('partitionuserupdate', [user, alarmdata.user[user]]);    ////////////////////update
 			} else {
 				eventEmitter.emit('data',alarmdata);
@@ -331,7 +331,7 @@ exports.initConfig = function(initconfig) {
 		var initialUpdate = alarmdata.system === undefined;
 		if (partition <= config.partitions) {
 			alarmdata.system = {'send':tpi.send,'name':tpi.name,'code':data};
-			if (configure2.alarm[0].atomicEvents[0] && !initialUpdate) {
+			if (configure2.alarm[0].atomicEvents[0] == 'true' && !initialUpdate) {
 				eventEmitter.emit('systemupdate', alarmdata.system);                    ///////////////////update
 			} else {
 				eventEmitter.emit('data',alarmdata);
