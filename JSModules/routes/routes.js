@@ -17,13 +17,7 @@ var pool = mysql.createPool({
   database: config2.name[0],
   users_table: config2.users_table[0]
 
-  
-/*	host     : 'localhost',
-  user     : 'CleoUser',
-  password : '33557722',
-  database: 'CleoHomeDB',
-  users_table: 'users_table'
-*/
+
 });
 
 
