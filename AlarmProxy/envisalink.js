@@ -208,7 +208,7 @@ exports.tpicommands = {
     'bytes':2,
     'post':'',
     'send':'',
-    'action':'keypadState'
+    'action':'keypadLedState'
   },
   '511' : {
     'name':'Keypad LED FLASH State - Partition 1 Only',
@@ -430,7 +430,7 @@ exports.tpicommands = {
     'name':'Partition In Alarm',
     'pre':'Partition',
     'bytes':1,
-    'post':'IN ALARM!',
+    'post':'ALARM!',
     'send':12,
     'action':'updatepartition'
   },
@@ -592,7 +592,7 @@ exports.tpicommands = {
     'bytes':0,
     'post':'',
     'send':'',
-    'action':''
+    'action':'power'
   },
   '801' : {
     'name':'Panel Battery Trouble Restore',
@@ -600,7 +600,7 @@ exports.tpicommands = {
     'bytes':0,
     'post':'',
     'send':'',
-    'action':''
+    'action':'power'
   },
   '802' : {
     'name':'Panel AC Trouble',
@@ -608,7 +608,7 @@ exports.tpicommands = {
     'bytes':0,
     'post':'',
     'send':'',
-    'action':''
+    'action':'power'
   },
   '803' : {
     'name':'Panel AC Restored',
@@ -616,7 +616,7 @@ exports.tpicommands = {
     'bytes':0,
     'post':'',
     'send':'',
-    'action':''
+    'action':'power'
   },
   '806' : {
     'name':'System Bell Trouble',
@@ -672,7 +672,7 @@ exports.tpicommands = {
     'bytes':1,
     'post':'is ON',
     'send':'',
-    'action':''
+    'action':'trouble'
   },
   '841' : {
     'name':'Trouble LED Off',
@@ -680,7 +680,7 @@ exports.tpicommands = {
     'bytes':1,
     'post':'is OFF',
     'send':'',
-    'action':''
+    'action':'trouble'
   },
   '842' : {
     'name':'Fire Trouble Alarm',

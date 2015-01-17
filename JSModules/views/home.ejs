@@ -4,22 +4,36 @@
     <head>
         <title>CleoHome Server</title>
        <!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> -->
+       
         <link rel="stylesheet" , href="/bootstrap/css/bootstrap.min.css"> 
         <link rel="stylesheet" href="/font-awesome-4.2.0/css/font-awesome.min.css"> <!-- load fontawesome-->
         <link rel='stylesheet',  href="/stylesheets/CleoHome_Main.css">
-        
+         <link rel='stylesheet',  href="/EventGraph/css/style.css">
+       <link rel='stylesheet',  href="/stylesheets/datepicker.css">
           
     </head>
     
     <body>
-    
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/jquery/jquery-2.1.1.min.js">\x3C/script>')</script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script>(typeof $().modal == 'function') || document.write('<script src="/bootstrap/js/bootstrap.min.js">\x3C/script>')</script>
     <script src="/socket.io/socket.io.js"></script>
-    <script type="text/javascript" src="/jquery/jquery-2.1.1.min.js"></script>
-    <script src="/bootstrap/js/bootstrap.min.js"></script>
-    <script src="/scripts/index_script.js"></script>
+    
+    
+     
+    <!--<script type="text/javascript" src="/jquery/jquery-2.1.1.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>-->
+  
+       
+    
         
         
-        
+        <div id="blackout" >
+            
+           <!-- <a id="refresh" href="#" data-toggle="tab" class="btn btn-default">Refresh</a>-->
+            
+        </div>
         
         <div class="container-fluid " >
             <nav class="nav nav-tabs " role="navigation">
@@ -39,11 +53,15 @@
                             <li onclick="switchEventsTab()">
                                 <a href="#Events" data-toggle="tab">Events</a>
                             </li>
+                            <li onclick="test()">
+                                <a href="#" data-toggle="tab">Test</a>
+                            </li>
                         </ul>
                         
                       
                     </div> <!-- navbar-collapse-->
-                    <a href="/logout" class="btn btn-default pull-right"><span class="fa fa-user"></span> Logout</a>  
+                    <a href="/logout" class="btn btn-default pull-right"><span class="fa fa-sign-out"></span> Logout</a>  
+                    <a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Local Signup</a>
                  <!-- container-fluid-->
                   
             </nav>
@@ -59,13 +77,34 @@
                             <h2 class = "panel-title col-xs-2">Alarm</h2>
                             <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
                             <span >
+                                <span><label id="alarm_connected" class = "label label-default">Connected</label></span>
+                                <span><label id="ac" class = "label label-success">AC</label></span>
+                                <span><label id="battery" class = "label label-success">Battery</label></span>
                                 <span><label id="bypass" class = "label label-default">Bypass</label></span>
                                 <span><label id="memory" class = "label label-default">Memory</label></span>
+                               <!--  <span> <label  id="night" class = "label label-default">Night Mode</label></span>-->
                                 <span> <label id="armed" class = "label label-default">Armed</label></span>
-                                <span> <label  id="partition1" class = "label label-default">Ready</label></span>
+                                <span> <label  id="partition1" class = "label label-default">Unknown</label></span>
+                                
                             </span>
                         </div>
+                        
                         <div class="panel-body" id="zone_container">
+                        <div id="alarm_blackout" >
+            
+                            <!-- <a id="refresh" href="#" data-toggle="tab" class="btn btn-default">Refresh</a>-->
+            
+                        </div>
+                        <div id="alarm_alert" class = "Alarm_Alert">
+                            
+                            
+                        </div>
+                        
+                        <div id = "Alarm_Alert_Btn_Container" class = "Alarm_Alert">
+                            <button id = "Alarm_Alert_Btn" class = "btn btn-default btn-lg" onclick = "restoreAlarmTrigger()">OK</button>
+                        </div>
+                        
+                        
                             <div id = "alarm_controls" class="well hidden">
                                     
                                             
@@ -85,7 +124,7 @@
                                                 <button class="btn btn-success" type="button" id="Disarm_Btn" onclick = "armDisarmAlarm('Disarm')" >Disarm </button>
                                             </span>
                                             <span>
-                                                <button class="btn btn-primary" type="button" id="Night_Arm_Btn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
+                                                <button class="btn btn-purple" type="button" id="Night_Arm_Btn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
                                             </span>
                                             
                                            <!-- </label>-->
@@ -113,18 +152,25 @@
                     
                 </div>
                 
-                <div class = "col-xs-12 col-md-6"  id="Event_Panel">
+                
+                
+                        
+                   
+                
+                <div class = "col-xs-12 "  id="Event_Panel">
                     <div class="panel panel-default " >
                         <div class="panel-heading">
                             <h2 class = "panel-title col-xs-3  col-lg-4" id = "Event_Panel_Title">Events</h2>
                             <br>
                             <span>
+                            <label id="Checkbox3" class="checkbox-inline">
+                                    <input type="checkbox" id="checkbox4" name="checkbox4" onclick = "checkbox4Click()" checked>Graph</label>
                                 <label id="Checkbox1" class="checkbox-inline" >
                                     <input type="checkbox" id="checkbox1" name="checkbox1">Zones</label>
                                 <label id="Checkbox2" class="checkbox-inline">
                                     <input type="checkbox" id="checkbox2" name="checkbox2">Partition</label>
-                                <label id="Checkbox3" class="checkbox-inline">
-                                    <input type="checkbox" id="checkbox3" name="checkbox3" checked>Important</label>
+                                <label id="Checkbox3" class="checkbox-inline ">
+                                    <input type="checkbox" id="checkbox3" name="checkbox3"  checked>Important</label>
                             </span>
                                 
                             
@@ -147,8 +193,9 @@
                                             <li role="presentation"><a role="menuitem" tabindex="-1" href="#">50</a></li>
                                             <li role="presentation"><a role="menuitem" tabindex="-1" href="#">100</a></li>
                                             <li role="presentation"><a role="menuitem" tabindex="-1" href="#">250</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">500</a></li>
                                             <li role="presentation"><a role="menuitem" tabindex="-1" href="#">1000</a></li>
-                                         
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">1500</a></li>
                                             
                                           </ul>
                                    </span>
@@ -156,32 +203,44 @@
                                         
                                 
                                 <!--<label id = "event_dropdown_btn" class="hidden">-->
-                                <span>
-                                    <button class="btn btn-primary" type="button" id="Num_Event_Btn" onclick = "showAllEvents()" >All Events </button>
-                                </span>
-                                <span>
-                                    <button class="btn btn-warning" type="button" id="Num_Event_Btn" onclick = "showImportantEvents()" >Important Events </button>
-                                </span>
-                                <span>
-                                    <button class="btn btn-danger" type="button" id="Last_Alarm_Btn" onclick = "showLastAlarm()" > Last Alarm </button>
-                                </span>
-                               <!-- </label>-->
-                                </span>
+                                    <span>
+                                        <button class="btn btn-primary" type="button" id="Num_Event_Btn" onclick = "showAllEvents(null,true)" >All Events </button>
+                                    </span>
+                                    <span>
+                                        <button class="btn btn-warning" type="button" id="Num_Event_Btn" onclick = "showImportantEvents()" >Important Events </button>
+                                    </span>
+                                    <span>
+                                        <button class="btn btn-danger" type="button" id="Last_Alarm_Btn" onclick = "showLastAlarm()" > Last Alarm </button>
+                                    </span>
+                                
+                               
+                                    <span class="input-daterange input-group col-xs-6" id="datepicker">
+                                        <input type="text" class=" form-control" name="start" id="datepicker1" onclick = "showdatepicker1()"/>
+                                        <span class="input-group-addon">to</span>
+                                        <input type="text" class="form-control" name="end" id="datepicker2" onclick = "showdatepicker2()"/>
+                                       <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button">Go!</button>
+                                      </span>
+                                    </span>
+                              </span> <!--button group -->
                             </div>
-                            
-                           
-                           
-                        </div>
-                        <table class = "table table-striped table-condensed" id="event_container">
+                               <!-- </label>-->
+                              
                             
                             
+                            <div class = "col-xs-12">    
+                                <div id="chart_placeholder" ></div>
                                 
-                            <!-- Events are added here by script-->    
-                                
-                            </table>
-                           <!--<ul id="messages"></ul>-->
-                    </div>
-                </div>
+                                <div style="text-align: center" id="legend" ></div>
+                            </div>
+                            <div>
+                                <table class = "table table-striped table-condensed" id="event_container">  <!-- Events are added here by script-->  </table>
+                             </div>  <!--<ul id="messages"></ul>-->
+                             
+                             
+                        </div>  <!-- panel body -->
+                    </div> <!-- panel -->
+                </div> <!-- event panel  -->
                 
                 <section class="tab-content">
            
@@ -213,9 +272,13 @@
         
         
         </div> <!--container-fluid -->
-        
-       
-        
+          <script src="/scripts/d3.min.js"></script>
+          <script src="/scripts/moment.min.js"></script>
+          <script src="/scripts/bootstrap-datepicker.js"></script>
+          <script src="/EventGraph/src/eventDrops.js"></script>
+          <script src="/scripts/index_script.js"></script>
+          
+     
     </body>
 
 </html>

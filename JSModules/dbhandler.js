@@ -1,9 +1,14 @@
 var mysql      = require('mysql');
+var config = require('./GetConfig.js');
+var config2 = config.data.xml.database[0];
+
+
 var pool = mysql.createPool({
-  host     : 'localhost',
-  user     : 'CleoUser',
-  password : '33557722',
-  database: 'CleoHomeDB'
+  	host     : config2.host[0],
+  user     : config2.user[0],
+  password : config2.password[0],
+  database: config2.name[0],
+  users_table: config2.users_table[0]
 });
 // don't need .connect()
 

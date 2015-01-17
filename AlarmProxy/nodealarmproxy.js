@@ -10,32 +10,137 @@ var alarmdata = {
 	partition:{},
 	user:{}
 };
-var password = '3572';
 
-var actual, server, config;
+var configure = require('../JSModules/GetConfig.js');
+var configure2 = configure.data.xml;
+
+//console.log(configure2.alarm[0].password[0]);
+var password = configure2.alarm[0].password[0];
+	var actual = new net.Socket();
+
+var server, config;
 var ackReceived = null;
+var nackReceived = null;
 var ackStatus = null;
+var acktimer1,connectTimer;
+var config2;
+var connected = 0;
 
+function checkAlarmConnected(){
+		
+		ping(function(err,answer){
+			
+			if(!answer){
+				connected = 0;
+				//console.log('Alarm Module: Alarm unavailable');
+				eventEmitter.emit('Alarms_connection_status',19,connected);
+	 			//logdata('{"Status":"Alarm disconnected"}');
+	 			connect();
+				
+			}else{
+			//	console.log('Alarm Module: Alarm available');
+				eventEmitter.emit('Alarms_connection_status',18,connected);
+	 			//logdata('{"Status":"Alarm connected"}');
+			}
+			
+			
+		})	;
+		
+	}	
+	
 exports.initConfig = function(initconfig) {
-
+ 
+	
 	config = initconfig;
 	
 	if (!config.actualport) {
-		config.actualport = 4025;
+		config.actualport = configure2.alarm[0].port[0];
 	}
 	if (!config.proxyenable) {
 		config.proxyenable = false;
 	}
+	
 
-	actual = net.connect({port: config.actualport, host:config.actualhost}, function() {
-		//console.log('Alarm connected');
-		 logdata('{"Status":"Alarm connected"}');
+		
+	
+	
+	setInterval(checkAlarmConnected,5000);
+		
+		connect();
+	//	ping(function(err,answer){
+	  	//	if(answer){
+	  	function connect(){
+				actual.connect({port: configure2.alarm[0].port[0], host:configure2.alarm[0].ip[0]}, function() {
+				console.log('Alarm Module: Alarm connected');
+				connected = 1;
+				eventEmitter.emit('Alarms_connection_status',18,1);
+	 			logdata('{"Status":"Alarm connected"}');
+	
+				});
+	  	}
+	
+	  	//	}
+	//	});
+   
+    
+    process.on('uncaughtException', function(err) {
+    if(err.code == 'EHOSTUNREACH'){
+        //retryconnect();
+    }
+    
+    //eventEmitter.emit('Alarms_connection_status',0);
+	//	 actual.destroy();
 	});
+		
+		
+	actual.on('error', function(e) {
+			
+			
+		/*	if(e.code == 'ECONNREFUSED') {}  */
+			
+		console.log("Alarm Module: Alarm connection error = " + e);	
+	//	 eventEmitter.emit('Alarms_connection_status',0);
+		 
+	//	  client.setInterval(function() {
+		  	
+	//	  	ping(function(err,answer){
+	//	  		if(answer){
+	//	            client.connect(config.actualport, config.actualhost, function(){
+	//	                console.log('Alarm Module: Alarm connected2');
+	//	                eventEmitter.emit('Alarms_connection_status',1);
+	//		 			logdata('{"Status":"Alarm connected2"}');
+	//	            });
+	//	  		}
+	//	  	});
+	//	    },5000);
+		 
+	});
+		
+	actual.on('close', function() {
+			
+		console.log("Alarm Module: Alarm connection closed" );	
+	//	eventEmitter.emit('Alarms_connection_status',0);
+		
+	//	logdata('{"Status":"Alarm disconnected"}');
+		// retryconnect();
+			
+	});
+		
+	actual.on('timeout', function() {
+			
+		console.log("Alarm Module: Alarm connection timeout" );	
+		// eventEmitter.emit('Alarms_connection_status',0);
+		  //actual.destroy();
+		 //retryconnect();
+			
+	});
+		
+		
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 	if (config.proxyenable) {
 		if (!config.serverport) {
-			config.serverport = 4025;
+			config.serverport = configure2.alarm[0].port[0];
 		}
 		if (!config.serverhost) {
 			config.serverhost = '0.0.0.0';
@@ -150,7 +255,7 @@ exports.initConfig = function(initconfig) {
 		var zone = parseInt(data.substring(3,6));
 		
 		var initialUpdate = alarmdata.zone[zone] === undefined;
-		if (zone <= config.zones) {
+		if (zone <= configure2.alarm[0].zones[0]) {
 			alarmdata.zone[zone] = {'send':tpi.send,'name':tpi.name,'code':data};
 			if (config.atomicEvents && !initialUpdate) {
 				//eventEmitter.emit('zoneupdate', [zone, alarmdata.zone[zone]]);
@@ -191,21 +296,42 @@ exports.initConfig = function(initconfig) {
 		var partition = parseInt(data.substring(3,4));
 		var user = parseInt(data.substring(4,8));
 		var initialUpdate = alarmdata.user[user] === undefined;
-		if (partition <= config.partitions) {
+		if (partition <= configure2.alarm[0].partitions[0]) {
 			alarmdata.user[user] = {'send':tpi.send,'name':tpi.name,'code':data};
-			if (config.atomicEvents && !initialUpdate) {
+			if (configure2.alarm[0].atomicEvents[0] && !initialUpdate) {
 				eventEmitter.emit('partitionuserupdate', [user, alarmdata.user[user]]);    ////////////////////update
 			} else {
 				eventEmitter.emit('data',alarmdata);
 			}
 		}
 	}
+	function updatepartitionpower(tpi,data) {
+		var code = parseInt(data.substring(0,3));
+		console.log("The power code is " + code);
+		eventEmitter.emit('power',code);
+		
+		
+		
+	}
+	
+	
+	function updatepartitiontrouble(tpi,data) {
+		var code = parseInt(data.substring(0,4));
+		//console.log("The trouble code is " + code);
+		if(code == '8411' || code == '8401'){
+		    eventEmitter.emit('trouble',code);
+		}
+		
+		
+	}
+	
+	
 	function updatesystem(tpi,data) {
 		var partition = parseInt(data.substring(3,4));
 		var initialUpdate = alarmdata.system === undefined;
 		if (partition <= config.partitions) {
 			alarmdata.system = {'send':tpi.send,'name':tpi.name,'code':data};
-			if (config.atomicEvents && !initialUpdate) {
+			if (configure2.alarm[0].atomicEvents[0] && !initialUpdate) {
 				eventEmitter.emit('systemupdate', alarmdata.system);                    ///////////////////update
 			} else {
 				eventEmitter.emit('data',alarmdata);
@@ -227,8 +353,8 @@ exports.initConfig = function(initconfig) {
 
 	actual.on('data', function(data) {
 		var dataslice = data.toString().replace(/[\n\r]/g, ',').split(',');
-        console.log(dataslice);
-		for (var i = 0; i<dataslice.length; i++) {
+       // console.log(dataslice);                                                       ////////////activate this for received data for debugging
+		for (var i = 0; i<dataslice.length; i++) {  
 			var datapacket = dataslice[i];
 			
 			if (datapacket !== '') {
@@ -264,12 +390,21 @@ exports.initConfig = function(initconfig) {
 						}
 						else if (tpi.action === 'nack'){
 						   
-						    ackReceived = datapacket.substring(3,6);
+						    nackReceived = datapacket.substring(3,6);
 						    ackStatus = false;
 						    
-						}else if(tpi.action === 'keypadState'){
+						}else if(tpi.action === 'keypadLedState'){
 						    
-						    updateLedState(datapacket.substring(4,5));
+						    updateLedState(tpi,datapacket.substring(4,5));
+						    
+						}else if(tpi.action === 'power'){
+						    
+							updatepartitionpower(tpi,datapacket);
+						    
+						}else if(tpi.action === 'trouble'){
+						    
+							updatepartitiontrouble(tpi,datapacket);
+						    
 						}
 						
 						
@@ -286,12 +421,10 @@ exports.initConfig = function(initconfig) {
 		}
 		//actual.end();
 	});
-	actual.on('end', function() {
-		//console.log('Alarm disconnected');
-		 logdata('{"Status":"Alarm disconnected"}');
-	});
+	
 
 	return eventEmitter;
+    	
 };
 
 function sendcommand(addressee,command,callback) {
@@ -303,21 +436,31 @@ function sendcommand(addressee,command,callback) {
 	checksum = checksum.toString(16).slice(-2).toUpperCase();
 	
 	actual.write(command+checksum+'\r\n');
+	if(acktimer1){clearInterval(acktimer1);} 
 	
     acktimer1 =  setInterval(function() {
-    
+   //console.log("Debug:Current Ack is " + ackReceived );
     if(ackReceived == command.substring(0,3)){
         ackReceived = null;
 	
     	if(ackStatus){
-    	    callback(true,false);
+    	   // console.log("Debug: Ack received for " + command.substring(0,3) );
     	    clearInterval(acktimer1);
+    	    callback(true,false,false);
+    	    
     	}else
     	{
-    	    
-    	    callback(false,true);
+    	    //console.log("Debug: NAck received for " + command.substring(0,3) );
     	    clearInterval(acktimer1);
+    	    callback(false,true,false);
+    	   
     	}
+    }else if(nackReceived == '010'){
+       // console.log("Debug: Retry request received for " + command.substring(0,3) );
+        nackReceived = null;
+        clearInterval(acktimer1);
+        callback(false,false,true);
+        
     }
     	
     },500);
@@ -328,24 +471,24 @@ function sendcommand(addressee,command,callback) {
 exports.manualCommand = function(command,passwordRequired,callback) {
 	if (actual) {
 	    if(passwordRequired){
-		    sendcommand(actual,command+password,function(ack,nack){
-		        
-		        callback(ack,nack);
+		    sendcommand(actual,command+password,function(ack,nack,retry){
+		        if(acktimer1){clearInterval(acktimer1);} 
+		        callback(ack,nack,retry);
 		        
 		        
 		    });
 	    }
 	    else{
-	      sendcommand(actual,command,function(ack,nack){
-	          
-	          callback(ack,nack);
+	      sendcommand(actual,command,function(ack,nack,retry){
+	          if(acktimer1){clearInterval(acktimer1);} 
+	          callback(ack,nack,retry);
 	          
 	      });
 	        
 	    }
 	} else {
 	    
-	     callback(false,false);
+	     callback(false,false,false);
 		//not initialized
 	}
 };
@@ -363,13 +506,41 @@ function logdata(data) {
 		
 } 
     
-function getPass(){
+//function getPass(){
     
-    return config.alarmpassword;
+  //  return config.alarmpassword;
+//}
+
+function updateLedState(tpi,datapacket){
+    
+    //console.log(datapacket);
+    eventEmitter.emit('keypadLedState',{code:'510',partition:'1',ledState:datapacket});
+    
+    
 }
 
-function updateLedState(datapacket){
-    
-    eventEmitter.emit('keypadLedState',datapacket);
-    
-}
+
+function ping(callback) {
+
+        var exec = require('child_process').exec;
+        exec("ping -c 3 " + configure2.alarm[0].ip[0], function(error, stdout, stderr) {
+
+            if (stdout.indexOf("3 received") > -1) {
+                // console.log("Ping to Alarm Module successful " );
+                callback(false,true);
+            }
+            else if (error) {
+               // console.log("Ping to Alarm Module: " + error);
+                callback(true,false);
+               
+            }
+            else if (stderr) {
+                //console.log("Ping to Alarm Module: " + stderr);
+                callback(true,false);
+            }else{
+                callback(false,false);
+            }
+        });
+        // console.log('test');
+    }
+   

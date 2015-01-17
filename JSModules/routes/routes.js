@@ -1,3 +1,32 @@
+
+// load up the user model
+var mysql = require('mysql');
+var bcrypt = require('bcrypt-nodejs');
+//var dbconfig = require('./database');
+var config = require('../GetConfig.js');
+var config2 = config.data.xml.database[0];
+
+
+
+var pool = mysql.createPool({
+
+
+	host     : config2.host[0],
+  user     : config2.user[0],
+  password : config2.password[0],
+  database: config2.name[0],
+  users_table: config2.users_table[0]
+
+  
+/*	host     : 'localhost',
+  user     : 'CleoUser',
+  password : '33557722',
+  database: 'CleoHomeDB',
+  users_table: 'users_table'
+*/
+});
+
+
 // app/routes.js
 module.exports = function(app, passport) {
 
@@ -5,8 +34,109 @@ module.exports = function(app, passport) {
 	// HOME PAGE (with login links) ========
 	// =====================================
 	app.get('/', function(req, res) {
-		res.render('index.ejs'); // load the index.ejs file
+		//console.log(req.session.cookie.maxAge);
+	//	if(req.session.cookie.maxAge == false || req.session.cookie.maxAge == null){
+			
+		//	res.redirect('/login');
+			
+	//	}else{
+			//	res.render('index.ejs'); // load the index.ejs file
+			/*if(req.headers.host == "10.0.0.21"){
+				res.redirect('/home');
+			}else{
+				res.redirect('/home');
+			}*/ 
+		if(req.cookies.Username && req.cookies.Token){
+			
+		
+			checktoken(req,function(isloggedin){
+				
+				if(isloggedin){
+					 
+					res.redirect('/home');
+				}else{
+					res.redirect('/login');
+				}
+				
+				
+			});
+		
+		}else{
+			res.redirect('/login');
+		}
+		
 	});
+	
+	function checktoken(req,callback){
+		
+		var token = req.cookies.Token;
+		var validlogin = false;
+		pool.getConnection(function(err, connection){
+                connection.query("select Token from user_logins where Username = '" + req.cookies.Username +  "'",function(err, rows){
+                    connection.release();
+                    if (err)
+                        return done(err);
+                    if (!rows.length) {
+                        console.log("Invalid Login: User not found in login list");
+                        req.cookies.Username = false;
+            	  		req.cookies.Token = false;
+                       validlogin = false; // req.flash is the way to set flashdata using connect-flash
+                        
+                    }
+                    
+                    var users = [];
+                    for(var i in rows){
+                    	users.push(rows[i]['Token']);
+                    }
+                   // console.log(users);					// enable to see tokens
+                    
+                    // if the user is found but the password is wrong
+                    if (users.indexOf(token) == -1)
+                    {
+                        console.log("Invalid login: Token incorrect");
+                        clearusertokens(req.cookies.Username,null);
+                        req.cookies.Username = false;
+            	  		req.cookies.Token = false;   								//  - clear database for user
+                        validlogin = false; 
+                        
+                    }else{
+                    console.log("Login token accepted");
+                    // all is well, return successful user						//issue new token    --- future feature
+                    validlogin = true;
+                    }
+                    
+                    callback(validlogin);
+                });
+            });
+            
+		
+	}
+	
+	function clearusertokens(user,token){
+		pool.getConnection(function(err, connection){
+			if(!token)
+                connection.query("DELETE from user_logins where Username = '" + user +  "'",cleartoken);
+           else
+           		connection.query("DELETE from user_logins where Token = '" + token +  "' AND Username = '" + user + "'" ,cleartoken);
+           		
+           		function cleartoken(err, rows){
+           		connection.release();
+           			if (err)
+                        return done(err);
+                    else
+                    {
+                    	console.log("User tokens deleted for user " + user);
+                    }
+                        
+                        
+           
+                	
+                }
+		});
+		
+		
+		
+	}
 
 	// =====================================
 	// LOGIN ===============================
@@ -20,26 +150,81 @@ module.exports = function(app, passport) {
 
 	// process the login form
 	app.post('/login', passport.authenticate('local-login', {
-            successRedirect : '/home', // redirect to the secure profile section
+           // successRedirect : '/home', // redirect to the secure profile section
             failureRedirect : '/login', // redirect back to the signup page if there is an error
             failureFlash : true // allow flash messages
 		}),
         function(req, res) {
-            console.log("hello");
+            var  token;
+            var timeout = 1000 * 60 * 60 * 24 * config.data.xml.authentication.timeout[0];
+   		            require('crypto').randomBytes(32, function(ex, buf) {
+    	              token = buf.toString('hex');
+	    
+   		           
+   		            
 
             if (req.body.remember) {
-              req.session.cookie.maxAge = 1000 * 60 * 3;
+            	console.log("remember me");	
+            
+          
+	            	console.log(token);
+	         
+           
+					res.cookie('Username', req.user.username, { maxAge: timeout, httpOnly: true });
+					res.cookie('Token', token, { maxAge: timeout,httpOnly: true });
+				//	res.cookie('Session_id', 3, { maxAge: timeout });
+					
+					pool.getConnection(function(err, connection){
+                
+    
+                        var insertQuery = "INSERT INTO user_logins ( Username, Token ) values ('" + req.user.username + "','" + token  + "')";
+    
+                        connection.query(insertQuery,function(err, rows) {
+                            newUserMysql.id = rows.insertId;
+    
+                            return done(null, newUserMysql);
+                        });
+                    
+                   connection.release(); 
+                });
+            
+	              //req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
+          
             } else {
+            	console.log("No Remember Me");
+            	 res.clearCookie('Username');
+            	  res.clearCookie('Token');
+            	 // res.clearCookie('Session_id');
               req.session.cookie.expires = false;
             }
-        res.redirect('/');
+   		            	
+   		            
+        res.redirect('/home');
+   		            });
     });
+    
+    
+  
+    
+    
+    
+    
+  /*app.post("/login", passport.authenticate('local',
+    { failureRedirect: '/login',
+      failureFlash: true }), function(req, res) {
+        if (req.body.remember) {
+          req.session.cookie.maxAge = 1000 * 60 * 3;
+        } else {
+          req.session.cookie.expires = false;
+        }
+      res.redirect('/');
+});*/
 
 	// =====================================
 	// SIGNUP ==============================
 	// =====================================
 	// show the signup form
-	app.get('/signup', function(req, res) {
+	app.get('/signup', isLoggedIn, function(req, res) {
 		// render the page and pass in any flash data if it exists
 		res.render('signup.ejs', { message: req.flash('signupMessage') });
 	});
@@ -56,29 +241,71 @@ module.exports = function(app, passport) {
 	// =====================================
 	// we will want this protected so you have to be logged in to visit
 	// we will use route middleware to verify this (the isLoggedIn function)
-	app.get('/profile', isLoggedIn, function(req, res) {
-		res.render('profile.ejs', {
-			user : req.user // get the user out of session and pass to template
-		});
-	});
 	
+//	function home(checklogin){
+	
+//	if(checklogin){
+		app.get('/home', function(req, res) {
+			
+			if(req.cookies.Username && req.cookies.Token){
+			
+		
+			checktoken(req,function(isloggedin){
+				
+				if(isloggedin){
+					 
+					res.render('home.ejs', {
+						user : req.user // get the user out of session and pass to template
+					});
+				}else{
+					res.redirect('/login');
+				}
+				
+				
+			});
+		
+		}else{
+			isLoggedIn(req,res,function(){
+			res.render('home.ejs',{
+				user : req.user // get the user out of session and pass to template
+			});
+			});
+		}
+			
+		});
+	//}else
+	//{
+	//	app.get('/home', function(req, res) {
+	//		res.render('home.ejs', {
+		//		user : req.user // get the user out of session and pass to template
+		//	});
+	//	});
+//	}
+	
+	
+//	}
 		// =====================================
 	// HOME SECTION =========================
 	// =====================================
 	// we will want this protected so you have to be logged in to visit
 	// we will use route middleware to verify this (the isLoggedIn function)
 	
-	app.get('/home', isLoggedIn, function(req, res) {
+/*	app.get('/home', isLoggedIn, function(req, res) {
 		res.render('home.ejs', {
 			user : req.user // get the user out of session and pass to template
 		});
-	});
+	});*/
 
 	// =====================================
 	// LOGOUT ==============================
 	// =====================================
 	app.get('/logout', function(req, res) {
 		req.logout();
+		clearusertokens(req.cookies.Username, req.cookies.Token);
+		req.session.cookie.expires = false;
+		res.clearCookie('Username');
+   	  res.clearCookie('Token');
+  	   res.clearCookie('Session_id');
 		res.redirect('/');
 	});
 };
@@ -91,5 +318,5 @@ function isLoggedIn(req, res, next) {
 		return next();
 
 	// if they aren't redirect them to the home page
-	res.redirect('/');
+	res.redirect('/login');
 }
