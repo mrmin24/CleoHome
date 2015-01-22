@@ -229,6 +229,7 @@ exports.initConfig = function(initconfig) {
 
 	function loginresponse(data) {
 		var loginStatus = data.substring(3, 4);
+		//console.log("Data " + data);
 		if (loginStatus == '0') {
 			//console.log('Incorrect Password :(');
 			 logdata('{"Status":"Incorrect Password :("}');
@@ -244,7 +245,7 @@ exports.initConfig = function(initconfig) {
 		} else if (loginStatus == '3') {
 			//console.log('login requested... sending response...');
 			 logdata('{"Status":"login requested... sending response..."}');
-			sendcommand(actual,'005'+config.password,function(){
+			sendcommand(actual,'005'+ configure2.alarm[0].envisPassword[0],function(){
 			    
 			});
 		
@@ -270,7 +271,7 @@ exports.initConfig = function(initconfig) {
 	function updatepartition(tpi,data) {
 		var partition = parseInt(data.substring(3,4));
 		var initialUpdate = alarmdata.partition[partition] === undefined;
-		if (partition <= config.partitions) {
+		if (partition <= configure2.alarm[0].partitions[0]) {
 			alarmdata.partition[partition] = {'send':tpi.send,'name':tpi.name,'code':data};
 			if (configure2.alarm[0].atomicEvents[0] == 'true' && !initialUpdate) {
 				//eventEmitter.emit('partitionupdate', [partition, alarmdata.partition[partition]]);
@@ -329,7 +330,7 @@ exports.initConfig = function(initconfig) {
 	function updatesystem(tpi,data) {
 		var partition = parseInt(data.substring(3,4));
 		var initialUpdate = alarmdata.system === undefined;
-		if (partition <= config.partitions) {
+		if (partition <= configure2.alarm[0].partitions[0]) {
 			alarmdata.system = {'send':tpi.send,'name':tpi.name,'code':data};
 			if (configure2.alarm[0].atomicEvents[0] == 'true' && !initialUpdate) {
 				eventEmitter.emit('systemupdate', alarmdata.system);                    ///////////////////update
@@ -353,12 +354,15 @@ exports.initConfig = function(initconfig) {
 
 	actual.on('data', function(data) {
 		var dataslice = data.toString().replace(/[\n\r]/g, ',').split(',');
-       // console.log(dataslice);                                                       ////////////activate this for received data for debugging
-		for (var i = 0; i<dataslice.length; i++) {  
+        //console.log(dataslice);                                                       ////////////activate this for received data for debugging
+        
+		for (var i = 0; i<dataslice.length; i++) { 
+		
 			var datapacket = dataslice[i];
 			
 			if (datapacket !== '') {
 				var tpi = elink.tpicommands[datapacket.substring(0,3)];
+			//	console.log(tpi);
 				if (tpi) {
 					if (tpi.bytes === '' || tpi.bytes === 0) {
 						console.log(tpi.pre,tpi.post);
@@ -413,9 +417,9 @@ exports.initConfig = function(initconfig) {
 						    generalresponse(tpi,datapacket);
 						}*/
 					}
-					if (config.proxyenable) {
-						broadcastresponse(datapacket.substring(0,datapacket.length-2));
-					}
+					//if (configure2.alarm[0].proxyEnabled[0]) {
+					//	broadcastresponse(datapacket.substring(0,datapacket.length-2));
+					//}
 				}
 			}
 		}

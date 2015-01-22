@@ -383,7 +383,7 @@ alarmsocket.on('connect', function() {
         });
         
         alarmsocket.on('power',function(code){
-             console.log("Sending Email");
+             console.log("Server: Power:Sending Email");
             switch(code){
 		    case 800: 
 		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '12' ,Current_State: 0 });
@@ -421,12 +421,16 @@ alarmsocket.on('connect', function() {
         
         
         alarmsocket.on('trouble',function(code){
-             console.log("Sending Email");
+             
+             
              if(code == '8411'){
-                io.emit("ac",false);
+                io.emit("ac",true);
+                sendemail("Trouble Event Restored");
                 log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 0 });
              }else if(code == '8401'){
-                 io.emit("ac",true);
+                 io.emit("ac",false);
+                 sendemail("Trouble Event");
+                 console.log("Server: Trouble Condition: Sending Email");
                  log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
              }
              
@@ -536,6 +540,7 @@ function getAlarmStatus(){
                                     if(err){
                                         console.log("Error occured during night mode status retrieval");
                                     }else{
+                                      //  console.log(bypass + " " + memory + " " + armed + " " + ready);
                                      io.emit("keypadLedState",{Bypass:bypass, Memory:memory,Armed:armed,Ready:ready,Night:night,Connected:connect});
                                     }
                                   });

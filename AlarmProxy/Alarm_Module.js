@@ -117,12 +117,11 @@ function start() {
 
             socket.on('disconnect', function() {
 
-                console.log('Client Disconnected from alarm updates');
+                console.log('Alarm Module: Client Disconnected from alarm updates');
 
                 if (this.server.sockets.sockets.length == 0) {
                     client = 0;
                     console.log('All clients disconnected');
-
                 }
             });
 
@@ -559,7 +558,7 @@ function start() {
                         zones: configure2.alarm[0].zones[0],
                         partitions: configure2.alarm[0].partitions[0],
                         proxyenable: configure2.alarm[0].proxyEnabled[0],
-                        atomicEvents: true
+                        atomicEvents: configure2.alarm[0].atomicEvents[0]
                     });
                 }
                 
@@ -594,6 +593,7 @@ function logdata(data) {
         if (data.pre == 'Zone') {
             if (alarmcode.indexOf(data.code) != -1) {
                 lastzone = data.zone;
+            
                 log.ownDb('Alarm_Items', {
                     Set: 'Current_State',
                     Where: 'Name',
@@ -613,7 +613,8 @@ function logdata(data) {
             }
             else {
                 lastzone = data.zone;
-
+            //console.log(lastzone);
+            //console.log(data.send);
                 log.ownDb('Alarm_Items', {
                     Set: 'Current_State',
                     Where: 'Name',
@@ -801,7 +802,8 @@ function logdata(data) {
 
 
             // console.log('Partition_' + data.partition + '_ledState');
-            //console.log(code);
+           // console.log(code);
+           // console.log(client);
             if (client) {
                 sockets.emit('keypadLedState', {
                     Bypass: bypass,

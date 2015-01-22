@@ -38,16 +38,16 @@ exports.update = function(table,data) {
 
     //console.log(data);
         pool.getConnection(function(err, connection){
-    connection.query('UPDATE '+ table +' SET ' + data.Set + '=? WHERE ' + data.Where + '= ?', [data.Current_State,data.Name], function(err, result) {
-       connection.release();
-        if(err) {
-            console.log(err);
-            }
-            else {
-        //        console.log(result);
-            }
-            
-    });
+            connection.query('UPDATE '+ table +' SET ' + data.Set + '=? WHERE ' + data.Where + '= ?', [data.Current_State,data.Name], function(err, result) {
+               connection.release();
+                if(err) {
+                    console.log(err);
+                    }
+                    else {
+                       //console.log(result);
+                    }
+                    
+            });
        });
  
 }

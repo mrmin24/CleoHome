@@ -445,6 +445,7 @@
     socket.on('AlarmPartitionStatusEvent', function(data){
     
         document.getElementById('partition1').innerHTML = data['Current_State'];
+        
         if(data['Current_State'] == "Disarmed")
       {
           
@@ -543,10 +544,7 @@
                 $('#partition1').removeClass("btn-purple").addClass("label-default");
             }
             
-            if(data['Ready'])
-            {
-                $('#partition1').removeClass().addClass("label label-success");
-            }
+            
             
             
         }else{
