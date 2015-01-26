@@ -128,325 +128,7 @@ function start() {
 
             socket.on('armDisarmAlarm', function(type) {
 
-
-
-                if (type == 'Away') {
-
-                    nap.manualCommand('0301', false, function(ack, nack, retry) {
-
-                        if (ack) {
-
-                            console.log('Away mode');
-
-
-                        }
-                        else if (nack) {
-
-                            console.log('Away mode failed');
-
-
-                        }
-
-
-                    });
-
-                }
-                else if (type == 'Stay') {
-
-
-                    nap.manualCommand('0311', false, function(ack, nack, retry) {
-
-                        if (ack) {
-
-                            console.log('Stay mode');
-
-
-                        }
-                        else if (nack) {
-
-                            console.log('Stay mode failed');
-
-
-                        }
-
-
-                    });
-
-
-
-
-                    // while(nap.ackReceived != '031') {}
-
-
-                }
-                else if (type == 'Disarm') {
-
-                    db.getdata('Alarm_Items', {
-                        Select: 'Current_State',
-                        whereClause: "Type LIKE '%11%' ORDER BY Id DESC LIMIT 1"
-                    }, function(err, data_receive) {
-
-                        if (err) {
-
-                            console.log(err);
-                        }
-                        else if (data_receive) {
-
-
-                            var currentState = data_receive[0]['Current_State'];
-
-
-                            // console.log(currentState);
-
-                            if (currentState == 1) {
-                                nap.manualCommand('0711*1', false, function(ack, nack, retry) {
-
-                                    if (ack) {
-
-                                        log.ownDb('Alarm_Items', {
-                                            Set: 'Current_State',
-                                            Where: 'Type',
-                                            Name: "11",
-                                            Current_State: 0
-                                        });
-                                        console.log('Night mode cancelled');
-
-                                        sleep(1000, function() {
-                                            nap.manualCommand('0401', true, function(ack, nack, retry) {
-
-                                                if (ack) {
-
-                                                    console.log('Disarmed');
-
-
-
-
-                                                }
-                                                else if (nack) {
-
-                                                    console.log('Disarm Failed');
-
-
-                                                }
-                                                else if (retry) {
-
-                                                    console.log("Debug: Retry required");
-                                                }
-                                                else {
-                                                    console.log("Debug: Something is not right");
-                                                }
-
-
-
-                                            });
-                                        });
-
-
-                                    }
-                                    else if (nack) {
-
-                                        console.log('Night mode cancel failed');
-
-
-                                    }
-                                    else if (retry) {
-
-                                        console.log("Debug: Retry required");
-                                    }
-
-
-                                });
-
-
-                            }
-                            else {
-
-                                nap.manualCommand('0401', true, function(ack, nack, retry) {
-
-
-
-                                    if (ack) {
-                                        console.log('Disarmed');
-
-
-                                    }
-                                    else if (nack) {
-
-                                        console.log('Disarm failed');
-
-
-                                    }
-                                    else if (retry) {
-
-                                        console.log("Debug: Retry required");
-                                    }
-                                });
-
-
-
-
-                            }
-
-                        }
-                    });
-                }
-
-                else if (type == 'Night') {
-                    console.log("debug: Night mode selected");
-
-                    db.getdata('Alarm_Items', {
-                        Select: 'Current_State',
-                        whereClause: "Type LIKE '%9%' ORDER BY Id DESC LIMIT 1"
-                    }, function(err, data_receive) {
-
-                        if (err) {
-                            console.log(err);
-
-                        }
-                        else if (data_receive) {
-
-
-                            var currentState = data_receive[0]['Current_State'];
-                            //console.log("debug: State before night mode is: " + currentState);
-
-                            // console.log(currentState);
-
-                            if (currentState == 7) {
-                                nap.manualCommand('0711*1', false, function(ack, nack, retry) {
-
-                                    if (ack) {
-
-                                        console.log('Night mode');
-                                        log.ownDb('Alarm_Items', {
-                                            Set: 'Current_State',
-                                            Where: 'Type',
-                                            Name: "11",
-                                            Current_State: 1
-                                        });
-
-                                    }
-                                    else if (nack) {
-
-                                        console.log('Night mode failed');
-
-
-                                    }
-                                    else if (retry) {
-
-                                        console.log("Debug: Retry required");
-                                    }
-
-
-                                });
-
-
-                            }
-                            else if (currentState == 3 || currentState == 5 || currentState == 11 || currentState == 13) {
-
-
-                                nap.manualCommand('0311', false, function(ack, nack, retry) {
-
-
-
-                                    if (ack) {
-                                        console.log('Stay mode');
-
-                                        nap.manualCommand('0711*1', false, function(ack, nack, retry) {
-
-                                            if (ack) {
-
-                                                console.log('Night mode');
-                                                log.ownDb('Alarm_Items', {
-                                                    Set: 'Current_State',
-                                                    Where: 'Type',
-                                                    Name: "11",
-                                                    Current_State: 1
-                                                });
-
-                                            }
-                                            else if (nack) {
-
-                                                console.log('Night mode failed');
-
-
-                                            }
-                                            else if (retry) {
-
-                                                console.log("Debug: Retry required");
-
-                                            }
-
-
-                                        });
-                                    }
-                                    else if (nack) {
-
-                                        console.log('Stay mode failed');
-
-
-                                    }
-                                    else if (retry) {
-
-                                        console.log("Debug: Retry required");
-                                    }
-                                });
-
-
-
-
-                            }
-                            else if (currentState == 6) {
-
-                                db.getdata('Alarm_Items', {
-                                    Select: 'Current_State',
-                                    whereClause: "Type LIKE '%11%' ORDER BY Id DESC LIMIT 1"
-                                }, function(err, data_receive) {
-
-                                    if (err) {
-
-                                    }
-                                    else if (data_receive[0]['Current_State']) {
-
-
-
-                                        nap.manualCommand('0711*1', false, function(ack, nack, retry) {
-
-                                            if (ack) {
-
-
-                                                console.log('Night mode cancelled');
-                                                log.ownDb('Alarm_Items', {
-                                                    Set: 'Current_State',
-                                                    Where: 'Type',
-                                                    Name: "11",
-                                                    Current_State: 0
-                                                });
-
-                                            }
-                                            else if (nack) {
-
-                                                console.log('Night mode cancel failed');
-
-
-                                            }
-                                            else if (retry) {
-
-                                                console.log("Debug: Retry required");
-                                            }
-
-
-                                        });
-                                    }
-
-                                });
-                            }
-
-                        }
-                    });
-
-                }
-
-
+                armDisarm(type);
 
             });
 
@@ -578,7 +260,8 @@ function start() {
 
 var watchevents = ['500', '510', '601', '602', '609', '610', '650', '651', '653', '625', '626', '652', '654', '655', '656', '657', /*'659'*/ , '670', '700', '701', '702', '750', '751', '800', '801', '802', '803', '829'];
 var alarmcode = ['601', '605', '620', '621', '625', '654'];
-
+var armDisarmZone = [configure2.alarm[0].awayArmZone[0],configure2.alarm[0].stayArmZone[0]];
+var zoneOpenedCode = '609';
 
 function logdata(data) {
 
@@ -611,7 +294,62 @@ function logdata(data) {
                     });
                 }
             }
-            else {
+            else if(armDisarmZone.indexOf(data.zone) > -1 && data.code == zoneOpenedCode){
+                console.log("Alarm: Arm / Disarm: " + data.zone + " / " + data.code )
+                db.getdata('Alarm_Items', {
+                        Select: 'Current_State',
+                        whereClause: "Type LIKE '9' ORDER BY Id DESC LIMIT 1"
+                    }, function(err, data_receive) {
+
+                        if (err) {
+
+                            console.log(err);
+                        }
+                        else if (data_receive) {
+
+                            var armStates = [6,7,8,9,10,12,13,14];
+                            var currentState = data_receive[0]['Current_State'];
+                            console.log(currentState);
+                            
+                            if(data.zone == configure2.alarm[0].awayArmZone[0]){
+                                
+                                if(currentState == 3 || currentState == 5 ){
+                                    
+                                    armDisarm("Away");    
+                                    
+                                }else if(armStates.indexOf(currentState) > -1 ){
+                                    console.log("Disarm");
+                                    armDisarm("Disarm");
+                                }
+                            
+                                
+                                
+                                
+                            }else if(configure2.alarm[0].stayArmZone[0]){
+                                var stayStates = [7,9,10];
+                                
+                                
+                                if(currentState == 3 || currentState == 5){
+                                    
+                                    armDisarm("Stay"); 
+                                    
+                                    
+                                }else if(currentState == 7 || currentState == 13 || currentState == 6 ){
+                                    
+                                    armDisarm("Night");
+                                }
+                                
+                                
+                            }
+                            
+                        }
+                    });
+                
+                
+                
+                
+                
+            }else {
                 lastzone = data.zone;
             //console.log(lastzone);
             //console.log(data.send);
@@ -742,6 +480,15 @@ function logdata(data) {
                 });
                 console.log('Alarm Module: An alarm was triggered');
                 sockets.emit('alarmTrigger', lastzone,Date.now());
+            }if (data.code == '656') {
+                log.ownDb('Alarm_Items', {
+                    Set: 'Current_State',
+                    Where: 'Name',
+                    Name: 'Partition_' + data.partition,
+                    Current_State: data.send
+                });
+                console.log('Alarm Module: Exit delay');
+                //sockets.emit('alarmTrigger', lastzone,Date.now());
             }
             else {
 
@@ -849,7 +596,7 @@ function getState(requiredState, callback) {
     }, function(err, data_receive) {
         if (err) {
             // error handling code goes here
-            console.log("ERROR : ", err);
+            console.log("ERROR1 : ", err);
         }
         else {
             // code to execute on data retrieval
@@ -1041,6 +788,328 @@ function sleep(time, callback) {
     callback();
 }
 
+
+function armDisarm(type){
+    
+
+
+
+                if (type == 'Away') {
+
+                    nap.manualCommand('0301', false, function(ack, nack, retry) {
+
+                        if (ack) {
+
+                            console.log('Away mode');
+
+
+                        }
+                        else if (nack) {
+
+                            console.log('Away mode failed');
+
+
+                        }
+
+
+                    });
+
+                }
+                else if (type == 'Stay') {
+
+
+                    nap.manualCommand('0311', false, function(ack, nack, retry) {
+
+                        if (ack) {
+
+                            console.log('Stay mode');
+
+
+                        }
+                        else if (nack) {
+
+                            console.log('Stay mode failed');
+
+
+                        }
+
+
+                    });
+
+
+
+
+                    // while(nap.ackReceived != '031') {}
+
+
+                }
+                else if (type == 'Disarm') {
+
+                    db.getdata('Alarm_Items', {
+                        Select: 'Current_State',
+                        whereClause: "Type LIKE '%11%' ORDER BY Id DESC LIMIT 1"
+                    }, function(err, data_receive) {
+
+                        if (err) {
+
+                            console.log(err);
+                        }
+                        else if (data_receive) {
+
+
+                            var currentState = data_receive[0]['Current_State'];
+
+
+                            // console.log(currentState);
+
+                            if (currentState == 1) {
+                                nap.manualCommand('0711*1', false, function(ack, nack, retry) {
+
+                                    if (ack) {
+
+                                        log.ownDb('Alarm_Items', {
+                                            Set: 'Current_State',
+                                            Where: 'Type',
+                                            Name: "11",
+                                            Current_State: 0
+                                        });
+                                        console.log('Night mode cancelled');
+
+                                        sleep(1000, function() {
+                                            nap.manualCommand('0401', true, function(ack, nack, retry) {
+
+                                                if (ack) {
+
+                                                    console.log('Disarmed');
+
+
+
+
+                                                }
+                                                else if (nack) {
+
+                                                    console.log('Disarm Failed');
+
+
+                                                }
+                                                else if (retry) {
+
+                                                    console.log("Debug: Retry required");
+                                                }
+                                                else {
+                                                    console.log("Debug: Something is not right");
+                                                }
+
+
+
+                                            });
+                                        });
+
+
+                                    }
+                                    else if (nack) {
+
+                                        console.log('Night mode cancel failed');
+
+
+                                    }
+                                    else if (retry) {
+
+                                        console.log("Debug: Retry required");
+                                    }
+
+
+                                });
+
+
+                            }
+                            else {
+
+                                nap.manualCommand('0401', true, function(ack, nack, retry) {
+
+
+
+                                    if (ack) {
+                                        console.log('Disarmed');
+
+
+                                    }
+                                    else if (nack) {
+
+                                        console.log('Disarm failed');
+
+
+                                    }
+                                    else if (retry) {
+
+                                        console.log("Debug: Retry required");
+                                    }
+                                });
+
+
+
+
+                            }
+
+                        }
+                    });
+                }
+
+                else if (type == 'Night') {
+                    console.log("debug: Night mode selected");
+
+                    db.getdata('Alarm_Items', {
+                        Select: 'Current_State',
+                        whereClause: "Type LIKE '%9%' ORDER BY Id DESC LIMIT 1"
+                    }, function(err, data_receive) {
+
+                        if (err) {
+                            console.log(err);
+
+                        }
+                        else if (data_receive) {
+
+
+                            var currentState = data_receive[0]['Current_State'];
+                            //console.log("debug: State before night mode is: " + currentState);
+
+                            // console.log(currentState);
+
+                            if (currentState == 7  || currentState == 13 ) {
+                                nap.manualCommand('0711*1', false, function(ack, nack, retry) {
+
+                                    if (ack) {
+
+                                        console.log('Night mode');
+                                        log.ownDb('Alarm_Items', {
+                                            Set: 'Current_State',
+                                            Where: 'Type',
+                                            Name: "11",
+                                            Current_State: 1
+                                        });
+
+                                    }
+                                    else if (nack) {
+
+                                        console.log('Night mode failed');
+
+
+                                    }
+                                    else if (retry) {
+
+                                        console.log("Debug: Retry required");
+                                    }
+
+
+                                });
+
+
+                            }
+                            else if (currentState == 3 || currentState == 5 ) {
+
+
+                                nap.manualCommand('0311', false, function(ack, nack, retry) {
+
+
+
+                                    if (ack) {
+                                        console.log('Stay mode');
+
+                                        nap.manualCommand('0711*1', false, function(ack, nack, retry) {
+
+                                            if (ack) {
+
+                                                console.log('Night mode');
+                                                log.ownDb('Alarm_Items', {
+                                                    Set: 'Current_State',
+                                                    Where: 'Type',
+                                                    Name: "11",
+                                                    Current_State: 1
+                                                });
+
+                                            }
+                                            else if (nack) {
+
+                                                console.log('Night mode failed');
+
+
+                                            }
+                                            else if (retry) {
+
+                                                console.log("Debug: Retry required");
+
+                                            }
+
+
+                                        });
+                                    }
+                                    else if (nack) {
+
+                                        console.log('Stay mode failed');
+
+
+                                    }
+                                    else if (retry) {
+
+                                        console.log("Debug: Retry required");
+                                    }
+                                });
+
+
+
+
+                            }
+                            else if (currentState == 6) {
+
+                                db.getdata('Alarm_Items', {
+                                    Select: 'Current_State',
+                                    whereClause: "Type LIKE '%11%' ORDER BY Id DESC LIMIT 1"
+                                }, function(err, data_receive) {
+
+                                    if (err) {
+
+                                    }
+                                    else if (data_receive[0]['Current_State']) {
+
+
+
+                                        nap.manualCommand('0711*1', false, function(ack, nack, retry) {
+
+                                            if (ack) {
+
+
+                                                console.log('Night mode cancelled');
+                                                log.ownDb('Alarm_Items', {
+                                                    Set: 'Current_State',
+                                                    Where: 'Type',
+                                                    Name: "11",
+                                                    Current_State: 0
+                                                });
+
+                                            }
+                                            else if (nack) {
+
+                                                console.log('Night mode cancel failed');
+
+
+                                            }
+                                            else if (retry) {
+
+                                                console.log("Debug: Retry required");
+                                            }
+
+
+                                        });
+                                    }
+
+                                });
+                            }
+
+                        }
+                    });
+
+                }
+}
    
 
 exports.start = start;

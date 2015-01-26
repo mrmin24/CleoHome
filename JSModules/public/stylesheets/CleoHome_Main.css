@@ -42,18 +42,33 @@ h2{
 
 #alarm_alert{
      background-color:#FF0000;
-    z-index:10;
+    z-index:11;
     height:100%;
     width:100%;
-    position:absolute;
+    position:relative;
     display:none;
     opacity:0.5;
-    
+    padding:0px;
+    margin:0px;
     
 }
 
 #Alarm_Alert_Btn_Container{
      display:none;
+    z-index:14;
+     height:75px;
+    width:75px;
+    left:40%;
+    top:20%;
+    position:relative;
     
+    
+}
+#Alarm_Alert_Btn{
+     display:visible;
+     height:100%;
+    width:100%;
+    opacity:1;
+  
     
 }

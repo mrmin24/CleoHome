@@ -415,7 +415,7 @@ exports.tpicommands = {
     'pre':'Partition',
     'bytes':1,
     'post':'Armed',
-    'send':'armed',
+    'send':20,
     'action':'updatepartition'
   },
   '653' : {
@@ -444,9 +444,9 @@ exports.tpicommands = {
   },
   '656' : {
     'name':'Exit Delay in Progress',
-    'pre':'Exit Delay of Partition',
+    'pre':'Partition',
     'bytes':1,
-    'post':'in Progress',
+    'post':'exit delay in Progress',
     'send':13,
     'action':'updatepartition'
   },

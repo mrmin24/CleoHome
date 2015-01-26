@@ -105,6 +105,7 @@ var dnsinterval = setInterval(function() {
 
 io.on('connection', function(socket){
   console.log('Client Connected');
+  console.log(lastArmTime);
   getAlarmTriggers(lastArmTime);
   getAlarmStatus();
    
@@ -167,7 +168,7 @@ io.on('connection', function(socket){
  socket.on('armDisarmAlarm',function(type){
     
     
-    alarmsocket.emit('armDisarmAlarm',type);
+   alarmsocket.emit('armDisarmAlarm',type);
     
     
 });
@@ -226,7 +227,7 @@ function test(){
     
     console.log("testing triggers");
        io.emit("alarmTrigger",{Event:"Left Garage",Time:Date().toString()});
-                 //  db.insert('Alarm_Triggers', {Zone: "Garage", Time: Date().toString()  });
+                   db.insert('Alarm_Triggers', {Zone: "Garage", Time: Date()  });
                   //  sendemail("An alarm has been triggered by zone " + "Garage");
                     
                     
@@ -310,9 +311,9 @@ alarmsocket.on('connect', function() {
     
     
         alarmsocket.on('AlarmEvent',function(data){
-           
+           //console.log("Alarm event")
            if(data['Partition'])
-           {
+           {    //console.log("this " + data['Current_State']);
                getState(data['Current_State'],function(realState){
                    
                    
@@ -337,7 +338,7 @@ alarmsocket.on('connect', function() {
               console.log("Error occured during night mode status retrieval");                          
             }else{
                 if(data.Armed){
-                    lastArmTime = Date.now();
+                    lastArmTime = Date();
                 }else{
                    lastArmTime = null; 
                 }
@@ -357,18 +358,21 @@ alarmsocket.on('connect', function() {
         
         alarmsocket.on('alarmTrigger',function(data,time){
         console.log('Server Module: An alarm was triggered');
-             db.getdata('Alarm_Items',{Select: 'Description',whereClause:"'Name' = '" + "'" + "Zone_" + data},function(err,data_receive){
-                        
+        //console.log(data);
+             db.getdata('Alarm_Items',{Select: 'Description',whereClause:'Name = ' + '"' + 'Zone_' + data + '"'},function(err,data_receive){
+                      // console.log('test1'); 
                    if(data_receive[0]){
                     console.log("Sending Email for Alarm Trigger, zone " + data_receive[0]['Description']);
+                     sendemail("An alarm has been triggered by zone " + data_receive[0]['Description']);
+                     db.insert('Alarm_Triggers', {Zone: data_receive[0]['Description'], Time: Date().toString()  });
                     io.emit("alarmTrigger",{Event:data_receive[0]['Description'],Time:time});
-                    db.insert('Alarm_Triggers', {Zone: data_receive[0]['Description'], Time: Date().toString()  });
-                    sendemail("An alarm has been triggered by zone " + data_receive[0]['Description']);
+                    
+                   
                     
                 }else{
                     if (err) {
                         // error handling code goes here
-                        console.log("ERROR : ",err);            
+                        console.log("ERROR (Alarm Trigger) : ",err);            
                     }
                 
                     console.log("No zone retrieved for Alarm Trigger");
@@ -379,7 +383,8 @@ alarmsocket.on('connect', function() {
                 }
 		
        
-        });
+            });
+            
         });
         
         alarmsocket.on('power',function(code){
@@ -446,11 +451,11 @@ alarmsocket.on('connect', function() {
 
 
 function getState(requiredState,callback){
-    
+    //console.log(requiredState);
     db.getdata('Alarm_States',{Select: 'State',whereClause:'Id = ' + requiredState},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR : ",err);            
+                            console.log("ERROR1 : ",err);            
                         } else {            
                         // code to execute on data retrieval
                         if(data_receive[0])
@@ -468,7 +473,7 @@ function getAlarmStatus(){
     db.getdata('Alarm_Items',{Select: 'Name,Current_State,Description,Alarm_Event,Type',whereClause:"'Id' LIKE '%'"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR : ",err);            
+                            console.log("ERROR2 : ",err);            
                         } else {       
                             
                         // code to execute on data retrieval
@@ -584,7 +589,7 @@ function getEvents(numEvents){
     db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Id LIKE '%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR : ",err);            
+                            console.log("ERROR3 : ",err);            
                         } else {            
                         // code to execute on data retrieval
                            for(var i = numEvents-1;i>=0;i--){
@@ -630,7 +635,7 @@ function getImportantEvents(numEvents){
     db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Event LIKE '%Important%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR : ",err);            
+                            console.log("ERROR4 : ",err);            
                         }
                         else 
                         {            
@@ -694,7 +699,7 @@ function getLastAlarm(){
     db.getdata('Event_Log',{Select: 'Id',whereClause:"Event LIKE '%12%' ORDER BY Id DESC LIMIT 1"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR : ",err);            
+                            console.log("ERROR5 : ",err);            
                         } else {            
                         // code to execute on data retrieval
                         
@@ -705,7 +710,7 @@ function getLastAlarm(){
                           db.getdata('Event_Log',{Select: '*',whereClause:"Id > "+ newid +" limit 20"},function(err,data_receives){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR : ",err);            
+                            console.log("ERROR6 : ",err);            
                         } else {            
                         // code to execute on data retrieval
                         
@@ -762,13 +767,14 @@ function getLastAlarm(){
 
 function getAlarmTriggers(lastArmTime){
     
-    db.getdata('Alarm_Triggers',{Select: 'Zone,Time',whereClause:"Time > " + lastArmTime},function(err,data_receive){
+    db.getLast('Alarm_Triggers',{Select: 'Zone,Time',whereClause:"'Zone' LIKE '%'" },function(err,data_receive){
         
         if(err){
             console.log(err);    
         }else if(data_receive[0]){
-            for(var i in data_receive){
-                io.emit("alarmTrigger",{Event:data_receive[i]["Zone"],Time:data_receive[i]["Time"]});
+            if(data_receive[0]['Time'] > lastArmTime){
+             console.log("New alarm event");
+                io.emit("alarmTrigger",{Event:data_receive[0]["Zone"],Time:data_receive[0]["Time"]});
             }
         }
         
@@ -880,7 +886,7 @@ function sendemail(data){
         }, function(err, message) { 
        // console.log(err || message); 
         if(message){
-		console.log("IP Address email sent successfully");
+		console.log("Email sent successfully");
 	}else if(err){
 		console.log("An error occured while sending email");
 	}

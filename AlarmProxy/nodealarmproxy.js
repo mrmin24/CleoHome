@@ -354,7 +354,7 @@ exports.initConfig = function(initconfig) {
 
 	actual.on('data', function(data) {
 		var dataslice = data.toString().replace(/[\n\r]/g, ',').split(',');
-        //console.log(dataslice);                                                       ////////////activate this for received data for debugging
+       // console.log(dataslice);                                                       ////////////activate this for received data for debugging
         
 		for (var i = 0; i<dataslice.length; i++) { 
 		

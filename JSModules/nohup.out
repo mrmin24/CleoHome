@@ -9551,3 +9551,412 @@ Connected to Alarm Module
 Server registered for Alarm events
 Server registered for Alarm updates
 IP Address email sent successfully
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+DNS Update: ok
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+debug: Night mode selected
+Stay mode
+Night mode
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+debug: Night mode selected
+Night mode cancelled
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+debug: Night mode selected
+Night mode
+debug: Night mode selected
+Night mode
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+Night mode cancelled
+Disarmed
+Client Disconnected
+All clients disconnected
+Invalid login: Token incorrect
+User tokens deleted for user guest
+remember me
+7f38c26caba88bd208eac7f1cef929ea46d177c1b4bb294512d7e055d1a3ca4d
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+debug: Night mode selected
+Stay mode
+Night mode
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Login token accepted
+Login token accepted
+Client Connected
+Night mode cancelled
+Disarmed
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Client Connected
+Login token accepted
+Login token accepted
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+Disarmed
+Away mode
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Login token accepted
+Client Connected
+Disarmed
+Zone 26 bypassed
+Bypassed zones are 26
+Zone 26 bypassed
+Bypassed zones are 
+Away mode
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Login token accepted
+Login token accepted
+Client Connected
+debug: Night mode selected
+Stay mode
+Night mode
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+Night mode cancelled
+Disarmed
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+Disarmed
+Away mode
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+Stay mode
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Login token accepted
+Login token accepted
+Client Connected
+debug: Night mode selected
+Night mode
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Login token accepted
+Login token accepted
+Client Connected
+debug: Night mode selected
+Night mode cancelled
+debug: Night mode selected
+Night mode
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Login token accepted
+Login token accepted
+Client Connected
+debug: Night mode selected
+Night mode cancelled
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+Disarmed
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Initialising config
+Config Initialised
+Mon, 26 Jan 2015 06:27:44 GMT body-parser deprecated bodyParser: use individual json/urlencoded middlewares at CleoHome_Server.js:52:13
+Mon, 26 Jan 2015 06:27:45 GMT body-parser deprecated undefined extended: provide extended option at ../../../node_modules/body-parser/index.js:85:29
+Mon, 26 Jan 2015 06:27:45 GMT express-session deprecated undefined resave option; provide resave option at CleoHome_Server.js:54:13
+Mon, 26 Jan 2015 06:27:45 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at CleoHome_Server.js:54:13
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+Alarm Module: Alarm connected
+Alarm Status 18
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm updates
+Stay mode
+IP Address email sent successfully
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+Login token accepted
+Login token accepted
+Client Connected
+DNS Update: ok
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Initialising config
+Config Initialised
+Mon, 26 Jan 2015 08:37:23 GMT body-parser deprecated bodyParser: use individual json/urlencoded middlewares at CleoHome_Server.js:52:13
+Mon, 26 Jan 2015 08:37:24 GMT body-parser deprecated undefined extended: provide extended option at ../../../node_modules/body-parser/index.js:85:29
+Mon, 26 Jan 2015 08:37:24 GMT express-session deprecated undefined resave option; provide resave option at CleoHome_Server.js:54:13
+Mon, 26 Jan 2015 08:37:24 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at CleoHome_Server.js:54:13
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+Alarm Module: Alarm connected
+Alarm Status 18
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Client Connected
+Server registered for Alarm events
+Server registered for Alarm updates
+Login token accepted
+Client Connected
+IP Address email sent successfully
+Disarmed
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Client Disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+DNS Update: ok
+Login token accepted
+Client Connected
+Client Disconnected
+Initialising config
+Config Initialised
+Mon, 26 Jan 2015 09:50:28 GMT body-parser deprecated bodyParser: use individual json/urlencoded middlewares at CleoHome_Server.js:52:13
+Mon, 26 Jan 2015 09:50:28 GMT body-parser deprecated undefined extended: provide extended option at ../../../node_modules/body-parser/index.js:85:29
+Mon, 26 Jan 2015 09:50:28 GMT express-session deprecated undefined resave option; provide resave option at CleoHome_Server.js:54:13
+Mon, 26 Jan 2015 09:50:28 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at CleoHome_Server.js:54:13
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+Alarm Module: Alarm connected
+Alarm Status 18
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm updates
+Client Connected
+Login token accepted
+Client Connected
+IP Address email sent successfully
+Login token accepted
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+Client Disconnected
+Client Connected
+DNS Update: ok
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Alarm: Arm / Disarm: 015 / 609
+Away mode
+Alarm: Arm / Disarm: 015 / 609
+Alarm: Arm / Disarm: 015 / 609
+Alarm Module: An alarm was triggered
+Server Module: An alarm was triggered
+Server Module: An alarm was triggered
+Disarmed
+Away mode
+Client Disconnected
+All clients disconnected
+Alarm: Arm / Disarm: 015 / 609
+Alarm Module: An alarm was triggered
+Server Module: An alarm was triggered
+Server Module: An alarm was triggered
+Alarm: Arm / Disarm: 015 / 609
+Alarm: Arm / Disarm: 015 / 609
+Alarm: Arm / Disarm: 015 / 609
+Alarm: Arm / Disarm: 015 / 609
+Login token accepted
+Login token accepted
+Login token accepted
+Client Connected
+Alarm: Arm / Disarm: 015 / 609
+Away mode
+Alarm: Arm / Disarm: 015 / 609
+Alarm: Arm / Disarm: 015 / 609
+Alarm: Arm / Disarm: 016 / 609
+Stay mode
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+Alarm: Arm / Disarm: 015 / 609
+Alarm: Arm / Disarm: 016 / 609
+Alarm: Arm / Disarm: 016 / 609
+Stay mode
+Alarm: Arm / Disarm: 016 / 609
+Alarm: Arm / Disarm: 016 / 609
+debug: Night mode selected
+Night mode
+Alarm: Arm / Disarm: 016 / 609
+debug: Night mode selected
+Night mode cancelled
+Alarm: Arm / Disarm: 015 / 609
+Client Disconnected
+All clients disconnected
+Client Connected
+Login token accepted
+Client Connected
+Client Disconnected
+Client Disconnected
+All clients disconnected

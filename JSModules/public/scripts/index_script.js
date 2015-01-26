@@ -163,7 +163,7 @@
          
          if(notwatchwords.indexOf(stringarr[0]) == -1){
              console.log(stringarr[0]);
-             if(watchwords.indexOf(stringarr[1]) > -1 || watchwords.indexOf(stringarr2[1]) > -1 || type == 'alarm'){
+             if(watchwords.indexOf(stringarr[1]) > -1 || watchwords.indexOf(stringarr2[1]) > -1 || watchwords.indexOf(stringarr2[2]) > -1 || type == 'alarm'){
                 var index = null;
                 for(var j in eventdata){
                     if(eventdata[j]['name'].indexOf(stringarr[0]) > -1){
@@ -414,7 +414,7 @@
     socket.on('AlarmZoneStatusEvent', function(data) {
     
     
-        if (data['Description'] && data['Description'].substring(0,5) != "Spare" && document.getElementById('zone' + data['Zone']) == null) 
+        if (data['Description'] && data['Description'].substring(0,5) != "Spare" && (data['Description'].indexOf("Arm") === -1) && document.getElementById('zone' + data['Zone']) == null) 
         {
             
             addElement(data['Zone'],data['Description'],data['Current_State']);
