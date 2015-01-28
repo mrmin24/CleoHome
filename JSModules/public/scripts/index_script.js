@@ -154,22 +154,25 @@
         
          var event = {};
          var stringarr = data['Event'].split(" - ");
-         var stringarr2 = data['Event'].split(" ");
+         var stringarr2 = stringarr[0].split(" ");
          
-        //console.log(stringarr[1]);
+        //console.log(stringarr2);
        // console.log(eventdata);
          var watchwords = ['Opened','Armed','Disarmed','Alarm!','Door'];
          var notwatchwords = ['Main Partition LED State','Alarm Connection Status'];
-         
+        
          if(notwatchwords.indexOf(stringarr[0]) == -1){
              console.log(stringarr[0]);
              if(watchwords.indexOf(stringarr[1]) > -1 || watchwords.indexOf(stringarr2[1]) > -1 || watchwords.indexOf(stringarr2[2]) > -1 || type == 'alarm'){
                 var index = null;
+               
                 for(var j in eventdata){
-                    if(eventdata[j]['name'].indexOf(stringarr[0]) > -1){
+                    
+                    
+                    if(eventdata[j]['name'] == stringarr[0]){
                         index = j;
                        // console.log(index);
-                        //console.log(j);
+                       // console.log(j);
                         break;
                     }
                 

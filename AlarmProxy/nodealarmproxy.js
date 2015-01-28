@@ -41,6 +41,7 @@ function checkAlarmConnected(){
 			//	console.log('Alarm Module: Alarm available');
 				eventEmitter.emit('Alarms_connection_status',18,connected);
 	 			//logdata('{"Status":"Alarm connected"}');
+	 			//getNewStatus();
 			}
 			
 			
@@ -134,6 +135,7 @@ exports.initConfig = function(initconfig) {
 		 //retryconnect();
 			
 	});
+		
 		
 		
 
@@ -236,9 +238,7 @@ exports.initConfig = function(initconfig) {
 		} else if (loginStatus == '1') {
 			//console.log('successfully logged in!  getting current data...');
 			 logdata('{"Status":"successfully logged in!  getting current data..."}');
-			sendcommand(actual,'001',function(){
-			    
-			});
+			getNewStatus();
 		} else if (loginStatus == '2') {
 			//console.log();
 			 logdata('{"Status:"Request for Password Timed Out :("}');
@@ -509,6 +509,12 @@ function logdata(data) {
       
 		
 } 
+
+function getNewStatus(){
+		sendcommand(actual,'001',function(){
+			    
+			});
+}
     
 //function getPass(){
     

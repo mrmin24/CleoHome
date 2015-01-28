@@ -37,7 +37,7 @@ io.sockets.on('connection', function(socket){
   console.log('Client connected');
  // var data = 'Alarm';
   
-  socket.on('register',function(data){
+  socket.on('register',function(data,callback){
       console.log(data.client + ' registered for ' + data.type + ' events');
       
     getLast("'"+data.type+"'",function(result){
@@ -58,8 +58,9 @@ io.sockets.on('connection', function(socket){
        socket.emit('connectstatus');
         
         });
-    
+        callback();
     });
+    
     });
     
  socket.on('disconnect',function(){

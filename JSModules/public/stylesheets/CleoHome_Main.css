@@ -28,6 +28,8 @@ h2{
     position:absolute;
     opacity:0.5;
     display:none;
+    padding:0px;
+    margin:0px;
 }
 
 #blackout{

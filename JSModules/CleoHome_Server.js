@@ -237,7 +237,7 @@ eventsocket.on('connect', function() {
     console.log('Connected to Event Handler');
    // io.emit('ConnectionStatus',{item: 'Event_Handler',status:'connected'});
     
-    eventsocket.emit('register',{type:'Alarm',client:'Server'});//,function(){});
+    eventsocket.emit('register',{type:'Alarm',client:'Server'},function(){});
     //console.log("testing");
     eventsocket.on('Event',function(data){
          //console.log(data);
@@ -351,6 +351,7 @@ alarmsocket.on('connect', function() {
         alarmsocket.on('AlarmConnectionState',function(status,connected){
           
              io.emit("AlarmConnectionState",{Connected:connected,Status:status});
+             
             
           });
         
