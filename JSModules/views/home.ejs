@@ -10,6 +10,7 @@
         <link rel='stylesheet',  href="/stylesheets/CleoHome_Main.css">
          <link rel='stylesheet',  href="/EventGraph/css/style.css">
        <link rel='stylesheet',  href="/stylesheets/datepicker.css">
+       <link rel='stylesheet',  href="/stylesheets/jquery-ui.min.css">
           
     </head>
     
@@ -19,6 +20,9 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <script>(typeof $().modal == 'function') || document.write('<script src="/bootstrap/js/bootstrap.min.js">\x3C/script>')</script>
     <script src="/socket.io/socket.io.js"></script>
+    <script src="/jquery/jquery-ui.min.js"></script>
+    
+    
     
     
      
@@ -52,6 +56,9 @@
                             </li>
                             <li onclick="switchEventsTab()">
                                 <a href="#Events" data-toggle="tab">Events</a>
+                            </li>
+                            <li onclick="settings()">
+                                <a href="#" data-toggle="tab">Settings</a>
                             </li>
                             <li onclick="test()">
                                 <a href="#" data-toggle="tab">Test</a>
@@ -103,13 +110,9 @@
                         </div>
                         
                         
-                        
-                        
                             <div id = "alarm_controls" class="well hidden">
                                     
-                                            
-                                            
-                                    
+                                         
                                     <!--<label id = "event_dropdown_btn" class="hidden">-->
                                     <div class="btn-toolbar" role="toolbar">
                                         <div class="btn-group">
@@ -151,10 +154,200 @@
                     </div>
                     
                 </div>
+               
+                <!-- Settings panel -->
                 
+                <div class = "col-xs-12 hidden " id="Settings_Panel"> 
                 
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h2 class = "panel-title col-xs-1" id = "Settings_Panel_Title">Settings</h2>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                           <button class="btn btn-danger" onclick = "saveConfig()">Save</button>
+                        </div>
+                         <div class="panel-body" id="settings_container">
+                         
+                          
+                          <div id="accordion" >
+                              <h3 >Config</h3>
+                              <div >
+                              <div id="accordion2" >
+                              <h4>Server</h4>
+                                <div class = "well">
+                                    <div class="col-xs-2 ">
+                                        <div class="checkbox " >
+                                          <label><input type="checkbox" value="" id="DNSUpdate_Check" >DNS Update</label>
+                                        </div>
+                                     </div><!-- /.col-lg-6 -->
+                                      
+                                      <div class="col-xs-2  ">
+                                        <div class="checkbox "  >
+                                          <label><input type="checkbox" value="" id="DNSEmail_Check" >DNS Email</label>
+                                        </div>
+                                     </div><!-- /.col-lg-6 -->
+                                      
+                                      <div class="form-group col-xs-8">
+                                          <label for="DNSInt" class="col-xs-3 control-label">DNS Update Interval (Mins)</label>
+                                          <div class="col-xs-2" id="DNSUpdateInt">
+                                             <input type="text" class="form-control" id="DNSInt" placeholder="">
+                                          </div>
+                                       </div>
+                                </div> <!-- WELL -->
+                            <h4>Email</h4>
+                                <div class = "well">
+                                    <div class="form-group ">
+                                          <label for="EmailFrom" class="col-xs-1 control-label">From:</label>
+                                          <div class="col-xs-11" >
+                                             <input type="text" class="form-control" id="EmailFrom" placeholder="From">
+                                          </div>
+                                       </div>
+                                      
+                                      <div class="form-group ">
+                                          <label for="EmailTo" class="col-xs-1 control-label">To:</label>
+                                          <div class="col-xs-11" >
+                                             <input type="text" class="form-control" id="EmailTo" placeholder="To">
+                                          </div>
+                                       </div>
+                                      
+                                      <div class="form-group ">
+                                          <label for="EmailCC" class="col-xs-1 control-label">CC:</label>
+                                          <div class="col-xs-11" >
+                                             <input type="text" class="form-control" id="EmailCC" placeholder="CC">
+                                          </div>
+                                       </div>
+                                    </div> <!-- WELL -->
+                                    
+                            <h4>Alarm</h4>
+                                <div class = "well">
+                                    <div class="form-group col-xs-4">
+                                          <label for="EnvisPass" class="col-xs-4 control-label">Envisalink Password</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="EnvisPass" placeholder="Password">
+                                          </div>
+                                       </div>
+                                      
+                                      <div class="form-group col-xs-4">
+                                          <label for="AlmPass" class="col-xs-4 control-label">Alarm Password</label>
+                                          <div class="col-xs-5">
+                                             <input type="text" class="form-control" id="AlmPass" placeholder="Password">
+                                          </div>
+                                       </div>
+                                      
+                                      <div class="form-group col-xs-4">
+                                          <label for="AlmPrt" class="col-xs-4 control-label">Alarm Port</label>
+                                          <div class="col-xs-5">
+                                             <input type="text" class="form-control" id="AlmPrt" placeholder="4025">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmIP" class="col-xs-4 control-label">Alarm IP</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmIP" placeholder="0.0.0.0">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmZones" class="col-xs-4 control-label">Number of Zones</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmZones" placeholder="32">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmPart" class="col-xs-4 control-label">Number of Partitions</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmPart" placeholder="1">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmAwayZone" class="col-xs-4 control-label">Away Arm Zone</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmAwayZone" placeholder="Away Zone">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmStayZone" class="col-xs-4 control-label">Stay Arm Zone</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmStayZone" placeholder="Stay Zone">
+                                          </div>
+                                       </div>
+                                    </div> <!-- WELL -->
+                                    
+                                <h4>DataBase</h4>
+                                    <div class = "well">
+                                        
+                                          
+                                          <div class="form-group col-xs-8">
+                                              <label for="DBName" class="col-xs-3 control-label">Database Name</label>
+                                              <div class="col-xs-5" >
+                                                 <input type="text" class="form-control" id="DBName" placeholder="">
+                                              </div>
+                                           </div>
+                                            <div class="form-group col-xs-8">
+                                              <label for="DBHost" class="col-xs-3 control-label">Database Host</label>
+                                              <div class="col-xs-5" >
+                                                 <input type="text" class="form-control" id="DBHost" placeholder="">
+                                              </div>
+                                           </div>
+                                            <div class="form-group col-xs-8">
+                                              <label for="DBUsername" class="col-xs-3 control-label">Database Username</label>
+                                              <div class="col-xs-5" >
+                                                 <input type="text" class="form-control" id="DBUsername" placeholder="">
+                                              </div>
+                                           </div>
+                                            <div class="form-group col-xs-8">
+                                              <label for="DBPass" class="col-xs-3 control-label">Database Password</label>
+                                              <div class="col-xs-5" >
+                                                 <input type="text" class="form-control" id="DBPass" placeholder="">
+                                              </div>
+                                           </div>
+                                    </div> <!-- WELL -->
+                                        
+                            <h4>Authentication</h4>
+                                        <div class = "well">
+                                            
+                                              
+                                              <div class="form-group col-xs-8">
+                                                  <label for="tokentimeout" class="col-xs-3 control-label">Authentication Token Timeout (Days)</label>
+                                                  <div class="col-xs-5" >
+                                                     <input type="text" class="form-control" id="tokentimeout" placeholder="">
+                                                  </div>
+                                               </div>
+                                            </div> <!-- WELL -->
+                              
+                                  </div>
+                              </div>
+                              
+                              <h3 >Users</h3>
+                              <div >
+                                <p>
+                                Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
+                                purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
+                                velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
+                                suscipit faucibus urna.
+                                </p>
+                              </div>
+                              <h3 >Section 3</h3>
+                              <div >
+                                <p>
+                                Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
+                                Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
+                                ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
+                                lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
+                                </p>
+                                <ul>
+                                  <li>List item one</li>
+                                  <li>List item two</li>
+                                  <li>List item three</li>
+                                </ul>
+                              </div>
+                              
+                         </div>
+                          
+                         </div>
+                    </div>
+                    
+                </div>
                 
-                        
+                 <!-- Events Panel -->      
                    
                 
                 <div class = "col-xs-12 "  id="Event_Panel">
@@ -172,8 +365,6 @@
                                 <label id="Checkbox3" class="checkbox-inline ">
                                     <input type="checkbox" id="checkbox3" name="checkbox3"  checked>Important</label>
                             </span>
-                                
-                            
                                 
                             
                         </div>
@@ -278,7 +469,22 @@
           <script src="/EventGraph/src/eventDrops.js"></script>
           <script src="/scripts/index_script.js"></script>
           
-     
+     <script>
+      $(function() {
+        $( "#accordion2" ).accordion({
+            active: false,
+            collapsible: true,
+            event: "click ",
+            heightStyle: "content"
+        });
+        $( "#accordion" ).accordion({
+            active: false,
+            collapsible: true,
+            event: "click ",
+            heightStyle: "content"
+            });
+      });
+  </script>
     </body>
 
 </html>

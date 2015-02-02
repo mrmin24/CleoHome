@@ -22,10 +22,10 @@ var db = require('./dbhandler');
 var bypassedZones = [];
 
 var lastArmTime = null;
-
-
-var configure = require('../JSModules/GetConfig.js');
-var configure2 = configure.data.xml;
+var getconfig = require('../JSModules/GetConfig.js');
+var writeXML = require('../JSModules/WriteConfig.js');
+var configure = getconfig.data;
+var configure2 = configure.xml;
 
 
 
@@ -85,6 +85,10 @@ var dnsinterval = setInterval(function() {
 		 
 		 if(configure2.server[0].dnsemail[0] == 'true')  
 		    sendemail("Your current IP is http://" + ip);   
+		    
+		 if(configure2.server[0].dnsproxy[0] == 'true')  
+		   updatednsproxy(function(){});   
+		  
         	
 		}
 	
@@ -108,7 +112,7 @@ io.on('connection', function(socket){
   console.log(lastArmTime);
   getAlarmTriggers(lastArmTime);
   getAlarmStatus();
-   
+  sendConfig(); 
  
   
   socket.on('disconnect',function(){
@@ -124,6 +128,24 @@ io.on('connection', function(socket){
         
      }
   });
+  
+  socket.on('updateconfig',function(config_receive){
+     // console.log(config_receive);
+     writeXML.json2xml(config_receive,'xml',function(xml){
+         getconfig.config(function(){
+          var configure3 = getconfig.data;
+           // console.log("2  " + configure3.xml.server[0].dnsupdate[0]);
+             configure2 = configure3.xml; 
+            //console.log(configure2.server[0].dnsupdate[0]);
+           io.emit("config",configure2); 
+         });
+       
+         
+     })
+     
+      
+  });
+  
   
   
   socket.on('AlarmDisconnect',function(){
@@ -952,8 +974,8 @@ function getip(callback){
 function updatedns(ip,callback2){
     
     var http2 = require('http');
-    var username = 'mariusminny@gmail.com';
-    var password = 'Yd@33557722';
+    var username = configure2.server[0].dnsusername[0];
+    var password = configure2.server[0].dnspassword[0];
     var auth = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
     var header = { 'Authorization': auth};
     //'Host': 'https://ydns.eu/api/v1/update/?host=example.ydns.eu&ip='+ip,
@@ -985,6 +1007,51 @@ req.on('error', function(e) {
 req.end();	
 callback2();
 
+}
+
+function updatednsproxy(callback2){
+    var http2 = require('http');
+   
+   
+   // var header = { 'Authorization': auth};
+    //'Host': 'https://ydns.eu/api/v1/update/?host=example.ydns.eu&ip='+ip,
+   
+    var options = {
+      host: 'api.unotelly.com',
+      path: '/api/v1/network/update_by_hash_api?user_hash=15c5462a66cfcce300f0ef2d82098269',//&ip='+ip.substring(0,15),
+      port: '80'
+      //This is the only line that is new. `headers` is an object with the headers to request
+     // headers: header 
+    };
+    
+  var req = http2.request(options, function(res) {
+  //	console.log('STATUS: ' + res.statusCode);
+  //	console.log('HEADERS: ' + JSON.stringify(res.headers));
+  	res.setEncoding('utf8');
+  	res.on('data', function (chunk) {
+    		console.log('DNS Proxy Update: ' + chunk);
+  	});
+  });
+
+req.on('error', function(e) {
+  console.log('problem with request: ' + e.message);
+});
+
+// write data to request body
+//req.write('data\n');
+//req.write('data\n');
+req.end();	
+callback2();
+    
+}
+
+function sendConfig(){
+    
+    
+    io.emit("config",configure2);
+    return;
+    
+    
 }
 
 exports.start = start;

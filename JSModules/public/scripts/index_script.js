@@ -9,7 +9,7 @@
   var Rows = 0;
     var numEvents2 = 20;      
     var btnPress = false;
-    
+    var config;
   
    showAllEvents(numEvents2,false);
   
@@ -35,8 +35,26 @@
        //$("#event_dropdown_btn").removeClass().addClass('hidden');
         $("#event_controls").removeClass().addClass('well hidden');
         $("#alarm_controls").removeClass().addClass('well hidden');
+        $("#Settings_Panel").removeClass().addClass('hidden');
         document.getElementById('checkbox4').checked = true;
          btnPress = false;
+            $( "#accordion2" ).accordion({ active: false});
+        $( "#accordion" ).accordion({active: false });
+     }
+     
+     function settings(){
+         $("#Alarm_Panel").removeClass().addClass('col-xs-12 col-lg-12');
+        $("#Event_Panel").removeClass().addClass('col-xs-12 ');
+        $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
+       // $("#event_dropdown_label").removeClass().addClass('hidden');
+       //$("#event_dropdown_btn").removeClass().addClass('hidden');
+        $("#event_controls").removeClass().addClass('well hidden');
+        $("#alarm_controls").removeClass().addClass('well hidden');
+        $("#Settings_Panel").removeClass().addClass('col-xs-12 show');
+        document.getElementById('checkbox4').checked = true;
+         btnPress = false;
+         
+         
             
      }
     
@@ -55,7 +73,7 @@
        // $("#event_dropdown_btn").removeClass().addClass('show');
         $("#event_controls").removeClass().addClass('well show');
         $("#alarm_controls").removeClass().addClass('well hidden');
-        
+        $("#Settings_Panel").removeClass().addClass('hidden');
          
      }
      
@@ -65,6 +83,7 @@
         $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
          $("#event_controls").removeClass().addClass('well hidden');
          $("#alarm_controls").removeClass().addClass('well show');
+         $("#Settings_Panel").removeClass().addClass('hidden');
          
          
         // $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-2');
@@ -99,9 +118,6 @@
              socket.emit('getEvents',{numEvents:numEvents},function(err,data){});
          }
             
-             
-         
-         
      }
      
      
@@ -619,9 +635,98 @@
        // console.log(data);
         
     
+    socket.on('config',function(config_receive){
+        
+       // console.log(config_receive);
+        config = config_receive;
+        updateConfigPage();
+        
+        
+    });
     
     
+    //LOCAL FUNCTION START///////////////////////////////////////////////////////////////////////////////////////////////////////
+    function updateConfigPage(){
+        
+       //console.log( $('#DNSEmail_Check').attr("checked"));
+       
+       //Server
+       $('#DNSUpdate_Check').prop('checked',config.server[0].dnsupdate[0] == "true") ;
+       $('#DNSEmail_Check').prop('checked',config.server[0].dnsemail[0] == "true");
+       $('#DNSInt').val(config.server[0].dnsinterval[0]) ;
+       
+       //Email
+       
+       $('#EmailFrom').val(config.email[0].from[0]) ;
+       $('#EmailTo').val(config.email[0].to[0]) ;
+       $('#EmailCC').val(config.email[0].cc[0]) ;
+       
+       //Alarm
+       
+       $('#EnvisPass').val(config.alarm[0].envisPassword[0]) ;
+       $('#AlmPass').val(config.alarm[0].password[0]) ;
+       $('#AlmPrt').val(config.alarm[0].port[0]) ;
+       $('#AlmIP').val(config.alarm[0].ip[0]) ;
+       $('#AlmZones').val(config.alarm[0].zones[0]) ;
+       $('#AlmPart').val(config.alarm[0].partitions[0]) ;
+       $('#AlmAwayZone').val(config.alarm[0].awayArmZone[0]) ;
+       $('#AlmStayZone').val(config.alarm[0].stayArmZone[0]) ;
+       
+       //Database
+       
+       $('#DBName').val(config.database[0].name[0]) ;
+       $('#DBHost').val(config.database[0].host[0]) ;
+       $('#DBUsername').val(config.database[0].user[0]) ;
+       $('#DBPass').val(config.database[0].password[0]) ;
+       
+       
+       //Authentication
+       $('#tokentimeout').val(config.authentication[0].timeout[0]) ;
+       
+        
+    }
     
+    function saveConfig(){
+       // config2 = {server:[],email:[],alarm:[],database:[],authentication:[]};
+        //Server
+       config.server[0].dnsupdate[0] = $('#DNSUpdate_Check').prop('checked').toString() ;
+       config.server[0].dnsemail[0] = $('#DNSEmail_Check').prop('checked').toString();
+       config.server[0].dnsinterval[0] = $('#DNSInt').prop('value') ;
+       
+       //Email
+       
+       config.email[0].from[0] = $('#EmailFrom').prop('value') ;
+       config.email[0].to[0] = $('#EmailTo').prop('value') ;
+       config.email[0].cc[0] = $('#EmailCC').prop('value') ;
+       
+       //Alarm
+       
+       config.alarm[0].envisPassword[0] = $('#EnvisPass').prop('value') ;
+       config.alarm[0].password[0] = $('#AlmPass').prop('value') ;
+       config.alarm[0].port[0] = $('#AlmPrt').prop('value') ;
+       config.alarm[0].ip[0] = $('#AlmIP').prop('value') ;
+       config.alarm[0].zones[0] = $('#AlmZones').prop('value') ;
+       config.alarm[0].partitions[0] = $('#AlmPart').prop('value') ;
+       config.alarm[0].awayArmZone[0] = $('#AlmAwayZone').prop('value') ;
+       config.alarm[0].stayArmZone[0] = $('#AlmStayZone').prop('value') ;
+       
+       //Database
+       
+       config.database[0].name[0] = $('#DBName').prop('value') ;
+       config.database[0].host[0] = $('#DBHost').prop('value') ;
+       config.database[0].user[0] = $('#DBUsername').prop('value') ;
+       config.database[0].password[0] = $('#DBPass').prop('value') ;
+       
+       
+       //Authentication
+       config.authentication[0].timeout[0] = $('#tokentimeout').prop('value') ;
+        
+        console.log(config.toString());
+        
+         socket.emit('updateconfig',config,function(err,ack){                  //testing purposes only
+         
+        });
+    }
     
     function showAlarmAlerts(data){
         eventdata.length = 0;

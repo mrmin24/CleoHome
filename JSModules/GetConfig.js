@@ -1,7 +1,7 @@
 
 exports.data;
 
-exports.start = function(callback) {
+exports.config = function(callback) {
     
 
     var fs = require('fs'),

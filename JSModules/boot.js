@@ -1,7 +1,7 @@
 var Config = require('./GetConfig.js');
 
 
-Config.start(function(){
+Config.config(function(){
 
 var Server = require('./CleoHome_Server.js');
 

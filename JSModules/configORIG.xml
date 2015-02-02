@@ -1,0 +1,54 @@
+<xml>
+    <database>
+        <name>CleoHomeDB</name>
+        <host>localhost</host>
+        <user>CleoUser</user>
+        <password></password>
+        <users_table>users</users_table>
+    </database>
+    
+    <authentication>
+        <timeout>30</timeout>     <!-- time in days  -->
+    </authentication>
+    
+    
+    <alarm>
+        <envisPassword></envisPassword>
+        <password>3572</password>
+        <port>4025</port>
+        <ip>10.0.0.20</ip>
+        <zones>27</zones>
+        <partitions>1</partitions>
+        <proxyEnabled>false</proxyEnabled>
+        <atomicEvents>true</atomicEvents>
+        <awayArmZone>015</awayArmZone>
+        <stayArmZone>016</stayArmZone>
+    </alarm>
+    
+    
+    <alarmmodule>
+        <port>44601</port>
+    </alarmmodule>
+    
+    <eventmodule>
+        <port>44602</port>
+    </eventmodule>
+    
+    <server>
+        <port>80</port>
+        <dnsupdate>true</dnsupdate>
+        <dnsusername></dnsusername>
+        <dnspassword></dnspassword>
+        <dnsinterval>2</dnsinterval>  <!-- upsate time in minutes -->
+        <dnsemail>false</dnsemail>
+        <dnsproxy>true</dnsproxy>
+    </server>
+    
+    <email>
+        <from></from>
+        <to></to>
+        <cc></cc>
+    </email>
+    
+
+</xml>
