@@ -633,7 +633,38 @@
             
         
        // console.log(data);
+    
+    
+    socket.on("sendUsers",function(users){
+        //console.log(users);
+        var newusers = document.getElementById('userTableBody');
+        var newHtml;
+        for(var i in users){
+            
+              newHtml = '<tr><td>'+ users[i].id  +'</td><td>'+ users[i].username  +'</td></tr>';
+              
+             newusers.innerHTML += newHtml;
+          
+        }
+       
+       var table = $('#users_table').DataTable();
+     
+        $('#users_table tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+            }
+        } );
+     
+        $('#Usr_Delete_Btn').click( function () {
+            table.row('.selected').remove().draw( false );
+        } );
         
+        
+    }) ;   
     
     socket.on('config',function(config_receive){
         
@@ -643,6 +674,7 @@
         
         
     });
+    
     
     
     //LOCAL FUNCTION START///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -727,6 +759,22 @@
          
         });
     }
+    
+    
+    
+    
+    
+    $(document).ready(function() {
+        
+        socket.emit('getusers',function(){
+        
+        
+        
+        });
+    } );
+    
+    
+    
     
     function showAlarmAlerts(data){
         eventdata.length = 0;

@@ -522,3 +522,625 @@ null
 Login token accepted
 Client Connected
 null
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+Client Disconnected
+DNS Proxy Update: IP Updated!
+DNS Update: ok
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Initialising config
+Config Initialised
+Initialising config
+Config Initialised
+Mon, 02 Feb 2015 14:31:04 GMT body-parser deprecated bodyParser: use individual json/urlencoded middlewares at CleoHome_Server.js:52:13
+Mon, 02 Feb 2015 14:31:05 GMT body-parser deprecated undefined extended: provide extended option at ../../../node_modules/body-parser/index.js:85:29
+Mon, 02 Feb 2015 14:31:05 GMT express-session deprecated undefined resave option; provide resave option at CleoHome_Server.js:54:13
+Mon, 02 Feb 2015 14:31:05 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at CleoHome_Server.js:54:13
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+Alarm Module: Alarm connected
+Alarm Status 18
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm updates
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Email sent successfully
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Client Disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+DNS Proxy Update: OK
+DNS Proxy Update: OK
+DNS Update: ok
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Client Disconnected
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+All clients disconnected
+DNS Update: ok
+DNS Proxy Update: OK
+DNS Proxy Update: OK
+DNS Proxy Update: OK
+DNS Proxy Update: OK
+DNS Proxy Update: OK
+Client Connected
+null
+Client Connected
+null
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Login token accepted
+Login token accepted
+Client Connected
+null
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Client Connected
+null
+Login token accepted
+Client Disconnected
+Client Disconnected
+Client Connected
+null
+Client Disconnected
+DNS Update: ok
+DNS Proxy Update: OK
+Client Connected
+null
+Login token accepted
+DNS Proxy Update: OK
+Client Connected
+null
+Client Disconnected
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+Client Connected
+null
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Client Disconnected
+Client Disconnected
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Initialising config
+Config Initialised
+Mon, 02 Feb 2015 19:27:28 GMT body-parser deprecated bodyParser: use individual json/urlencoded middlewares at CleoHome_Server.js:52:13
+Mon, 02 Feb 2015 19:27:28 GMT body-parser deprecated undefined extended: provide extended option at ../../../node_modules/body-parser/index.js:85:29
+Mon, 02 Feb 2015 19:27:28 GMT express-session deprecated undefined resave option; provide resave option at CleoHome_Server.js:54:13
+Mon, 02 Feb 2015 19:27:28 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at CleoHome_Server.js:54:13
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+Alarm Module: Alarm connected
+Alarm Status 18
+Client connected
+Client Connected
+null
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm updates
+Login token accepted
+Client Connected
+null
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Email sent successfully
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Client Disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+Client Disconnected
+Client Disconnected
+DNS Proxy Update: OK
+DNS Update: ok
+Client Connected
+null
+Login token accepted
+Client Disconnected
+Client Connected
+null
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+Client Disconnected
+All clients disconnected
+DNS Update: ok
+DNS Proxy Update: OK
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Connected
+null
+Client Connected
+null
+Client Disconnected
+Client Disconnected
+Client Disconnected
+DNS Proxy Update: OK
+DNS Update: ok
+Client Disconnected
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Login token accepted
+Login token accepted
+Client Connected
+null
+Client Disconnected
+Client Disconnected
+Alarm: Arm / Disarm: 016 / 609
+5
+Stay mode
+Alarm Module: Exit delay
+Login token accepted
+Login token accepted
+Client Connected
+Mon Feb 02 2015 22:33:45 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Disconnected
+Client Connected
+Mon Feb 02 2015 22:33:45 GMT+0200 (SAST)
+New alarm event
+debug: Night mode selected
+Night mode
+Client Disconnected
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+All clients disconnected
+DNS Proxy Update: OK
+DNS Update: ok
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Disconnected
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Disconnected
+Client Disconnected
+Client Disconnected
+DNS Update: ok
+DNS Proxy Update: OK
+Client Disconnected
+All clients disconnected
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Disconnected
+Client Disconnected
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Disconnected
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+All clients disconnected
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Disconnected
+Client Disconnected
+Alarm Status 19
+Alarm Status 18
+Client Disconnected
+All clients disconnected
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Connected
+Mon Feb 02 2015 22:36:54 GMT+0200 (SAST)
+New alarm event
+Client Disconnected
+Alarm: Arm / Disarm: 015 / 609
+6
+Disarm
+Night mode cancelled
+Disarmed
+Alarm: Arm / Disarm: 015 / 609
+3
+Away mode
+Alarm Module: Exit delay
+Login token accepted
+Client Connected
+Tue Feb 03 2015 07:36:22 GMT+0200 (SAST)
+Client Disconnected
+Client Disconnected
+All clients disconnected
+DNS Proxy Update: OK
+DNS Update: ok
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+DNS Proxy Update: OK
+DNS Update: ok
+DNS Proxy Update: OK
+DNS Update: ok
+DNS Proxy Update: OK
+DNS Update: ok
+Alarm Status 19
+Alarm Status 18
+DNS Update: ok
+DNS Proxy Update: OK
+Login token accepted
+Client Connected
+Tue Feb 03 2015 07:36:22 GMT+0200 (SAST)
+Client Disconnected
+All clients disconnected
+Alarm Module: An alarm was triggered
+Server Module: An alarm was triggered
+Server Module: An alarm was triggered
+Sending Email for Alarm Trigger, zone Lapa
+Sending Email for Alarm Trigger, zone Lapa
+Email sent successfully
+Email sent successfully
+Login token accepted
+Client Connected
+Tue Feb 03 2015 07:36:22 GMT+0200 (SAST)
+New alarm event
+Client Disconnected
+All clients disconnected
+Client Connected
+Tue Feb 03 2015 07:36:22 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Connected
+Tue Feb 03 2015 07:36:22 GMT+0200 (SAST)
+New alarm event
+Client Disconnected
+Alarm Module: An alarm was triggered
+Server Module: An alarm was triggered
+Server Module: An alarm was triggered
+Sending Email for Alarm Trigger, zone Lapa
+Sending Email for Alarm Trigger, zone Lapa
+Email sent successfully
+Email sent successfully
+Client Disconnected
+All clients disconnected
+Alarm Module: An alarm was triggered
+Server Module: An alarm was triggered
+Server Module: An alarm was triggered
+Sending Email for Alarm Trigger, zone Lapa
+Sending Email for Alarm Trigger, zone Lapa
+Email sent successfully
+Email sent successfully
+Client Connected
+Tue Feb 03 2015 07:36:22 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Connected
+Tue Feb 03 2015 07:36:22 GMT+0200 (SAST)
+New alarm event
+Login token accepted
+Client Connected
+Tue Feb 03 2015 07:36:22 GMT+0200 (SAST)
+New alarm event
+Disarmed
+Zone 25 bypassed
+Bypassed zones are 25
+Away mode
+Client Disconnected
+Alarm Module: Exit delay
+Client Disconnected
+Alarm Module: An alarm was triggered
+Server Module: An alarm was triggered
+Server Module: An alarm was triggered
+Sending Email for Alarm Trigger, zone Front Beam
+Sending Email for Alarm Trigger, zone Front Beam
+Email sent successfully
+Email sent successfully
+Alarm: Arm / Disarm: 015 / 609
+6
+Disarm
+Disarmed
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+DNS Proxy Update: OK
+DNS Update: ok
+DNS Proxy Update: OK
+DNS Update: ok
+Login token accepted
+Client Connected
+null
+Client Disconnected
+All clients disconnected
+Login token accepted
+Login token accepted
+Client Connected
+null
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+DNS Proxy Update: OK
+DNS Update: ok
+Login token accepted
+Client Connected
+null
+Alarm Status 19
+Client Connected
+null
+Login token accepted
+Alarm Status 18
+Client Connected
+null
+Client Disconnected
+DNS Update: ok
+DNS Proxy Update: OK
+Client Disconnected
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Initialising config
+Config Initialised

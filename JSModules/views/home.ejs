@@ -11,7 +11,7 @@
          <link rel='stylesheet',  href="/EventGraph/css/style.css">
        <link rel='stylesheet',  href="/stylesheets/datepicker.css">
        <link rel='stylesheet',  href="/stylesheets/jquery-ui.min.css">
-          
+         <link rel='stylesheet',  href="/stylesheets/jquery.dataTables.css"> 
     </head>
     
     <body>
@@ -21,7 +21,7 @@
     <script>(typeof $().modal == 'function') || document.write('<script src="/bootstrap/js/bootstrap.min.js">\x3C/script>')</script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/jquery/jquery-ui.min.js"></script>
-    
+    <script src="/jquery/jquery.dataTables.min.js"></script>
     
     
     
@@ -163,13 +163,13 @@
                         <div class="panel-heading">
                             <h2 class = "panel-title col-xs-1" id = "Settings_Panel_Title">Settings</h2>
                             <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
-                           <button class="btn btn-danger" onclick = "saveConfig()">Save</button>
+                           <button class="btn btn-danger btn-sm" onclick = "saveConfig()">Save</button>
                         </div>
                          <div class="panel-body" id="settings_container">
                          
                           
                           <div id="accordion" >
-                              <h3 >Config</h3>
+                              <h3 >Config </h3>
                               <div >
                               <div id="accordion2" >
                               <h4>Server</h4>
@@ -317,14 +317,44 @@
                               </div>
                               
                               <h3 >Users</h3>
-                              <div >
-                                <p>
-                                Sed non urna. Donec et ante. Phasellus eu ligula. Vestibulum sit amet
-                                purus. Vivamus hendrerit, dolor at aliquet laoreet, mauris turpis porttitor
-                                velit, faucibus interdum tellus libero ac justo. Vivamus non quam. In
-                                suscipit faucibus urna.
-                                </p>
-                              </div>
+                              <div>
+                               <div class="btn-group">
+                                            <span>
+                                                <button class="btn btn-default" type="button" id="Usr_Delete_Btn" onclick = "armDisarmAlarm('Away')" >Delete </button>
+                                            </span>
+                                            
+                                            <span>
+                                                <button class="btn btn-default" type="button" id="Usr_Delete_Token_Btn"  onclick = "armDisarmAlarm('Stay')"  >Remove Token </button>
+                                            </span>
+                                           <!-- <span>
+                                                <button class="btn btn-default" type="button" id="Usr_Delete_Btnn" onclick = "armDisarmAlarm('Disarm')" >Disarm </button>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-default" type="button" id="Usr_Delete_Btnn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
+                                            </span>-->
+                                    </div>
+                                    <br><br>
+                                        <div>    
+                                           <span>
+                                               <table class = "table" id="users_table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Id</th>
+                                                            <th>Username</th>
+                                                            
+                                                        </tr>
+                                                    </thead>
+                                                    
+                                                    <tbody id="userTableBody">
+                                                       
+                                                   
+                                                     </tbody> 
+                                                   
+                                                   
+                                               </table>
+                                            </span>
+                                   </div>
+                                        </div>
                               <h3 >Section 3</h3>
                               <div >
                                 <p>
