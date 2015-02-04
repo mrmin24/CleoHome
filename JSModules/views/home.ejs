@@ -68,7 +68,7 @@
                       
                     </div> <!-- navbar-collapse-->
                     <a href="/logout" class="btn btn-default pull-right"><span class="fa fa-sign-out"></span> Logout</a>  
-                    <a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Local Signup</a>
+                    
                  <!-- container-fluid-->
                   
             </nav>
@@ -318,20 +318,31 @@
                               
                               <h3 >Users</h3>
                               <div>
+                             <!-- <div id="dialog1" title="User Deleted" >
+                                  <p>User deleted</p>
+                                </div>
+                                <div id="dialog2" title="Token Deleted">
+                                  <p>User token deleted</p>
+                                </div>-->
+                              <div class = "well">
                                <div class="btn-group">
                                             <span>
-                                                <button class="btn btn-default" type="button" id="Usr_Delete_Btn" onclick = "armDisarmAlarm('Away')" >Delete </button>
+                                                <button class="btn btn-default" type="button" id="Usr_Refresh_Btn" onclick = "getusers()" ><span class="fa fa-refresh"></span> Refresh </button>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-default" type="button" id="Usr_Delete_Btn" onclick = "" >Delete </button>
                                             </span>
                                             
                                             <span>
-                                                <button class="btn btn-default" type="button" id="Usr_Delete_Token_Btn"  onclick = "armDisarmAlarm('Stay')"  >Remove Token </button>
+                                                <button class="btn btn-default" type="button" id="Usr_Token_Delete_Btn"  onclick = ""  >Remove Token </button>
                                             </span>
-                                           <!-- <span>
-                                                <button class="btn btn-default" type="button" id="Usr_Delete_Btnn" onclick = "armDisarmAlarm('Disarm')" >Disarm </button>
-                                            </span>
-                                            <span>
+                                            
+                                            <a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Local Signup</a>
+                                            
+                                            <!--<span>
                                                 <button class="btn btn-default" type="button" id="Usr_Delete_Btnn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
                                             </span>-->
+                                    </div>
                                     </div>
                                     <br><br>
                                         <div>    

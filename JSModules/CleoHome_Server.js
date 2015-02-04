@@ -146,32 +146,42 @@ io.on('connection', function(socket){
       
   });
   
-  socket.on('getusers',function(callback){
-      console.log("Getting Users...");
-      db.getdata('users',{Select: 'id,username',whereClause:'id LIKE "%"'},function(err,data_receive){
-                      // console.log('test1'); 
-                   if(data_receive[0]){
-                   // console.log(data_receive);
-                    io.emit("sendUsers",data_receive);
-                    
-                }else{
-                    if (err) {
-                        // error handling code goes here
-                        console.log("ERROR (GetUsers) : ",err);            
-                    }
-                
-                    
-                }
-		
-       
-            });
+  socket.on('getusers',function(){
       
+      sendusers();
       
   });
   
   
   
-  
+  socket.on('delete_user',function(userId,username){
+      //console.log(userId);
+      db.deletedata('users',{whereClause:'id = "' + userId + '"'},function(){
+          
+          console.log('User Deleted');
+          db.deletedata('user_logins',{whereClause:'Username = "' + username + '"'},function(){
+          
+          console.log('User Token Deleted');
+          io.emit("user_deleted");
+          sendusers();
+        });
+          
+      });
+      
+      
+      
+  });
+  socket.on('delete_user_token',function(username){
+      //console.log(userId);
+      
+          db.deletedata('user_logins',{whereClause:'Username = "' + username + '"'},function(){
+          
+          console.log('User Token Deleted');
+          io.emit("user_token_deleted");
+        });
+          
+     
+  });
   
   
   socket.on('AlarmDisconnect',function(){
@@ -270,6 +280,27 @@ socket.on('test',function(){
 });
 
 }
+  
+function sendusers(){
+    console.log("Getting Users...");
+      db.getdata('users',{Select: 'id,username',whereClause:'id LIKE "%"'},function(err,data_receive){
+                      // console.log('test1'); 
+                   if(data_receive[0]){
+                   // console.log(data_receive);
+                    io.emit("sendUsers",data_receive);
+                    
+                }else{
+                    if (err) {
+                        // error handling code goes here
+                        console.log("ERROR (GetUsers) : ",err);            
+                    }
+                
+                    
+                }
+		
+       
+            });
+}  
   
 function test(){
     

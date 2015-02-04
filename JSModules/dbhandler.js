@@ -75,6 +75,30 @@ exports.getdata = function(table,data,callback) {
     });
 }
 
+exports.deletedata = function(table,data,callback) {
+//console.log(data.whereClause);
+   pool.getConnection(function(err, connection){
+    
+    //console.log(data.whereClause);
+   
+    connection.query('DELETE FROM ?? WHERE ' + data.whereClause, [table], function(err, result) {
+      
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+       
+       connection.release();
+        if(err) {
+             callback(err,null);
+            }
+            else {
+             callback(null,result);
+            }
+            
+    });
+   
+    });
+}
+
+
 
 exports.getLast = function(table,data,callback) {
 

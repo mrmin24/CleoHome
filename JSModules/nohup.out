@@ -1144,3 +1144,471 @@ Client Connected
 null
 Initialising config
 Config Initialised
+Initialising config
+Config Initialised
+Tue, 03 Feb 2015 22:17:51 GMT body-parser deprecated bodyParser: use individual json/urlencoded middlewares at CleoHome_Server.js:52:13
+Tue, 03 Feb 2015 22:17:51 GMT body-parser deprecated undefined extended: provide extended option at ../../../node_modules/body-parser/index.js:85:29
+Tue, 03 Feb 2015 22:17:51 GMT express-session deprecated undefined resave option; provide resave option at CleoHome_Server.js:54:13
+Tue, 03 Feb 2015 22:17:51 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at CleoHome_Server.js:54:13
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+Alarm Module: Alarm connected
+Alarm Status 18
+Client Connected
+null
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Login token accepted
+Server registered for Alarm events
+Server registered for Alarm updates
+Client Connected
+null
+Getting Users...
+Email sent successfully
+Client Disconnected
+Client Disconnected
+All clients disconnected
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+DNS Proxy Update: OK
+DNS Update: ok
+Alarm: Arm / Disarm: 016 / 609
+5
+Stay mode
+Alarm Module: Exit delay
+Alarm: Arm / Disarm: 016 / 609
+7
+debug: Night mode selected
+Night mode
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+DNS Proxy Update: OK
+DNS Update: ok
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm Status 19
+Alarm Status 18
+Alarm: Arm / Disarm: 015 / 609
+6
+Disarm
+Night mode cancelled
+Disarmed
+Alarm: Arm / Disarm: 015 / 609
+3
+Away mode
+Alarm Module: Exit delay
+Alarm: Arm / Disarm: 015 / 609
+6
+Disarm
+Disarmed
+Login token accepted
+Client Connected
+null
+Getting Users...
+Client Disconnected
+All clients disconnected
+Alarm Status 19
+Alarm Module: Alarm connection error = Error: read EHOSTUNREACH
+Alarm Module: Alarm connection closed
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Login token accepted
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Client Connected
+null
+Getting Users...
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Login token accepted
+Client Connected
+null
+Getting Users...
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Client Disconnected
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Login token accepted
+Client Connected
+null
+Getting Users...
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Client Disconnected
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Alarm Module: Alarm connection error = Error: This socket is closed.
+Initialising config
+Config Initialised
+Wed, 04 Feb 2015 15:00:38 GMT body-parser deprecated bodyParser: use individual json/urlencoded middlewares at CleoHome_Server.js:52:13
+Wed, 04 Feb 2015 15:00:38 GMT body-parser deprecated undefined extended: provide extended option at ../../../node_modules/body-parser/index.js:85:29
+Wed, 04 Feb 2015 15:00:39 GMT express-session deprecated undefined resave option; provide resave option at CleoHome_Server.js:54:13
+Wed, 04 Feb 2015 15:00:39 GMT express-session deprecated undefined saveUninitialized option; provide saveUninitialized option at CleoHome_Server.js:54:13
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+Alarm Module: Alarm connected
+Alarm Status 18
+Client connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm updates
+Email sent successfully
+Alarm Module: Client Disconnected from alarm updates
+All clients disconnected
+Connected to Alarm Module
+Server registered for Alarm updates
+DNS Proxy Update: OK
+DNS Update: ok
+Login token accepted
+Login token accepted
+Client Connected
+null
+Getting Users...
+Stay mode
+Alarm Module: Exit delay
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Getting Users...
+Alarm Status 19
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Login token accepted
+Alarm Status 18
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Getting Users...
+Client Disconnected
+Client Disconnected
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+Wed Feb 04 2015 20:22:55 GMT+0200 (SAST)
+Getting Users...
+Away mode
+Alarm Module: Exit delay
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Getting Users...
+Getting Users...
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Getting Users...
+Getting Users...
+Getting Users...
+Getting Users...
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Getting Users...
+Getting Users...
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Login token accepted
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...
+Login token accepted
+Client Disconnected
+All clients disconnected
+Client Connected
+null
+Getting Users...

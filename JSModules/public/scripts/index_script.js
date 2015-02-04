@@ -10,7 +10,7 @@
     var numEvents2 = 20;      
     var btnPress = false;
     var config;
-  
+  var selectedRow;
    showAllEvents(numEvents2,false);
   
 
@@ -375,6 +375,17 @@
          
      }
      
+      socket.on("user_deleted",function(){
+        
+         $("<div>User Deleted!</div>" ).dialog();
+    });
+    
+    socket.on("user_token_deleted",function(){
+        console.log("test");
+         $( "<div>User Token Deleted!</div>" ).dialog();
+        
+    });
+     
      socket.on('lastAlarmEvents',function(data){
          
          var rows = $('#event_container tr').length+1;
@@ -638,6 +649,7 @@
     socket.on("sendUsers",function(users){
         //console.log(users);
         var newusers = document.getElementById('userTableBody');
+         newusers.innerHTML = '';
         var newHtml;
         for(var i in users){
             
@@ -645,23 +657,9 @@
               
              newusers.innerHTML += newHtml;
           
+       if(i == users.length - 1)
+        setusertable();
         }
-       
-       var table = $('#users_table').DataTable();
-     
-        $('#users_table tbody').on( 'click', 'tr', function () {
-            if ( $(this).hasClass('selected') ) {
-                $(this).removeClass('selected');
-            }
-            else {
-                table.$('tr.selected').removeClass('selected');
-                $(this).addClass('selected');
-            }
-        } );
-     
-        $('#Usr_Delete_Btn').click( function () {
-            table.row('.selected').remove().draw( false );
-        } );
         
         
     }) ;   
@@ -760,21 +758,55 @@
         });
     }
     
-    
-    
+   
     
     
     $(document).ready(function() {
+        getusers();
+       
         
-        socket.emit('getusers',function(){
         
-        
-        
-        });
     } );
     
     
+    function getusers(){
+        
+        socket.emit('getusers',function(){  });
+    }
     
+    function setusertable(){
+        
+        var table = new $('#users_table').DataTable();
+     
+        $('#users_table tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                selectedRow = $(this);
+                
+            }
+        } );
+     
+        $('#Usr_Delete_Btn').click( function () {
+           socket.emit("delete_user",selectedRow[0].children[0].innerHTML,selectedRow[0].children[1].innerHTML);
+            //console.log(selectedRow[0].children[0].innerHTML);
+            //table.row('.selected').remove().draw( false );
+            
+        } );
+        
+        $('#Usr_Token_Delete_Btn').click( function () {
+           socket.emit("delete_user_token",selectedRow[0].children[1].innerHTML);
+            //console.log(selectedRow[0].children[0].innerHTML);
+            //table.row('.selected').remove().draw( false );
+            
+        } );
+        
+        
+        
+    }
     
     function showAlarmAlerts(data){
         eventdata.length = 0;
@@ -959,10 +991,10 @@
     
     /**************************************************************************************************/
     function test(){
-        
-        socket.emit('test',function(err,ack){                  //testing purposes only
-         return    
-        });
+        $( "<div>hello!</div>" ).dialog();
+       // socket.emit('test',function(err,ack){                  //testing purposes only
+        // return    
+        //});
         
         }
         
