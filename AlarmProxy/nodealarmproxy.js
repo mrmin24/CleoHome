@@ -25,6 +25,8 @@ var ackStatus = null;
 var acktimer1,connectTimer;
 var config2;
 var connected = 0;
+var alarmip = '10.0.0.20';
+var alarmport = '4025';
 
 function checkAlarmConnected(){
 		
@@ -71,7 +73,8 @@ exports.initConfig = function(initconfig) {
 	//	ping(function(err,answer){
 	  	//	if(answer){
 	  	function connect(){
-				actual.connect({port: configure2.alarm[0].port[0], host:configure2.alarm[0].ip[0]}, function() {
+			//	actual.connect({port: configure2.alarm[0].port[0], host:configure2.alarm[0].ip[0]}, function() {
+				actual.connect({port: alarmport, host:alarmip}, function() {
 				console.log('Alarm Module: Alarm connected');
 				connected = 1;
 				eventEmitter.emit('Alarms_connection_status',18,1);

@@ -1,0 +1,12 @@
+Initialising config
+{ [Error: ENOENT, open './config.xml'] errno: 34, code: 'ENOENT', path: './config.xml' }
+
+/var/lib/cloud9/node_modules/xml2js/lib/xml2js.js:398
+      if (str.toString().trim() === '') {
+              ^
+TypeError: Cannot call method 'toString' of undefined
+    at Parser.exports.Parser.Parser.parseString (/var/lib/cloud9/node_modules/xml2js/lib/xml2js.js:398:15)
+    at Parser.parseString (/var/lib/cloud9/node_modules/xml2js/lib/xml2js.js:6:61)
+    at /var/lib/cloud9/Projects/CleoHome/JSModules/GetConfig.js:15:16
+    at fs.js:207:20
+    at Object.oncomplete (fs.js:107:15)
