@@ -54,6 +54,9 @@
                             <li onclick="switchAlarmTab()">
                                 <a href="#Alarm" data-toggle="tab" >Alarm</a>
                             </li>
+                            <li onclick="switchDevicesTab()">
+                                <a href="#Devices" data-toggle="tab" >Devices</a>
+                            </li>
                             <li onclick="switchEventsTab()">
                                 <a href="#Events" data-toggle="tab">Events</a>
                             </li>
@@ -141,6 +144,63 @@
                                             
                                            
                                         </div>
+                                    </div>
+                            </div> <!-- <well>-->
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+                
+                <!---------------------DEVICE PANEL----------------->
+                
+                 <div class = "col-xs-12 " id="Devices_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h2 class = "panel-title col-xs-2">Devices</h2>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="devices_container">
+                        
+                        
+                        
+                        
+                            <div id = "devices_controls" class="well hidden">
+                                    
+                                         
+                                    <!--<label id = "event_dropdown_btn" class="hidden">-->
+                                    <div class="btn-toolbar" role="toolbar">
+                                        <div class="btn-group">
+                                            <span>
+                                                <button class="btn btn-danger" type="button" id="Away_Arm_Btn" onclick = "armDisarmAlarm('Away')" >Away Arm </button>
+                                            </span>
+                                            
+                                            <span>
+                                                <button class="btn btn-warning" type="button" id="Stay_Arm_Btn"  onclick = "armDisarmAlarm('Stay')"  >Stay Arm </button>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-success" type="button" id="Disarm_Btn" onclick = "armDisarmAlarm('Disarm')" >Disarm </button>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-purple" type="button" id="Night_Arm_Btn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
+                                            </span>
+                                            
+                                           <!-- </label>-->
+                                            </span>
+                                        </div>
+                                        
+                                        
                                     </div>
                             </div> <!-- <well>-->
                             

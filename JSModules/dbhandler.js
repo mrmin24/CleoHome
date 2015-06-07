@@ -33,17 +33,17 @@ exports.insert = function(table,data) {
        });
 }
 
-exports.update = function(table,data) {
+exports.update = function(table,data,callback) {
 
-    //console.log(data);
+   // console.log(data);
         pool.getConnection(function(err, connection){
     connection.query('UPDATE '+ table +' SET ' + data.Set + '=? WHERE ' + data.Where + '= ?', [data.Current_State,data.Name], function(err, result) {
        connection.release();
         if(err) {
-            console.log(err);
+             callback(err,null);
             }
             else {
-        //        console.log(result);
+             callback(null,result);
             }
             
     });

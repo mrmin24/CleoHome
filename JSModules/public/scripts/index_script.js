@@ -456,6 +456,21 @@
     
     });
     
+    socket.on('DeviceStatusEvent', function(data) {
+    
+    
+        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null) 
+        {
+            
+            addDevices(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
+          
+            
+        }
+        
+    
+    
+    });
+    
     socket.on("alarmTrigger",function(data){
        console.log(data);
       showAlarmAlerts(data);
@@ -471,6 +486,16 @@
     
     
     });
+    
+    socket.on('DeviceEvent', function(data) {
+    
+    
+         checkUncheckDevice('device' + data['Id'], data['Current_State']);
+        
+    
+    
+    });
+    
     
     socket.on('AlarmPartitionStatusEvent', function(data){
     
@@ -892,6 +917,84 @@
          
 
         return ;
+    }
+    
+    
+    function addDevices(id,device,state,NodeID,NodePort){
+        
+        
+        if(state == 1)
+        {
+          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
+           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+NodeID+','+NodePort+')">'+device +'</button></span>';
+        }
+        else
+        {
+            
+            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-default fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+NodeID+','+NodePort+')" >'+device +'</button></span>';
+            
+           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
+        }
+        
+        var radioFragment = document.getElementById('devices_container');
+        radioFragment.innerHTML += newHtml;
+        // console.log( radioFragment.innerHTML);
+
+        return ;
+    }
+    function checkUncheckDevice(item, state){
+    
+       
+       
+        
+        if (state == 1) {
+           
+            var elem = document.getElementById(item);
+            if(elem){
+               //elem.style.color = "red";
+                $('#'+item).removeClass("btn-default").addClass("btn btn-success");
+                 
+            }            
+        }
+        else if (state == 0) {
+    
+            var elem = document.getElementById(item);
+            if(elem){
+                //elem.style.color = "black";
+                $('#'+item).removeClass("btn-success").addClass("btn btn-default");
+            }
+        }
+        
+        /*
+       
+       if (state == 1) {
+            var elem = document.getElementById(item);
+            if(elem){
+                elem.style.color = "red";
+                elem.checked = true;
+            }            
+        }
+        else if (state == 2) {
+    
+            var elem = document.getElementById(item);
+            if(elem){
+                elem.style.color = "black";
+                elem.checked = false;
+            }
+        }*/
+    
+    
+    
+    }
+    
+    
+    function deviceSwitch(NodeID,NodePort,state){
+        
+            
+            socket.emit('deviceSwitch',NodeID,NodePort);
+            
+            
+        
     }
     
     function addEvent(type,event,time,important){

@@ -36,6 +36,8 @@ var eventsocket = eventio.connect('http://localhost:' + configure2.eventmodule[0
 var alarmio = require('socket.io-client');
 var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0].port[0]);
 
+var mySensorio = require('socket.io-client');
+var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 
 
@@ -109,9 +111,10 @@ var dnsinterval = setInterval(function() {
 
 io.on('connection', function(socket){
   console.log('Client Connected');
-  console.log(lastArmTime);
+  //console.log(lastArmTime);
   getAlarmTriggers(lastArmTime);
   getAlarmStatus();
+  getDeviceStatus();
   sendConfig(); 
  
   
@@ -277,9 +280,61 @@ socket.on('test',function(){
    
     });
     
+    socket.on('deviceSwitch',function(NodeID,NodePort,State){
+      //console.log(userId);
+      
+        db.getdata('Items',{Select: 'Item_Current_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+      	
+      	  if(data_receive){
+            if(data_receive[0].Item_Current_Value == 1)
+             mySensorsocket.emit('deviceSwitch',NodeID,NodePort,0);
+            else
+                mySensorsocket.emit('deviceSwitch',NodeID,NodePort,1);
+      	  }
+        });
+  });
+    
 });
 
 }
+
+
+mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
+    //console.log("Device Status Change");
+   // console.log(NodePort);
+     db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+        // console.log(data_receive);
+         if(data_receive[0]){
+                    //console.log(data_receive);
+                    ID = data_receive[0].Id;
+                     data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                    db.update("Items",data,function(err,data_receive){
+                          
+                        
+                         if(data_receive){
+                             
+                             //console.log(data_receive[0]);
+                              io.emit('DeviceEvent', {Id:ID,Current_State:State});
+                             
+                         }else
+                         {
+                            console.log(err); 
+                             
+                         }
+                        
+                    }); 
+        }else 
+        if(err)
+        {
+            console.log(err);
+        }
+         
+     });
+    
+   
+    
+    
+});
   
 function sendusers(){
     console.log("Getting Users...");
@@ -662,6 +717,47 @@ function getAlarmStatus(){
                return;
     
 }
+function getDeviceStatus(){
+   
+    db.getdata('Items',{Select: 'Id,Item_Name,Item_Current_Value,Item_Type,Node_Id,Node_Port',whereClause:"'Id' LIKE '%'"},function(err,data_receive){
+                        if (err) {
+                        // error handling code goes here
+                            console.log("ERROR2 : ",err);            
+                        } else {       
+                            
+                        // code to execute on data retrieval
+                        var device = [1 , 2 , 3 , 4 , 6];
+                        
+                           for(var i in data_receive){
+                               //console.log(data_receive[i]['Type'] + " " + data_receive[i]['Name']);  
+                                if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
+                                {
+                                    var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port']};
+                                   
+                                    io.emit('DeviceStatusEvent',data);
+                                    
+                                   
+                                
+                                }
+                                
+                                
+                               
+                           }
+                             
+                            
+                             
+                        }
+                       
+                   });
+                   
+             
+               
+               return;
+    
+}
+
+
+
 
 
 function getEvents(numEvents){
