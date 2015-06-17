@@ -70,7 +70,8 @@ http.listen(port);
 
 
 function start() {
-    
+ if(configure2.server[0].dnsupdate[0] == 'true')  
+		    updatedns(ip,function(){});    
 //setupexpress(); 
 var dnsinterval = setInterval(function() {
         
@@ -280,16 +281,16 @@ socket.on('test',function(){
    
     });
     
-    socket.on('deviceSwitch',function(NodeID,NodePort,State){
+    socket.on('deviceSwitch',function(Id){
       //console.log(userId);
       
-        db.getdata('Items',{Select: 'Item_Current_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+        db.getdata('Items',{Select: 'Item_Current_Value,Node_Id,Node_Port',whereClause:'Id = ' + Id.toString()},function(err,data_receive){
       	
       	  if(data_receive){
             if(data_receive[0].Item_Current_Value == 1)
-             mySensorsocket.emit('deviceSwitch',NodeID,NodePort,0);
+             mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
             else
-                mySensorsocket.emit('deviceSwitch',NodeID,NodePort,1);
+                mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
       	  }
         });
   });
@@ -302,11 +303,14 @@ socket.on('test',function(){
 mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
     //console.log("Device Status Change");
    // console.log(NodePort);
-     db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+   if(State > 0){State = 1;}
+   
+     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
         // console.log(data_receive);
          if(data_receive[0]){
                     //console.log(data_receive);
                     ID = data_receive[0].Id;
+                    enabledValue = data_receive[0].Item_Enabled_Value;
                      data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
                     db.update("Items",data,function(err,data_receive){
                           
@@ -314,7 +318,7 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
                          if(data_receive){
                              
                              //console.log(data_receive[0]);
-                              io.emit('DeviceEvent', {Id:ID,Current_State:State});
+                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
                              
                          }else
                          {
@@ -726,13 +730,13 @@ function getDeviceStatus(){
                         } else {       
                             
                         // code to execute on data retrieval
-                        var device = [1 , 2 , 3 , 4 , 6];
+                        var device = [1 , 2 , 3 , 4 , 5,6];
                         
                            for(var i in data_receive){
                                //console.log(data_receive[i]['Type'] + " " + data_receive[i]['Name']);  
                                 if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
                                 {
-                                    var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port']};
+                                    var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type']};
                                    
                                     io.emit('DeviceStatusEvent',data);
                                     
