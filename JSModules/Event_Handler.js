@@ -43,7 +43,7 @@ io.sockets.on('connection', function(socket){
     getLast("'"+data.type+"'",function(result){
         
         if(result.length > 0)
-        {
+        {  // console.log(result[0]['Id']);
             lastId = result[0]['Id']; 
             socket.emit('Event', result[0]);
          //   console.log(result[0]);
@@ -94,10 +94,13 @@ app.get('/', function(req, res){
 
 function setListen(type,lastId,callback){
     
+  //console.log(type);
+  if(type === "'Alarm'"){
+     
    if(timer1){clearInterval(timer1);}
    
    timer1 =  setInterval(function() {
-        
+       
         db.getdata('Event_Log',{Select: 'Id,Type, Event, Time',whereClause:'Type = ' + type + ' AND Id > '+ lastId},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
@@ -118,6 +121,37 @@ function setListen(type,lastId,callback){
         
     } ,1000);
     
+    
+  }else if(type === "'Motion'"){
+       console.log(type + " " + lastId);
+    
+    // if(timer2){clearInterval(timer2);}
+   
+   timer2 =  setInterval(function() {
+       
+       // console.log(type + " " + lastId);
+       
+        db.getdata('Event_Log',{Select: 'Id,Type, Event, Time',whereClause:'Type = ' + type + ' AND Id > '+ lastId},function(err2,data_receive2){
+                        if (err2) {
+                        // error handling code goes here
+                            console.log("ERROR : ",err);            
+                        } else {  
+                           // console.log(data_receive2);
+                        // code to execute on data retrieval
+                          if(data_receive2.length > 0){
+                            lastId = data_receive2[data_receive2.length-1]['Id'];
+                          }
+                         // console.log(data_receive[0]);
+                          callback(data_receive2);
+                          
+                        }
+                       
+                   });
+        
+     
+        
+    } ,1000);
+  }
     
 }
 

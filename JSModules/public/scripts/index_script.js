@@ -1,6 +1,7 @@
     
     const Access_Type = 5;
     const Irrigation_Type = 6; 
+    const Motion_Type = 7;
     
     var socket = io();
     var eventdroptext = 10;
@@ -227,14 +228,14 @@
          var stringarr = data['Event'].split(" - ");
          var stringarr2 = stringarr[0].split(" ");
          
-        //console.log(stringarr2);
+       //console.log(stringarr2);
        // console.log(eventdata);
          var watchwords = ['Opened','Armed','Disarmed','Alarm!','Door'];
          var notwatchwords = ['Main Partition LED State','Alarm Connection Status'];
         
          if(notwatchwords.indexOf(stringarr[0]) == -1){
              console.log(stringarr[0]);
-             if(watchwords.indexOf(stringarr[1]) > -1 || watchwords.indexOf(stringarr2[1]) > -1 || watchwords.indexOf(stringarr2[2]) > -1 || type == 'alarm'){
+             if(watchwords.indexOf(stringarr[1]) > -1 || watchwords.indexOf(stringarr2[1]) > -1 || watchwords.indexOf(stringarr2[2]) > -1 || type == 'alarm' ){
                 var index = null;
                
                 for(var j in eventdata){
@@ -514,7 +515,7 @@
     socket.on('DeviceStatusEvent', function(data) {
     
     //console.log(data['Item_Type']);
-        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] != Access_Type && data['Item_Type'] != Irrigation_Type) 
+        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] != Access_Type && data['Item_Type'] != Irrigation_Type && data['Item_Type'] != Motion_Type) 
         {
             
             addDevices(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
@@ -534,6 +535,14 @@
         {
             
             addIrrigation(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
+          
+            
+        }
+        
+         if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] == Motion_Type) 
+        {
+            
+            addMotion(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
           
             
         }
@@ -566,6 +575,8 @@
     
     
     });
+    
+    
     
     
     socket.on('AlarmPartitionStatusEvent', function(data){
@@ -768,6 +779,11 @@
         
         
     });
+    
+    function refreshIP(){
+         socket.emit('refreshIP');
+        
+    }
     
     
     
@@ -1063,6 +1079,7 @@
     }
     
     
+    
     function deviceSwitch(Id){
         
             //console.log("Switch :" + Id);
@@ -1118,6 +1135,29 @@
         return ;
     }
     
+    function addMotion(id,device,state,NodeID,NodePort){
+        
+        
+        if(state == 1)
+        {
+          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
+           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" >'+device +'</button></span>';
+        }
+        else
+        {
+            
+            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-default fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off"  >'+device +'</button></span>';
+            
+           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
+        }
+        
+        var radioFragment = document.getElementById('motion_container');
+        radioFragment.innerHTML += newHtml;
+        // console.log( radioFragment.innerHTML);
+
+        return ;
+    }
+    
     function addEvent(type,event,time,important){
        
         var rows = $('#event_container tr').length+1;
@@ -1152,6 +1192,8 @@
             
             return
     }
+    
+    
     
     
     

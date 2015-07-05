@@ -1,4 +1,5 @@
 var net = require('net');
+//var log = require('./logger.js');
 
 var gatewayip = '10.0.0.22';
 var gatewayport = '5003';
@@ -8,6 +9,8 @@ var db = require('./dbhandler');
 
 var Access_Type = 5;
 var Irrigation_Type = 6; 
+var Motion_Type = 7;
+
 //var alarmio = require('socket.io-client');
 //var actual = alarmio.connect(gatewayip + gatewayport);
 
@@ -39,6 +42,8 @@ function start() {
 	    	
 	    	if(data[2] == 1){
 	    		socket.emit("deviceStatusChange",data[0],data[1],data[5]);
+	    		
+	    		
 	    	}
 	    	
 	    	if(data[2] == 3){
@@ -49,6 +54,8 @@ function start() {
 	    			
 	    		}
 	    	}
+	    	
+	    	
 	    	
 	    }       
 	
@@ -166,7 +173,7 @@ function start() {
 						                       //console.log('data sent');
 						                   });
 					    	 }
-		    			 }else 
+		    			  }else 
 		    			 {
 		    			 	
 		    			 	actual.write(NodeId.toString() + ';' + NodePort.toString()+';1;1;2;' + State.toString() +'\n',function(){

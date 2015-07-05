@@ -4,7 +4,7 @@ var passport = require('passport');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var ip = require('externalip');
+//var ip = require('external-ip');
 //var routes = require('./routes');
 //var router = express.Router();
 
@@ -70,12 +70,14 @@ http.listen(port);
 
 
 function start() {
- if(configure2.server[0].dnsupdate[0] == 'true')  
-		    updatedns(ip,function(){});    
+  var oldip = externalip;    
 //setupexpress(); 
+
+ 		    
+    		    
 var dnsinterval = setInterval(function() {
         
-    var oldip = externalip;    
+   
     getip(function(ip){
         
         if(ip){
@@ -83,21 +85,22 @@ var dnsinterval = setInterval(function() {
         
         	if(oldip != externalip)
         	{
-         if(configure2.server[0].dnsupdate[0] == 'true')  
-		    updatedns(ip,function(){});
-		 
-		 if(configure2.server[0].dnsemail[0] == 'true')  
-		    sendemail("Your current IP is http://" + ip);   
-		    
-		 if(configure2.server[0].dnsproxy[0] == 'true')  
-		   updatednsproxy(function(){});   
-		  
+             if(configure2.server[0].dnsupdate[0] == 'true')  
+    		    updatedns(ip,function(){});
+    		 
+    		 if(configure2.server[0].dnsemail[0] == 'true')  
+    		    sendemail("Your current IP is http://" + ip);   
+    		    
+    		 if(configure2.server[0].dnsproxy[0] == 'true')  
+    		   updatednsproxy(function(){});   
+		       
+		      oldip = externalip;   
         	
-		}
+		    }
 	
 	}
-        
-    });
+    
+});
         
      
        // console.log('test');
@@ -274,6 +277,30 @@ io.on('connection', function(socket){
         bypassedZones.length = 0;
    
     }); 
+    
+    
+    
+    
+ socket.on('refreshIP',function(){
+    
+        getip(function(ip){
+            
+            if(ip){
+               
+    		    updatedns(ip,function(){});
+    		 
+    		 
+    		    sendemail("Your current IP is http://" + ip);   
+    		    
+    		
+    		   updatednsproxy(function(){});   
+    		  
+        	}
+            
+        });
+   
+    }); 
+    
 
 socket.on('test',function(){
     test();
@@ -290,7 +317,7 @@ socket.on('test',function(){
             if(data_receive[0].Item_Current_Value == 1)
              mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
             else
-                mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
+              mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
       	  }
         });
   });
@@ -303,6 +330,7 @@ socket.on('test',function(){
 mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
     //console.log("Device Status Change");
    // console.log(NodePort);
+   var evaluate = require('../JSModules/Rule_Items_Evaluate');
    if(State > 0){State = 1;}
    
      db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
@@ -314,11 +342,19 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
                      data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
                     db.update("Items",data,function(err,data_receive){
                           
+                          
                         
                          if(data_receive){
+                            // console.log(ID + " " + State);
+                             io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
+                             evaluate.evaluateChange(ID,State,function(node,port,state){
                              
+                             if(node && port && state){
+                              mySensorsocket.emit('deviceSwitch',node,port,state);
+                             }
                              //console.log(data_receive[0]);
-                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
+                             });
+                             
                              
                          }else
                          {
@@ -339,6 +375,8 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
     
     
 });
+
+
   
 function sendusers(){
     console.log("Getting Users...");
@@ -376,6 +414,8 @@ eventsocket.on('connect', function() {
    // io.emit('ConnectionStatus',{item: 'Event_Handler',status:'connected'});
     
     eventsocket.emit('register',{type:'Alarm',client:'Server'},function(){});
+    eventsocket.emit('register',{type:'Motion',client:'Server'},function(){});
+    
     //console.log("testing");
     eventsocket.on('Event',function(data){
          //console.log(data);
@@ -412,7 +452,7 @@ eventsocket.on('connect', function() {
         else if(data['Event'].indexOf('Zone') > -1)
         {
             var eventdata = JSON.parse(data['Event']);
-            
+           // console.log(eventdata);
             constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
                 if(eventstring)
                 {
@@ -569,11 +609,11 @@ alarmsocket.on('connect', function() {
              
              if(code == '8411'){
                 io.emit("ac",true);
-                sendemail("Trouble Event Restored");
+               // sendemail("Trouble Event Restored");
                 log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 0 });
              }else if(code == '8401'){
                  io.emit("ac",false);
-                 sendemail("Trouble Event");
+                 //sendemail("Trouble Event");
                  console.log("Server: Trouble Condition: Sending Email");
                  log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
              }
@@ -730,7 +770,7 @@ function getDeviceStatus(){
                         } else {       
                             
                         // code to execute on data retrieval
-                        var device = [1 , 2 , 3 , 4 , 5,6];
+                        var device = [1 , 2 , 3 , 4 , 5,6,7];
                         
                            for(var i in data_receive){
                                //console.log(data_receive[i]['Type'] + " " + data_receive[i]['Name']);  
@@ -776,7 +816,7 @@ function getEvents(numEvents){
                                 
                                 var eventData = JSON.parse(data_receive[i]['Event']);
                                 
-                                    
+                                  //  console.log(eventData);
                                     
                                    
                                      
@@ -1001,7 +1041,7 @@ function constructEvent(eventData,time,type,callback){
         
          var eventString = eventData['Important'];
          callback(eventString,null,time,type);
-    }
+    } 
     else
     {
         
@@ -1118,13 +1158,32 @@ function getModeStatus(callback){
 }
 
 function getip(callback){
-    
-    ip(function (err, ip) {
-  	//console.log(ip); // => 8.8.8.8
-  
-  
-  	callback(ip);
-	});
+   
+   require('http').request({
+    hostname: 'myexternalip.com',
+    path: '/raw',
+    agent: false
+    }, function(res) {
+    if(res.statusCode != 200) {
+        throw new Error('non-OK status: ' + res.statusCode);
+    }
+    res.setEncoding('utf-8');
+    var ipAddress = '';
+    res.on('data', function(chunk) {
+        ipAddress += chunk;
+     // console.log(chunk);
+     callback(ipAddress); 
+        
+    });
+     
+    res.on('end', function() {
+     // ipAddress contains the external IP address
+    });
+    }).on('error', function(err) {
+    throw err;
+}).end();
+   
+
 
 }
 

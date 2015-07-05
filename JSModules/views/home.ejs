@@ -69,6 +69,9 @@
                             <li onclick="settings()">
                                 <a href="#" data-toggle="tab">Settings</a>
                             </li>
+                             <li onclick="refreshIP()">
+                                <a href="#" data-toggle="tab">Refresh IP</a>
+                            </li>
                             <li onclick="test()">
                                 <a href="#" data-toggle="tab">Test</a>
                             </li>
@@ -164,7 +167,34 @@
                     
                 </div>
                 
+                <!---------------------MOTION PANEL----------------->
                 
+                 <div class = "col-xs-12 " id="Motion_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h2 class = "panel-title col-xs-2">Motion</h2>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="motion_container">
+                        
+                        
+                        
+                        
+                            
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
                 
                 <!---------------------DEVICE PANEL----------------->
                 
@@ -182,33 +212,7 @@
                         
                         
                         
-                            <div id = "devices_controls" class="well hidden">
-                                    
-                                         
-                                    <!--<label id = "event_dropdown_btn" class="hidden">-->
-                                    <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group">
-                                            <span>
-                                                <button class="btn btn-danger" type="button" id="Away_Arm_Btn" onclick = "armDisarmAlarm('Away')" >Away Arm </button>
-                                            </span>
-                                            
-                                            <span>
-                                                <button class="btn btn-warning" type="button" id="Stay_Arm_Btn"  onclick = "armDisarmAlarm('Stay')"  >Stay Arm </button>
-                                            </span>
-                                            <span>
-                                                <button class="btn btn-success" type="button" id="Disarm_Btn" onclick = "armDisarmAlarm('Disarm')" >Disarm </button>
-                                            </span>
-                                            <span>
-                                                <button class="btn btn-purple" type="button" id="Night_Arm_Btn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
-                                            </span>
-                                            
-                                           <!-- </label>-->
-                                            </span>
-                                        </div>
-                                        
-                                        
-                                    </div>
-                            </div> <!-- <well>-->
+                           
                             
                            
                             
