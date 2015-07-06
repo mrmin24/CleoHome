@@ -69,22 +69,22 @@ exports.initConfig = function(initconfig) {
 	
 	setInterval(checkAlarmConnected,5000);
 		
-		connect();
-	//	ping(function(err,answer){
-	  	//	if(answer){
-	  	function connect(){
-			//	actual.connect({port: configure2.alarm[0].port[0], host:configure2.alarm[0].ip[0]}, function() {
-				actual.connect({port: alarmport, host:alarmip}, function() {
-				console.log('Alarm Module: Alarm connected');
-				connected = 1;
-				eventEmitter.emit('Alarms_connection_status',18,1);
-	 			logdata('{"Status":"Alarm connected"}');
-	
-				});
-	  	}
-	
-	  	//	}
-	//	});
+	connect();
+//	ping(function(err,answer){
+  	//	if(answer){
+  	function connect(){
+		//	actual.connect({port: configure2.alarm[0].port[0], host:configure2.alarm[0].ip[0]}, function() {
+		actual.connect({port: alarmport, host:alarmip}, function() {
+		console.log('Alarm Module: Alarm connected');
+		connected = 1;
+		eventEmitter.emit('Alarms_connection_status',18,1);
+ 		logdata('{"Status":"Alarm connected"}');
+
+		});
+  	}
+
+  	//	}
+//	});
    
     
     process.on('uncaughtException', function(err) {
@@ -142,94 +142,7 @@ exports.initConfig = function(initconfig) {
 		
 		
 
-//////////////////////////////////////////////////////////////////////////////////////////////
-	if (configure2.alarm[0].proxyEnabled[0] == 'true') {
-		if (!config.serverport) {
-			config.serverport = configure2.alarm[0].port[0];
-		}
-		if (!config.serverhost) {
-			config.serverhost = '0.0.0.0';
-		}
-		if (!config.serverpassword) {
-			config.serverpassword = config.actualpassword;
-		}
-		var server = net.createServer(function(c) { //'connection' listener
-			console.log('server connected');
-			connections.push(c);
 
-			c.on('end', function() {
-				var index = connections.indexOf(c);
-				if ( ~index ) connections.splice(index,1);
-				console.log('server disconnected:',connections);
-			});
-
-			c.on('data', function(data) {
-				//console.log(data.toString());
-				var dataslice = data.toString().replace(/[\n\r]/g, ',').split(',');
-
-				for (var i = 0; i < dataslice.length; i++) {
-					var rec = elink.applicationcommands[dataslice[i].substring(0,3)];
-					if (rec) {
-						if (rec.bytes === '' || rec.bytes === 0) {
-							console.log(rec.pre,rec.post);
-						} else {
-							console.log(rec.pre,dataslice[i].substring(3,dataslice[i].length-2),rec.post);
-						}
-						if (rec.action == 'checkpassword') {
-							checkpassword(c,dataslice[i]);
-						}
-						console.log(rec.action);
-						if (rec.action == 'forward') {
-							sendforward(dataslice[i].substring(0,dataslice[i].length-2));
-						}
-						sendcommand(c,rec.send,function(){
-						    
-						});
-					}
-				}
-			});
-
-			c.write('505300');
-			c.pipe(c);
-		});
-		server.listen(config.serverport,config.serverhost, function() { //'listening' listener
-			console.log('server bound');
-			 console.log(config.password);
-		});
-
-		var checkpassword = function (c,data) {
-			if (data.substring(3,data.length-2) == config.serverpassword) {
-				console.log('Correct Password! :)');
-				sendcommand(c,'5051',function(){
-				    
-				});
-			} else {
-				console.log('Incorrect Password :(');
-				sendcommand(c,'5050',function(){
-				    
-				});
-				c.end();
-			}
-		};
-
-		var sendforward = function (data) {
-			console.log('sendforward:',data);
-			sendcommand(actual,data,function(){
-			    
-			});
-		};
-
-		var broadcastresponse = function (response) {
-			if (connections.length > 0) {
-				for (var i = 0; i<connections.length; i++) {
-					sendcommand(connections[i],response,function(){
-					    
-					});
-				}
-			}
-		};
-	}
-	///////////////////////////////////////////////////////////////////////////////////////////////////
 	
 
 	function loginresponse(data) {

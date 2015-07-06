@@ -45,60 +45,7 @@ function start() {
                         atomicEvents: true
                     });
             }
-                    //connect();
-
-   // ping();
-    
-  // function ping() {
-
-       /* var exec = require('child_process').exec;
-        exec("ping -c 3 10.0.0.20", function(error, stdout, stderr) {
-
-            if (stdout) {
-                // console.log("Ping to Alarm Module successful");
-                if (!alarm) {
-                    console.log("Ping to Alarm Module successful");
-                    alarm = nap.initConfig({
-                        password: config.password, //replace config.* with appropriate items
-                        serverpassword: config.serverpassword,
-                        actualhost: config.host,
-                        actualport: config.port,
-                        serverhost: '0.0.0.0',
-                        serverport: config.port,
-                        zones: config.zones,
-                        partitions: config.partitions,
-                        proxyenable: config.proxyEnabled,
-                        atomicEvents: true
-                    });
-                    connect();
-                }
-            }
-            else if (error) {
-                console.log("Ping to Alarm Module: " + error);
-                log.ownDb('Alarm_Items', {
-                    Set: 'Current_State',
-                    Where: 'Name',
-                    Name: 'Alarm_Connection_Status',
-                    Current_State: 0
-                });
-                alarm = null;
-            }
-            else if (stderr) {
-                console.log("Ping to Alarm Module: " + stderr);
-                log.ownDb('Alarm_Items', {
-                    Set: 'Current_State',
-                    Where: 'Name',
-                    Name: 'Alarm_Connection_Status',
-                    Current_State: 0
-                });
-                alarm = null;
-            }
-        });
-        // console.log('test');
-   // }
-    
-  //  setInterval(ping, 5000);
-*/
+          
   
 
         io.sockets.on('connection', function(socket) {
@@ -108,8 +55,6 @@ function start() {
             socket.on('register', function(data, callback) {
                 console.log(data.client + ' registered for ' + data.type + ' updates');
                 client = 1;
-                
-                
                 
                 callback();
             });
@@ -121,7 +66,7 @@ function start() {
 
                 if (this.server.sockets.sockets.length == 0) {
                     client = 0;
-                    console.log('All clients disconnected');
+                    console.log('All clients disconnected from alarm module');
                 }
             });
 
@@ -146,10 +91,7 @@ function start() {
 
         });
 
-        //if (config.access_token && config.app_id) {
-        //SmartThings is setup/enabled
-
-        //}
+       
 
 
  // function connect() {

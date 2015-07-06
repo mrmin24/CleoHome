@@ -114,6 +114,9 @@ function dayMinutesUpdate(){
                
                
                 var newTime = calcTime.calculateMinutes();
+                
+                
+                
                 data = {'Set':'Item_Current_Value','Where':'Id','Current_State':newTime ,'Name':result[0].Id};
                         
                 db.update('Items',data,function(){});   
@@ -126,7 +129,37 @@ function dayMinutesUpdate(){
                  //console.log(data_receive[0]);
                  });
                  
+                
                  
+                 if(newTime == 0){   //set day in DB at midnight
+                  data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + 'Day_Of_Week' + '"'};
+        
+                    db.getdata('Items',data,function(err,result){
+                       
+                       if(err){
+                           
+                           console.log(err);
+                       }else if(result){
+                           
+                        day = new Date();
+                        day = day.getDay();
+                        console.log("Setting day to: " + day);
+                         
+                         data = {'Set':'Item_Current_Value','Where':'Id','Current_State':day ,'Name':result[0].Id};
+                            
+                         db.update('Items',data,function(){});   
+                         
+                         evaluate.evaluateChange(result[0].Id,day,function(node,port,state){
+                                             
+                             if(node && port && state){
+                              mySensorsocket.emit('deviceSwitch',node,port,state);
+                             }
+                         //console.log(data_receive[0]);
+                         });
+                        }
+                 
+                    });
+                 }
                  
                     
                // console.log("At time: " + timenow + " IsDark is: " + isDark);    

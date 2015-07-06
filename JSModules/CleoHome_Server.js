@@ -51,9 +51,20 @@ var externalip = "127.0.0.1";
     app.set('view engine', 'ejs');
      
     app.use(cookieParser('anewsecret'));
-    app.use(bodyParser());
+    //app.use(bodyParser());
+    app.use(bodyParser.urlencoded({ extended: true }));
+
+    app.use(bodyParser.json());
     //app.use(logger('dev')); // log every request to the console
-    app.use(session({ secret: 'anewsecret2' }));
+    //app.use(session({ secret: 'anewsecret2' }));
+    app.use(session({
+        secret: 'anewsecret2',
+        name: 'cleohome_session',
+        //store: sessionStore, // connect-mongo session store
+        proxy: true,
+        resave: true,
+        saveUninitialized: true
+    }));
     app.use(flash());
     app.use(passport.initialize());
     app.use(passport.session());
@@ -70,12 +81,10 @@ http.listen(port);
 
 
 function start() {
-  var oldip = externalip;    
-//setupexpress(); 
+    var oldip = externalip;    
 
- 		    
-    		    
-var dnsinterval = setInterval(function() {
+
+    var dnsinterval = setInterval(function() {
         
    
     getip(function(ip){
@@ -107,10 +116,6 @@ var dnsinterval = setInterval(function() {
     } ,1000*60*configure2.server[0].dnsinterval[0]);
     
 
-        
-    
-        
-     
       
 
 io.on('connection', function(socket){
@@ -191,11 +196,11 @@ io.on('connection', function(socket){
   });
   
   
-  socket.on('AlarmDisconnect',function(){
+ /* socket.on('AlarmDisconnect',function(){   
       console.log('disconnect requested');
      alarmsocket.disconnect(); 
       
-  });
+  });*/
   
   socket.on('getEvents',function(data){
     
@@ -536,8 +541,8 @@ alarmsocket.on('connect', function() {
         
         
         alarmsocket.on('alarmTrigger',function(data,time){
-        console.log('Server Module: An alarm was triggered');
-        //console.log(data);
+            console.log('Server Module: An alarm was triggered');
+            //console.log(data);
              db.getdata('Alarm_Items',{Select: 'Description',whereClause:'Name = ' + '"' + 'Zone_' + data + '"'},function(err,data_receive){
                       // console.log('test1'); 
                    if(data_receive[0]){
@@ -613,7 +618,7 @@ alarmsocket.on('connect', function() {
                 log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 0 });
              }else if(code == '8401'){
                  io.emit("ac",false);
-                 //sendemail("Trouble Event");
+                 sendemail("Trouble Event");
                  console.log("Server: Trouble Condition: Sending Email");
                  log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
              }

@@ -230,7 +230,7 @@
          
        //console.log(stringarr2);
        // console.log(eventdata);
-         var watchwords = ['Opened','Armed','Disarmed','Alarm!','Door'];
+         var watchwords = ['Opened','Armed','Disarmed','Alarm!','Door','Gate'];  //graph only graphs these event items if words are in description
          var notwatchwords = ['Main Partition LED State','Alarm Connection Status'];
         
          if(notwatchwords.indexOf(stringarr[0]) == -1){
