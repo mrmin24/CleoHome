@@ -3,6 +3,7 @@ var config = require('./config.js'); //comment this out
 var log = require('./logger.js');
 var db = require('./dbhandler');
 
+
 var configure = require('../JSModules/GetConfig.js');
 var configure2 = configure.data.xml;
 
@@ -12,6 +13,8 @@ var sockets;
 var lastzone;
 var alarm = null;
 var oldconnectionstatus = null;
+
+
 
 function start() {
 
@@ -167,6 +170,8 @@ function start() {
                     Current_State: status
                 });
                 
+                
+                
               
             }
             
@@ -227,6 +232,18 @@ function logdata(data) {
                     Name: 'Zone_' + data.zone,
                     Current_State: data.send,
                     Alarm_Event: Date()
+                });
+                
+                console.log("GettingID");
+                 getID('Zone_' + data.zone,function(ID){
+                    evaluate.evaluateChange(ID,data.send,function(node,port,state){
+                             
+                         if(node && port && state){
+                          mySensorsocket.emit('deviceSwitch',node,port,state);
+                         }
+                     //console.log(data_receive[0]);
+                    });
+                
                 });
 
                 //console.log(data.zone + " test 1");
@@ -303,6 +320,11 @@ function logdata(data) {
                     Name: 'Zone_' + data.zone,
                     Current_State: data.send
                 });
+                
+                
+                
+                
+                
                 // console.log(data.zone + " test 3");
                 if (client) {
                     // console.log(data.zone + " test 2");
@@ -1054,6 +1076,8 @@ function armDisarm(type){
 
                 }
 }
+
+
    
 
 exports.start = start;

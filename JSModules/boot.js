@@ -1,5 +1,5 @@
 
-const startup_delay = 1000; 
+const startup_delay = 130000; 
 
 console.log('Controller active, delay for router is ' + startup_delay/1000  + ' seconds, please wait...');
 

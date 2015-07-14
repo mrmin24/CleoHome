@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+    
+    <head>
+        <title>CleoHome Server</title>
+       <!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> -->
+       
+        <link rel="stylesheet" , href="/bootstrap/css/bootstrap.min.css"> 
+        <link rel="stylesheet" href="/font-awesome-4.2.0/css/font-awesome.min.css"> <!-- load fontawesome-->
+        <link rel='stylesheet',  href="/stylesheets/CleoHome_Main.css">
+         <link rel='stylesheet',  href="/EventGraph/css/style.css">
+       <link rel='stylesheet',  href="/stylesheets/datepicker.css">
+       <link rel='stylesheet',  href="/stylesheets/jquery-ui.min.css">
+         <link rel='stylesheet',  href="/stylesheets/jquery.dataTables.css"> 
+    </head>
+    
+    <body>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/jquery/jquery-2.1.1.min.js">\x3C/script>')</script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    <script>(typeof $().modal == 'function') || document.write('<script src="/bootstrap/js/bootstrap.min.js">\x3C/script>')</script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/jquery/jquery-ui.min.js"></script>
+    <script src="/jquery/jquery.dataTables.min.js"></script>
+    
+    
+    
+     
+    <!--<script type="text/javascript" src="/jquery/jquery-2.1.1.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>-->
+  
+       
+    
+        
+        
+        <div id="blackout" >
+            
+           <!-- <a id="refresh" href="#" data-toggle="tab" class="btn btn-default">Refresh</a>-->
+            
+        </div>
+        
+        <div class="container-fluid " >
+            <nav class="nav nav-tabs " role="navigation">
+                <!--<div class="container-fluid">-->
+                    <div class="navbar-header" >
+                        <a class="navbar-brand" href="/">CleoHome</a>
+                    </div>
+                   
+                    <div class="navbar-collapse collapse  " id="navbar-collapse-1">
+                         <ul class="nav nav-tabs" id="tabs" >
+                            <li  >
+                                <a href="./home" >Home</a>
+                            </li>
+                            
+                            <li class="active" >
+                                <a href="#" >Rules</a>
+                            </li>
+                        </ul>
+                        
+                      
+                    </div> <!-- navbar-collapse-->
+                    <a href="/logout" class="btn btn-default pull-right"><span class="fa fa-sign-out"></span> Logout</a>  
+                    
+                 <!-- container-fluid-->
+                  
+            </nav>
+            
+            <br>
+            <div class = "row">
+            
+            
+                <div class = "col-xs-12 " id="Alarm_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>Rules</strong>
+                        </div>
+                        
+                        <div class="panel-body" id="zone_container">
+                        
+                      
+                            
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+               
+                    
+            </div> <!--row-->
+        
+        
+        </div> <!--container-fluid -->
+          <script src="/scripts/d3.min.js"></script>
+          <script src="/scripts/moment.min.js"></script>
+          <script src="/scripts/bootstrap-datepicker.js"></script>
+          <script src="/EventGraph/src/eventDrops.js"></script>
+          <script src="/scripts/index_script.js"></script>
+          
+     <script>
+      $(function() {
+        $( "#accordion2" ).accordion({
+            active: false,
+            collapsible: true,
+            event: "click ",
+            heightStyle: "content"
+        });
+        $( "#accordion" ).accordion({
+            active: false,
+            collapsible: true,
+            event: "click ",
+            heightStyle: "content"
+            });
+      });
+  </script>
+    </body>
+
+</html>

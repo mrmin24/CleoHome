@@ -20,23 +20,27 @@ exports.checkRule = function(rule,callback){
            
           
            var ids = "";
+          
            for(var i = 0; i < res.length ; i++){
                if(!isNaN(res[i])){
                          
-                  ids += res[i] ;          
+                  if(ids.indexOf(res[i]) == -1){
+                      if(ids.length > 0 ){
+                       ids += ",";
+                      }
+                    ids += res[i] ;          
                   
-                  if(i + 1 < res.length ){
-                   ids += ",";
+                      
                   }
                 }
               
            }
-           
+           //console.log(ids);
             var where = "Id IN (" + ids + ") ORDER BY FIELD (Id," + ids + ")";
         
            
            
-           data = {'Select':'Status','whereClause':where };
+           data = {'Select':'Status,Id','whereClause':where };
     
             db.getdata('Rule_Items',data,function(err,result2){
                
@@ -46,15 +50,22 @@ exports.checkRule = function(rule,callback){
                    
                }else if(result2){
                   // console.log(result2);
-                   
+                   //console.log(result2);
                    var cond = "";
-                   var j = 0;
+                  // var j = 0;
                    for(var i = 0; i < res.length ; i++){
                
                      if(!isNaN(res[i])){
                          
-                        cond += result2[j].Status;
-                        j++;
+                         
+                        for(var j = 0;j<result2.length;j++){
+                            if(result2[j].Id == res[i]){
+                                cond += result2[j].Status;
+                            }
+                        } 
+                         
+                        
+                       // j++;
                          
                      }else if(isNaN(res[i])){
                          

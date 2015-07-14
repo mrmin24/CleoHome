@@ -12,10 +12,10 @@ var pool = mysql.createPool({
 
 
 	host     : config2.host[0],
-  user     : config2.user[0],
-  password : config2.password[0],
-  database: config2.name[0],
-  users_table: config2.users_table[0]
+	  user     : config2.user[0],
+	  password : config2.password[0],
+	  database: config2.name[0],
+	  users_table: config2.users_table[0]
 
 
 });
@@ -141,6 +141,8 @@ module.exports = function(app, passport) {
 		// render the page and pass in any flash data if it exists
 		res.render('login.ejs', { message: req.flash('loginMessage') });
 	});
+	
+	
 
 	// process the login form
 	app.post('/login', passport.authenticate('local-login', {
@@ -151,8 +153,8 @@ module.exports = function(app, passport) {
         function(req, res) {
             var  token;
             var timeout = 1000 * 60 * 60 * 24 * config.data.xml.authentication[0].timeout[0];
-   		            require('crypto').randomBytes(32, function(ex, buf) {
-    	              token = buf.toString('hex');
+           require('crypto').randomBytes(32, function(ex, buf) {
+          	token = buf.toString('hex');
 	    
    		           
    		            
@@ -194,8 +196,8 @@ module.exports = function(app, passport) {
    		            	
    		            
         res.redirect('/home');
-   		            });
-    });
+   	});
+   });
     
     
   
@@ -230,6 +232,12 @@ module.exports = function(app, passport) {
 		failureFlash : true // allow flash messages
 	}));
 
+
+	app.get('/rules', function(req, res) {
+
+		// render the page and pass in any flash data if it exists
+		res.render('rules.ejs');
+	});
 	// =====================================
 	// PROFILE SECTION =========================
 	// =====================================
@@ -244,27 +252,27 @@ module.exports = function(app, passport) {
 			if(req.cookies.Username && req.cookies.Token){
 			
 		
-			checktoken(req,function(isloggedin){
+				checktoken(req,function(isloggedin){
+					
+					if(isloggedin){
+						 
+						res.render('home.ejs', {
+							user : req.user // get the user out of session and pass to template
+						});
+					}else{
+						res.redirect('/login');
+					}
 				
-				if(isloggedin){
-					 
-					res.render('home.ejs', {
-						user : req.user // get the user out of session and pass to template
-					});
-				}else{
-					res.redirect('/login');
-				}
 				
-				
-			});
-		
-		}else{
-			isLoggedIn(req,res,function(){
-			res.render('home.ejs',{
-				user : req.user // get the user out of session and pass to template
-			});
-			});
-		}
+				});
+			
+			}else{
+				isLoggedIn(req,res,function(){
+				res.render('home.ejs',{
+					user : req.user // get the user out of session and pass to template
+				});
+				});
+			}
 			
 		});
 	//}else
@@ -298,8 +306,8 @@ module.exports = function(app, passport) {
 		clearusertokens(req.cookies.Username, req.cookies.Token);
 		req.session.cookie.expires = false;
 		res.clearCookie('Username');
-   	  res.clearCookie('Token');
-  	   res.clearCookie('Session_id');
+   	  	res.clearCookie('Token');
+  	    res.clearCookie('Session_id');
 		res.redirect('/');
 	});
 };
