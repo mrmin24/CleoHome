@@ -31,17 +31,29 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    data = {'Set':'Status','Where':'Id','Current_State':1,'Name':result[i].Id};
                 
                    db.update('Rule_Items',data,function(){});
-                   rule.checkRule(result[i].Rule_Id,function(node,port,state){
-                       
-                        if(node && port && state){
-                            callback(node,port,state);
+                   var res = result[i].Rule_Id.split(';');
+           
+                   var ids = "";
+                  
+                   for(var i = 0; i < res.length ; i++){
+                       if(!isNaN(res[i])){
+                          rule.checkRule(res[i],function(node,port,state){
+                  
+                            if(node && port && state){
+                                 
+                                callback(node,port,state);
+                            }
+                            else
+                            {
+                                callback(null,null,null);
+                            }
+                           
+                        });   
+                          
                         }
-                        else
-                        {
-                            callback(null,null,null);
-                        }
-                       
-                   });
+                      
+                   }
+                   
                    status = 0;
                }else
                {

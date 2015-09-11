@@ -27,7 +27,7 @@ var writeXML = require('../JSModules/WriteConfig.js');
 var configure = getconfig.data;
 var configure2 = configure.xml;
 
-
+var gatewayStatus = 0;
 
 
 var eventio = require('socket.io-client');
@@ -39,8 +39,8 @@ var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0]
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
-
-
+const Virtual_Item_Type = 15;
+var nodeCheckInterval = 60000;
 
 var port = configure2.server[0].port[0];   
 var externalip = "127.0.0.1";
@@ -83,7 +83,7 @@ http.listen(port);
 function start() {
     var oldip = externalip;    
 
-
+    var nodeinterval = setInterval(updateNodeStatus(),nodeCheckInterval);
     var dnsinterval = setInterval(function() {
         
    
@@ -124,8 +124,9 @@ io.on('connection', function(socket){
   getAlarmTriggers(lastArmTime);
   getAlarmStatus();
   getDeviceStatus();
+  getNodeStatus();
   sendConfig(); 
- 
+  sendGatewayStatus();
   
   socket.on('disconnect',function(){
      
@@ -307,22 +308,42 @@ io.on('connection', function(socket){
     }); 
     
 
-socket.on('test',function(){
-    test();
+    socket.on('test',function(){
+        test();
         
    
+    });
+    
+    socket.on("getNodesStatus",function(){
+       // console.log("test");
+        updateNodeStatus();
     });
     
     socket.on('deviceSwitch',function(Id){
       //console.log(userId);
       
-        db.getdata('Items',{Select: 'Item_Current_Value,Node_Id,Node_Port',whereClause:'Id = ' + Id.toString()},function(err,data_receive){
+        db.getdata('Items',{Select: 'Item_Type,Item_Current_Value,Node_Id,Node_Port',whereClause:'Id = ' + Id.toString()},function(err,data_receive){
       	
       	  if(data_receive){
-            if(data_receive[0].Item_Current_Value == 1)
-             mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
-            else
-              mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
+      	      
+      	   if(data_receive[0].Item_Current_Value == 1 )
+      	   {
+          	     if(data_receive[0].Item_Type == Virtual_Item_Type)
+          	    {
+          	       virtualDeviceStatusChange(Id,0);
+          	    }else
+          	    {
+                 mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
+          	    }
+            }else
+            {    if(data_receive[0].Item_Type == Virtual_Item_Type)
+      	        {
+      	            virtualDeviceStatusChange(Id,1);
+      	        }else
+      	        {
+                    mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
+      	        }
+            } 
       	  }
         });
   });
@@ -332,13 +353,12 @@ socket.on('test',function(){
 }
 
 
-mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
-    //console.log("Device Status Change");
-   // console.log(NodePort);
-   var evaluate = require('../JSModules/Rule_Items_Evaluate');
+function virtualDeviceStatusChange(Id,State){
+    
+    var evaluate = require('../JSModules/Rule_Items_Evaluate');
    if(State > 0){State = 1;}
    
-     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Id = ' + Id},function(err,data_receive){
         // console.log(data_receive);
          if(data_receive[0]){
                     //console.log(data_receive);
@@ -376,8 +396,86 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
          
      });
     
+}
+
+mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
+    //console.log("Device Status Change");
+   // console.log(NodePort);
+   var evaluate = require('../JSModules/Rule_Items_Evaluate');
+   if(State > 0){State = 1;}
+   
+     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+        // console.log(data_receive);
+         if(data_receive[0]){
+                    //console.log(data_receive);
+                    ID = data_receive[0].Id;
+                    enabledValue = data_receive[0].Item_Enabled_Value;
+                     data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                    db.update("Items",data,function(err,data_receive){
+                          
+                          
+                        
+                         if(data_receive){
+                            // console.log(ID + " " + State);
+                             io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
+                             evaluate.evaluateChange(ID,State,function(node,port,state){
+                            
+                             if(node && port && state){
+                              mySensorsocket.emit('deviceSwitch',node,port,state);
+                             }
+                             //console.log(data_receive[0]);
+                             });
+                             
+                             
+                         }else
+                         {
+                            console.log(err); 
+                             
+                         }
+                        
+                    }); 
+        }else 
+        if(err)
+        {
+            console.log(err);
+        }
+         
+     });
+    
    
     
+    
+});
+
+
+mySensorsocket.on('gatewayConnected',function(gatewayState){
+    gatewayStatus = gatewayState;
+    sendGatewayStatus();
+    
+    
+});
+
+
+mySensorsocket.on('nodeAlive',function(NodeID){
+    var timenow = new Date().getTime();
+     data = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
+    db.update("Nodes",data,function(err,data_receive){
+              
+              
+            
+             if(data_receive){
+                // console.log(ID + " " + State);
+                 console.log("Node state updated");
+                 
+                 
+             }else
+             {
+                console.log(err); 
+                 
+             }
+            
+    }); 
+    updateNodeStatus();
     
 });
 
@@ -768,17 +866,17 @@ function getAlarmStatus(){
 }
 function getDeviceStatus(){
    
-    db.getdata('Items',{Select: 'Id,Item_Name,Item_Current_Value,Item_Type,Node_Id,Node_Port',whereClause:"'Id' LIKE '%'"},function(err,data_receive){
+    db.getdata('Items',{Select: 'Id,Item_Name,Item_Current_Value,Item_Type,Node_Id,Node_Port',whereClause:"'Id' LIKE '%' ORDER BY Item_Sort_Position ASC"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
                             console.log("ERROR2 : ",err);            
                         } else {       
                             
                         // code to execute on data retrieval
-                        var device = [1 , 2 , 3 , 4 , 5,6,7];
+                        var device = [1 , 2 , 3 , 4 , 5,6,7,11,15];
                         
                            for(var i in data_receive){
-                               //console.log(data_receive[i]['Type'] + " " + data_receive[i]['Name']);  
+                              // console.log(data_receive[i]['Item_Name']);  
                                 if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
                                 {
                                     var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type']};
@@ -802,6 +900,79 @@ function getDeviceStatus(){
              
                
                return;
+    
+}
+
+function getNodeStatus(){
+   
+    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
+    if (err) {
+    // error handling code goes here
+        console.log("ERROR2 : ",err);            
+    } else {       
+        
+    // code to execute on data retrieval
+   // var device = [1 , 2 , 3 , 4 , 5,6,7,11,15];
+    
+       for(var i in data_receive){
+          // console.log(data_receive[i]['Item_Name']);  
+           // if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
+            //{
+                var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node'};
+               
+                io.emit('DeviceStatusEvent',data);
+                
+               
+            
+           // }
+            
+            
+           
+       }
+         
+        
+         
+    }
+   
+});
+}
+
+function updateNodeStatus(){
+   
+    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
+    if (err) {
+    // error handling code goes here
+        console.log("ERROR2 : ",err);            
+    } else {       
+        
+    // code to execute on data retrieval
+   // var device = [1 , 2 , 3 , 4 , 5,6,7,11,15];
+    
+       for(var i in data_receive){
+           //console.log(data_receive[i]['Item_Name']);  
+           // if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
+            //{
+                var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node'};
+               
+                io.emit('NodeStatusEvent',data);
+                
+               
+            
+           // }
+            
+            
+           
+       }
+         
+        
+         
+    }
+   
+});
+       
+    
+    
+    return;
     
 }
 
@@ -1278,6 +1449,11 @@ function sendConfig(){
     io.emit("config",configure2);
     return;
     
+    
+}
+
+function sendGatewayStatus(){
+    io.emit("gatewayConnected",gatewayStatus);
     
 }
 

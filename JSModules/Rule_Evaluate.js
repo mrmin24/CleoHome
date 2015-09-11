@@ -80,8 +80,13 @@ exports.checkRule = function(rule,callback){
                   
                   if(executeRule > 0){
                       var res2 = result[0].Result.split(';');
-                       data = {'Select':'Node_Id,Node_Port','whereClause':"Id = " + res2[0] };
-    
+                      var nodes = [];
+                      var ports = [];
+                      var values = [];
+                      
+                      for(var i = 0;i< res2.length/3;i++){
+                       data = {'Select':'Node_Id,Node_Port','whereClause':"Id = " + res2[i*3] };
+                        value = res2[i*3+2];
                         db.getdata('Items',data,function(err,result3){
                            
                            if(err){
@@ -91,12 +96,21 @@ exports.checkRule = function(rule,callback){
                                
                            }else if(result3){
                                console.log(result3[0]);
-                               callback(result3[0].Node_Id,result3[0].Node_Port,res2[2]);
-                               
+                              
+                              // console.log(nodes[i] + " " + ports[i] + " " + values[i] );
+                             // setTimeout(function () {
+                                callback(result3[0].Node_Id,result3[0].Node_Port,value);
+                              //}, 2000);
+                              
                            }
                            
                         });
+                        
+                       
+                        
+                      }
                       
+                      //callback(result3[0].Node_Id,result3[0].Node_Port,res2[(i*3)+2]);
                       
                       
                   }else

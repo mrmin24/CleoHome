@@ -29,16 +29,27 @@ function start() {
 		 socket.on('deviceSwitch',function(NodeId,NodePort,State){
 		 	
 		 	
-		 	//console.log("sending data");
-		 	sendData(NodeId,NodePort,State)	;
-		 	
+		 	console.log("is array " + Array.isArray(NodeId));
+		 	if(Array.isArray(NodeId))
+			 	for(var i in NodeId)
+			 	{
+			 		console.log(NodeId[i] + " " + NodePort[i] + " " + State[i] );
+			 		setTimeout(function() {
+					    sendData(NodeId[i],NodePort[i],State[i])	;
+					}, 250);
+			 	}
+		 	else
+		 	{console.log(NodeId + " " + NodePort + " " + State );
+		 		sendData(NodeId,NodePort,State)	;
+		 			
+		 	}
 		 });
 		 
 		 
 		 
 		 
 		function processData(data){
-	    
+	    	socket.emit("nodeAlive",data[0]);
 	    	
 	    	if(data[2] == 1){
 	    		socket.emit("deviceStatusChange",data[0],data[1],data[5]);
@@ -64,10 +75,11 @@ function start() {
 	   
 		  	function connect(){
 		  		console.log('Mysensors: Trying to connect to Gateway @ ' + gatewayip + ':' + gatewayport);
-		  	
+		  		
 					actual.connect({port: gatewayport, host:gatewayip}, function() {
 					    console.log('Mysensors: Gateway connected');
-				       
+					    
+				        socket.emit("gatewayConnected",1);
 	                	if(retrytimer)clearInterval(retrytimer);                
 					});
 					
@@ -82,6 +94,7 @@ function start() {
 	    process.on('uncaughtException', function(err) {
 	    if(err.code == 'EHOSTUNREACH'){
 	        //retryconnect();
+	        socket.emit("gatewayConnected",0);
 	        	if(retrytimer)clearInterval(retrytimer);    
 		  		retrytimer = setInterval(function() {connect()},5000);
 	    }
@@ -96,7 +109,7 @@ function start() {
 			/*	if(e.code == 'ECONNREFUSED') {}  */
 				
 			console.log("Mysensors: Gateway connection error = " + e);	
-			
+				socket.emit("gatewayConnected",0);
 				if(retrytimer)clearInterval(retrytimer);    
 		  		retrytimer = setInterval(function() {connect()},5000);
 	
@@ -105,7 +118,8 @@ function start() {
 			
 		actual.on('close', function() {
 				
-			console.log("Mysensors: Gateway connection closed" );	
+			console.log("Mysensors: Gateway connection closed" );
+				socket.emit("gatewayConnected",0);
 				if(retrytimer)clearInterval(retrytimer);    
 		  		retrytimer = setInterval(function() {connect()},5000);
 	
@@ -114,7 +128,8 @@ function start() {
 			
 		actual.on('timeout', function() {
 				
-			console.log("Mysensors: Gateway connection timeout" );	
+			console.log("Mysensors: Gateway connection timeout" );
+				socket.emit("gatewayConnected",0);
 				if(retrytimer)clearInterval(retrytimer);    
 		  		retrytimer = setInterval(function() {connect()},5000);
 		
@@ -125,6 +140,7 @@ function start() {
 		actual.on('disconnect', function() {
 			
 		console.log("Mysensors: Gateway connection disconnected" );	
+			socket.emit("gatewayConnected",0);
 			if(retrytimer)clearInterval(retrytimer);    
 		  	retrytimer = setInterval(function() {connect()},5000);
 	
@@ -142,19 +158,19 @@ function start() {
 	    	
 	    	
 	    function sendData(NodeId,NodePort,State){		
-	    	
+	    		
 	    		db.getdata('Items',{Select: 'Item_Type,Item_Is_Toggle,Item_Toggle_Delay',whereClause:'Node_Id = ' + NodeId.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
 	    			 if(data_receive[0]){
 	    			 	
 	    			 	if(data_receive[0].Item_Type == Access_Type && data_receive[0].Item_Is_Toggle == 1 ){
 				    	 	if(State == 0){
-					    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;40;0\n',function(){
+					    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;0\n',function(){
 				       
 				                       //console.log('data sent');
 				                   });
 					    	 	
 					    	 }else{
-				    	 		actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;40;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
+				    	 		actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
 				       
 				                       //console.log('data sent');
 				                   });
@@ -162,15 +178,15 @@ function start() {
 		    			 }else 	if(data_receive[0].Item_Type == Irrigation_Type && data_receive[0].Item_Is_Toggle == 1 ){
 					    	 
 					    	 if(State == 0){
-					    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;41;0\n',function(){
+					    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;0\n',function(){
 				       
 				                       //console.log('data sent');
 				                   });
 					    	 	
 					    	 }else{
-						    	 actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;41;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
+						    	 actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
 						       
-						                       //console.log('data sent');
+						                      // console.log(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay);
 						                   });
 					    	 }
 		    			  }else 

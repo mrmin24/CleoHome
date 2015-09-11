@@ -63,6 +63,9 @@
                             <li onclick="switchIrrigationTab()">
                                 <a href="#Devices" data-toggle="tab" >Irrigation</a>
                             </li>
+                            <li onclick="switchNodesTab()">
+                                <a href="#Devices" data-toggle="tab" >Nodes</a>
+                            </li>
                             <li onclick="switchEventsTab()">
                                 <a href="#Events" data-toggle="tab">Events</a>
                             </li>
@@ -82,7 +85,9 @@
                         
                       
                     </div> <!-- navbar-collapse-->
+                    
                     <a href="/logout" class="btn btn-default pull-right"><span class="fa fa-sign-out"></span> Logout</a>  
+                    
                     
                  <!-- container-fluid-->
                   
@@ -176,9 +181,11 @@
                 
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                           <strong>Motion</strong>
+                           <strong>Motion  </strong>
                             <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
-                            
+                            <span>
+                                <span id="gatewayStatus" class="label label-default">Gateway</span>
+                            </span>
                         </div>
                         
                         <div class="panel-body" id="motion_container">
@@ -286,7 +293,33 @@
                     
                 </div>
                 
+                <!---------------------Nodes PANEL----------------->
                 
+                 <div class = "col-xs-12 hidden" id="Nodes_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Nodes</strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="nodes_container">
+                        
+                        
+                        
+                        
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
                
                 <!-- Settings panel -->
                 

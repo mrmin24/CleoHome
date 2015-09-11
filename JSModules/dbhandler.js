@@ -61,7 +61,7 @@ exports.getdata = function(table,data,callback) {
     connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause, [table], function(err, result) {
       
   // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
-       
+      // console.log(result);
        connection.release();
         if(err) {
              callback(err,null);

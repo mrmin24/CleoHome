@@ -16,9 +16,10 @@
     var config;
     var selectedRow;
    
+   const Last_Seen_Error = 601000;
    
     showAllEvents(numEvents2,false);
-  
+   
 
     
    $(function(){
@@ -45,6 +46,7 @@
          $("#Devices_Panel").removeClass().addClass('col-xs-12');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
         document.getElementById('checkbox4').checked = true;
          btnPress = false;
             $( "#accordion2" ).accordion({ active: false});
@@ -62,6 +64,7 @@
          $("#Devices_Panel").removeClass().addClass('col-xs-12');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
         $("#Settings_Panel").removeClass().addClass('col-xs-12 show');
         document.getElementById('checkbox4').checked = true;
          btnPress = false;
@@ -89,6 +92,7 @@
          $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
          
      }
      
@@ -102,6 +106,7 @@
           $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
          
          
         // $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-2');
@@ -121,6 +126,7 @@
          $("#Devices_Panel").removeClass().addClass('col-xs-12');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
          
      }
      
@@ -134,6 +140,7 @@
          $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('col-xs-12');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
          
      }
      
@@ -147,7 +154,22 @@
           $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('col-xs-12');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
          
+     }
+     
+      function switchNodesTab(){
+         $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
+         $("#Event_Panel").removeClass().addClass('col-xs-12');
+        $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
+         $("#event_controls").removeClass().addClass('well hidden');
+         $("#alarm_controls").removeClass().addClass('well hidden');
+         $("#Settings_Panel").removeClass().addClass('hidden');
+          $("#Devices_Panel").removeClass().addClass('hidden');
+         $("#Access_Panel").removeClass().addClass('hidden');
+         $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('col-xs-12');
+         socket.emit("getNodesStatus",function(){});
      }
      
      
@@ -349,7 +371,14 @@
          
      });
      
-     
+     socket.on('gatewayConnected',function(status){
+        console.log("Gateway = " + status);
+         if(status){
+              $("#gatewayStatus").removeClass().addClass('label label-success');
+         }else{
+              $("#gatewayStatus").removeClass().addClass('label label-danger');
+         }
+     });
      
      function showLastAlarm(){
          
@@ -514,8 +543,10 @@
     
     socket.on('DeviceStatusEvent', function(data) {
     
-    //console.log(data['Item_Type']);
-        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] != Access_Type && data['Item_Type'] != Irrigation_Type && data['Item_Type'] != Motion_Type) 
+    //console.log(data);
+    
+    
+        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] != Access_Type && data['Item_Type'] != Irrigation_Type && data['Item_Type'] != Motion_Type && data['Item_Type'] != 'Node') 
         {
             
             addDevices(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
@@ -531,7 +562,7 @@
             
         }
         
-        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] == Irrigation_Type) 
+        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] == Irrigation_Type ) 
         {
             
             addIrrigation(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
@@ -547,9 +578,41 @@
             
         }
         
+         if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('node' + data['Id']) == null && data['Item_Type'] == 'Node') 
+        {
+            
+            addNodes(data['Id'],data['Device'],data['Current_State']/*,data['Node_Id'],data['Node_Port']*/);
+          
+            
+        }
+        
     
     
     });
+    
+    
+    
+     socket.on('NodeStatusEvent', function(data) {
+         //console.log(new Date().getTime() - data['Current_State']);
+         var time = new Date().getTime() - data['Current_State'];
+          lastseen = (time/1000/60).toString();
+          lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
+         
+         if(time > Last_Seen_Error)
+        {
+         
+         $('#node'+data['Id']).removeClass('btn btn-success').addClass('btn btn-danger');
+        }else
+        {
+         $('#node'+data['Id']).removeClass("btn btn-danger").addClass('btn btn-success ');
+        }
+        
+        
+        $('#node'+data['Id']).html(data['Device'] + " (" + lastseen + ")");
+        
+        
+        
+     });
     
     socket.on("alarmTrigger",function(data){
        console.log(data);
@@ -1135,6 +1198,9 @@
         return ;
     }
     
+    
+    
+    
     function addMotion(id,device,state,NodeID,NodePort){
         
         
@@ -1151,12 +1217,46 @@
            // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
         }
         
+        
+        
+        
         var radioFragment = document.getElementById('motion_container');
         radioFragment.innerHTML += newHtml;
         // console.log( radioFragment.innerHTML);
 
         return ;
     }
+    
+    function addNodes(id,device,state/*,NodeID,NodePort*/){
+       // console.log(new Date().getTime() - state);
+      //  console.log( state);
+      var time = new Date().getTime() - state;
+      lastseen = (time/1000/60).toString();
+      lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
+        if(time > Last_Seen_Error)
+        {
+          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
+           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" style="white-space: normal" >'+ device + " (" + lastseen + ")"+'</button></span>';
+        }
+        else
+        {
+            
+            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off"  style="white-space: normal" >'+ device + " (" + lastseen + ")"+'</button></span>';
+            
+           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
+        }
+        
+        
+        
+        
+        var radioFragment = document.getElementById('nodes_container');
+        radioFragment.innerHTML += newHtml;
+        // console.log( radioFragment.innerHTML);
+
+        return ;
+    }
+    
+     
     
     function addEvent(type,event,time,important){
        
