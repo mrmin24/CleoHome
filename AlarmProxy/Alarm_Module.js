@@ -89,6 +89,15 @@ function start() {
 
 
             });
+            
+            socket.on('panic', function() {
+
+
+
+                sendPanic();
+
+
+            });
 
 
 
@@ -694,6 +703,27 @@ function bypassZones(zones, callback) {
     bypassOne(zones.splice(0, 1), zones, callback);
 
 
+}
+
+
+function sendPanic(){
+    
+     nap.manualCommand('0603' , false, function(ack, nack, retry) {
+            if (nack) {
+                console.log("nack");
+                
+                return;
+            }
+            else if (ack) {
+
+                console.log("ack"); 
+
+            }
+            
+
+
+        });
+     console.log('send panic 2');
 }
 
 var nextzone, nextzone, bypassedZones = [];

@@ -4,7 +4,7 @@ var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var calcTime = require('../JSModules/compareTime');
 
 
-var intervaltime = 60000;
+var intervaltime = 1 * 60 * 1000;
 
 
 
@@ -18,7 +18,7 @@ function start() {
    
     timeUpdate();
     dayMinutesUpdate();
-    
+    weekDayUpdate();
     
     zeroTime(function(){   //waits for 00 seconds before starting interval to ensure time is checked on each minute
         timeUpdate();
@@ -29,7 +29,7 @@ function start() {
     
             timeUpdate();
             dayMinutesUpdate();
-            
+           // weekDayUpdate();
          
         }, intervaltime);
     });
@@ -53,10 +53,16 @@ function timeUpdate(){
                         
                 db.update('Items',data,function(){});   
                  
-                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state){
+                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime){
                                      
                      if(node && port && state){
                       mySensorsocket.emit('deviceSwitch',node,port,state);
+                     }
+                     
+                     
+                     if(cancelTime){
+                                 
+                         mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                      }
                  //console.log(data_receive[0]);
                  });
@@ -121,10 +127,15 @@ function dayMinutesUpdate(){
                         
                 db.update('Items',data,function(){});   
                  
-                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state){
+                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime){
                                      
                      if(node && port && state){
                       mySensorsocket.emit('deviceSwitch',node,port,state);
+                     }
+                     
+                     if(cancelTime){
+                                 
+                         mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                      }
                  //console.log(data_receive[0]);
                  });
@@ -132,33 +143,7 @@ function dayMinutesUpdate(){
                 
                  
                  if(newTime == 0){   //set day in DB at midnight
-                  data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + 'Day_Of_Week' + '"'};
-        
-                    db.getdata('Items',data,function(err,result){
-                       
-                       if(err){
-                           
-                           console.log(err);
-                       }else if(result){
-                           
-                        day = new Date();
-                        day = day.getDay();
-                        console.log("Setting day to: " + day);
-                         
-                         data = {'Set':'Item_Current_Value','Where':'Id','Current_State':day ,'Name':result[0].Id};
-                            
-                         db.update('Items',data,function(){});   
-                         
-                         evaluate.evaluateChange(result[0].Id,day,function(node,port,state){
-                                             
-                             if(node && port && state){
-                              mySensorsocket.emit('deviceSwitch',node,port,state);
-                             }
-                         //console.log(data_receive[0]);
-                         });
-                        }
-                 
-                    });
+                  weekDayUpdate();
                  }
                  
                     
@@ -173,6 +158,42 @@ function dayMinutesUpdate(){
         });
 }
 
-
+function weekDayUpdate(){
+    
+    data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + 'Day_Of_Week' + '"'};
+        
+    db.getdata('Items',data,function(err,result){
+       
+       if(err){
+           
+           console.log(err);
+       }else if(result){
+           
+        day = new Date();
+        day = day.getDay();
+        console.log("Setting day to: " + day);
+         
+         data = {'Set':'Item_Current_Value','Where':'Id','Current_State':day ,'Name':result[0].Id};
+            
+         db.update('Items',data,function(){});   
+         
+         evaluate.evaluateChange(result[0].Id,day,function(node,port,state,cancelTime){
+                             
+             if(node && port && state){
+              mySensorsocket.emit('deviceSwitch',node,port,state);
+             }
+             
+             if(cancelTime){
+                                 
+                 mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+             }
+         //console.log(data_receive[0]);
+         });
+        }
+ 
+    });
+                    
+                    
+}
                    
 exports.start = start;                   

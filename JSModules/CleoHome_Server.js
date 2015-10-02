@@ -21,7 +21,7 @@ var db = require('./dbhandler');
 
 var bypassedZones = [];
 
-var lastArmTime = null;
+var lastArmTime = Date.now();
 var getconfig = require('../JSModules/GetConfig.js');
 var writeXML = require('../JSModules/WriteConfig.js');
 var configure = getconfig.data;
@@ -83,7 +83,7 @@ http.listen(port);
 function start() {
     var oldip = externalip;    
 
-    var nodeinterval = setInterval(updateNodeStatus(),nodeCheckInterval);
+    var nodeinterval = setInterval(updateNodeStatus,nodeCheckInterval);
     var dnsinterval = setInterval(function() {
         
    
@@ -166,6 +166,18 @@ io.on('connection', function(socket){
   });
   
   
+  
+  socket.on('getrules',function(){
+      
+      sendrules();
+      
+  });
+  
+  socket.on('getItems',function(){
+      
+      senditems();
+      
+  });
   
   socket.on('delete_user',function(userId,username){
       //console.log(userId);
@@ -285,7 +297,16 @@ io.on('connection', function(socket){
     }); 
     
     
+ socket.on('panic',function(){
     
+    
+   
+     alarmsocket.emit('panic',function(){
+         console.log('Panic');
+        
+       
+     });
+    });    
     
  socket.on('refreshIP',function(){
     
@@ -307,6 +328,15 @@ io.on('connection', function(socket){
    
     }); 
     
+    
+    
+    
+    socket.on('getWeather',function(){
+        getWeather();
+        
+   
+    });
+
 
     socket.on('test',function(){
         test();
@@ -347,6 +377,243 @@ io.on('connection', function(socket){
       	  }
         });
   });
+  
+  
+  socket.on('saveRule',function(ruleData){
+      
+      var rule = "";
+      var ids = [];
+      var ids2 = [];
+      var ruleItemsId = [];
+      
+      console.log(ruleData);
+      var j = 0;
+      for(var i = 0;i<ruleData['length'];i++)
+      {
+          //db.getdata('Items',{Select: 'Id',whereClause:'Item_Name = "' + ruleData['dropdownMenuReq'+(i+1)] +'"'},function(err,data_receive){
+            db.getSQL( 'SELECT Id FROM Items WHERE Item_Name = "' + ruleData['dropdownMenuReq'+ (i+1)] + '" UNION SELECT Id FROM Alarm_Items WHERE Description = "' + ruleData['dropdownMenuReq'+ (i+1)] + '"'  ,function(err,data_receive){
+             if(data_receive[0]){
+              
+              ids[j] = data_receive[0]['Id'];   
+              j++;   
+              
+             
+          
+        
+         if(j==ruleData['length']) {
+              
+               var condition = '';
+               var selectedItemRules = [];
+               var nonNull = [];
+               var isNull = [];
+               
+              var h = 0;
+              var newWhereClause = "";
+              for(var g = 0 ;g<j;g++){
+                 
+                 
+                 
+                 
+                 
+                 
+                 if(ruleData['equalsValueReq'+(g+1)])  //also add secondary rule value in where
+                 {
+                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Equals = "'+ ruleData['equalsValueReq'+(g+1)] +'"';
+                    
+                     
+                 }else if(ruleData['greaterValueReq'+(g+1)]){
+                    
+                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Greater_Than = "'+ ruleData['greaterValueReq'+(g+1)] +'"';
+                     
+                 }else if(ruleData['lessValueReq'+(g+1)]){
+                    
+                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Less_Than = "'+ ruleData['lessValueReq'+(g+1)] +'"';
+                     
+                 }else if(ruleData['notEqualValueReq'+(g+1)]){
+                    
+                     newWhereClause = 'Item_Id = "' + ids[g] +'" AND Not_Equal = "'+ ruleData['notEqualValueReq'+(g+1)] +'"';
+                     
+                 }else{}
+             
+                 
+                  db.getdata('Rule_Items',{Select: 'Second_Id,Rule_Id',whereClause:newWhereClause},function(err,data_receive){
+                        //console.log("Returned: " + data_receive[0]);
+                        
+                         if(data_receive[0]){
+                            
+                          
+                          ids2[h] = data_receive[0]['Second_Id'];
+                          selectedItemRules[h] = data_receive[0]['Rule_Id'];
+                          h++; 
+                        
+                         }else if(err)
+                         {
+                             console.log(err);
+                         }else{
+                             ids2[h] = null;
+                             selectedItemRules[h] = null;
+                             h++; 
+                         }
+                    
+              
+              
+                         if(h == j){
+                            
+                           
+                          db.getdata('Rule_Items',{Select: 'Second_Id',whereClause:'Id LIKE "%" ORDER BY Id DESC LIMIT 1'},function(err,data_receive){
+                
+                             if(data_receive[0]){
+                                 
+                                var n = 0;
+                                var b = 0;
+                                 for(var k =0 ;k<j;k++){
+                                     
+                                     
+                                     if(!ids2[k]){
+                                         
+                                       ids2[k]  = data_receive[0].Second_Id + n + 1;  
+                                       isNull[n] = k;
+                                       n++;
+                                     }else{
+                                         nonNull[b] = k;
+                                         b++;
+                                     }
+                                      
+                                      
+                                     if(k >0){
+                                         
+                                          condition += ';';
+                                          if(ruleData['operator'+ (k+1)] == 'AND'){
+                                           condition += '*' ;
+                                          }else 
+                                          if(ruleData['operator'+ (k+1)] == 'OR'){
+                                           condition += '+' ;
+                                          }
+                                          
+                                          condition += ';';
+                                      }
+                                      
+                                      condition += ids2[k];
+                          
+                                 }
+                                     
+                                   
+                                         
+                                    // db.getdata('Items',{Select: 'Id',whereClause:'Item_Name = "' + ruleData['dropdownMenuAction1'] +'"'},function(err,data_receive){
+                                       db.getSQL('SELECT Id FROM Items WHERE Item_Name = "' + ruleData['dropdownMenuAction1'] + '" UNION SELECT Id FROM Alarm_Items WHERE Description = "' + ruleData['dropdownMenuAction1'] + '"',function(err,data_receive){    
+                                         if(data_receive[0]){
+                                            
+                                          action =  data_receive[0]['Id'] + ';=;' + ruleData['ActionValue1'] ;  
+                                          onTime = ruleData['ActionOnValue1'] ;
+                                          console.log(action);
+                                          
+                                          
+                                          
+                                          db.insert('Rules', {Conditions:condition, Result: action,RuleOnTime:onTime, Comments:ruleData['description']  });
+                                          
+                                          
+                                          db.getdata('Rules',{Select: 'Id',whereClause:'Id LIKE "%" ORDER BY Id DESC LIMIT 1'},function(err,data_receive2){
+                                
+                                             if(data_receive2[0]){
+                                                 
+                                             
+                                              var ruleId = data_receive2[0].Id;
+                                              
+                                            
+                                            
+                                             
+                                             for(var m = 0;m<nonNull.length;m++)
+                                              {
+                                                  newRules = selectedItemRules[nonNull[m]] + ';' + ruleId;
+                                                  
+                                                   data = {Set:'Rule_Id',Current_State:newRules,Where:"Second_Id",Name:ids2[nonNull[m]]};
+                                                    db.update("Rule_Items",data,function(err,data_receive){
+                                                          
+                                                          
+                                                        
+                                                     if(data_receive){
+                                                         console.log("success");
+                                                         
+                                                     }else
+                                                     {
+                                                         
+                                                     
+                                                     }
+                                                     
+                                                    });
+                                              }
+                                             
+                                             
+                                             
+                                              for(var m = 0;m<isNull.length;m++)
+                                              {
+                                                  
+                                                 
+                                                db.insert('Rule_Items', {Second_Id:ids2[isNull[m]],Rule_Id:ruleId, Item_Id: ids[isNull[m]],Equals: ruleData['equalsValueReq'+ (isNull[m]+1)]?ruleData['equalsValueReq'+ (isNull[m]+1)]:null  , Greater_Than: ruleData['greaterValueReq'+ (isNull[m]+1)]?ruleData['greaterValueReq'+ (isNull[m]+1)]:null ,Less_Than: ruleData['lessValueReq'+ (isNull[m]+1)]?ruleData['lessValueReq'+ (isNull[m]+1)]:null ,Not_Equal:  ruleData['notEqualValueReq'+ (isNull[m]+1)]?ruleData['notEqualValueReq'+ (isNull[m]+1)]:null , Secondary_Item: 0  ,Status: 0, Comments: ''  });
+                                              
+                                                if(m == b){
+                                                  console.log('Rules Saved');
+                                                 
+                                                 }
+                                              }
+                                              
+                                                  
+                                                 
+                                                 }else
+                                                 {
+                                                     console.log(err);
+                                                 }
+                                             
+                                          });
+                                          
+                                          
+                                          
+                                         
+                                         }else
+                                         {
+                                             console.log(err);
+                                         }
+                                     
+                                     
+                                         
+                                      });
+                                         
+                                         
+                                     
+                                  
+                                  //console.log('Rules Saved');
+                             
+                             }else
+                             {
+                                 console.log(err);
+                             }
+                             
+                          });
+                          
+                          
+                      
+                    
+                      
+                      
+                      
+                         }
+                  });
+                 
+              }
+              
+             
+            }
+            
+             }else
+             {
+                 console.log(err);
+             }
+               
+               
+          });  //end firs db call
+        
+      }
+  });
     
 });
 
@@ -372,10 +639,15 @@ function virtualDeviceStatusChange(Id,State){
                          if(data_receive){
                             // console.log(ID + " " + State);
                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
-                             evaluate.evaluateChange(ID,State,function(node,port,state){
+                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime){
                              
                              if(node && port && state){
                               mySensorsocket.emit('deviceSwitch',node,port,state);
+                             }
+                             
+                             if(cancelTime){
+                                 
+                                 mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                              }
                              //console.log(data_receive[0]);
                              });
@@ -418,10 +690,15 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
                          if(data_receive){
                             // console.log(ID + " " + State);
                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
-                             evaluate.evaluateChange(ID,State,function(node,port,state){
+                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime){
                             
                              if(node && port && state){
                               mySensorsocket.emit('deviceSwitch',node,port,state);
+                             }
+                             
+                             if(cancelTime){
+                                 
+                                 mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                              }
                              //console.log(data_receive[0]);
                              });
@@ -485,23 +762,113 @@ function sendusers(){
     console.log("Getting Users...");
       db.getdata('users',{Select: 'id,username',whereClause:'id LIKE "%"'},function(err,data_receive){
                       // console.log('test1'); 
-                   if(data_receive[0]){
-                   // console.log(data_receive);
-                    io.emit("sendUsers",data_receive);
-                    
-                }else{
-                    if (err) {
-                        // error handling code goes here
-                        console.log("ERROR (GetUsers) : ",err);            
-                    }
+               if(data_receive[0]){
+               // console.log(data_receive);
+                io.emit("sendUsers",data_receive);
                 
-                    
+            }else{
+                if (err) {
+                    // error handling code goes here
+                    console.log("ERROR (GetUsers) : ",err);            
                 }
-		
-       
-            });
+            
+                
+            }
+	
+   
+        });
 }  
   
+  
+  
+function sendrules(){
+    console.log("Getting Rules...");
+      db.getdata('Rules',{Select: 'Id,Conditions,Result,Comments',whereClause:'Id LIKE "%"'},function(err,data_receive){
+                      // console.log('test1'); 
+           if(data_receive[0]){
+           // console.log(data_receive);
+            io.emit("sendRules",data_receive);
+            
+        }else{
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR (GetRules) : ",err);            
+            }
+        
+            
+        }
+
+
+    });
+}  
+
+
+
+function senditems(){
+    console.log("Getting Items...");
+      db.getdata('Items',{Select: 'Id,Item_Name',whereClause:'Id LIKE "%"'},function(err,data_receive){
+                      // console.log('test1'); 
+           if(data_receive[0]){
+           // console.log(data_receive);
+                db.getdata('Alarm_Items',{Select: 'Id,Description',whereClause:'Id LIKE "%"'},function(err,data_receive2){
+                          // console.log('test1'); 
+                   if(data_receive2[0]){
+                   // console.log(data_receive);
+                    
+                        io.emit("sendItems",data_receive,data_receive2);
+                   
+                     }else{
+                    if (err) {
+                        // error handling code goes here
+                        console.log("ERROR (GetItems) : ",err);            
+                    }
+                    
+                     }
+                });
+           
+            
+            
+        }else{
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR (GetItems) : ",err);            
+            }
+        
+            
+        }
+
+
+    });
+}  
+
+
+
+function getWeather(){
+     db.getdata('Items',{Select: 'Item_Current_Value',whereClause:'Item_Name = "Wind Speed" OR Item_Name = "Temperature"'},function(err,data_receive){
+                      // console.log('test1'); 
+           if(data_receive[0]){
+            //console.log(data_receive);
+            io.emit("sendWeather",data_receive[1].Item_Current_Value,data_receive[0].Item_Current_Value);
+            
+        }else{
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR (GetItems) : ",err);            
+            }
+        
+            
+        }
+
+
+    });
+    
+    
+    
+    
+}
+
+
+
 function test(){
     
     console.log("testing triggers");
@@ -866,7 +1233,7 @@ function getAlarmStatus(){
 }
 function getDeviceStatus(){
    
-    db.getdata('Items',{Select: 'Id,Item_Name,Item_Current_Value,Item_Type,Node_Id,Node_Port',whereClause:"'Id' LIKE '%' ORDER BY Item_Sort_Position ASC"},function(err,data_receive){
+    db.getdata('Items',{Select: 'Id,Item_Name,Item_Current_Value,Item_Type,Node_Id,Node_Port,Item_Enabled_Value',whereClause:"'Id' LIKE '%' ORDER BY Item_Sort_Position ASC"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
                             console.log("ERROR2 : ",err);            
@@ -879,7 +1246,7 @@ function getDeviceStatus(){
                               // console.log(data_receive[i]['Item_Name']);  
                                 if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
                                 {
-                                    var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type']};
+                                    var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value']};
                                    
                                     io.emit('DeviceStatusEvent',data);
                                     

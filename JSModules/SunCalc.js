@@ -5,7 +5,7 @@ var calcTime = require('../JSModules/compareTime');
 
 var latitude = -25.825848;
 var longitude = 28.269367;
-var intervaltime = 300000;
+var intervaltime = 5 * 60 * 1000;
 var isDark = 1;
 
 
@@ -74,10 +74,15 @@ function checkSunCalc(){
                         
                 db.update('Items',data,function(){});   
                  
-                 evaluate.evaluateChange(result[0].Id,isDark,function(node,port,state){
+                 evaluate.evaluateChange(result[0].Id,isDark,function(node,port,state,cancelTime){
                                      
                      if(node && port && state){
                       mySensorsocket.emit('deviceSwitch',node,port,state);
+                     }
+                     
+                     if(cancelTime){
+                                 
+                         mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                      }
                  //console.log(data_receive[0]);
                  });

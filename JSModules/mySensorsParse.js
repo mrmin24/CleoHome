@@ -10,6 +10,9 @@ var db = require('./dbhandler');
 var Access_Type = 5;
 var Irrigation_Type = 6; 
 var Motion_Type = 7;
+var offTimes = [];
+var offTimesObjects = {};
+var offTimeInterval = 1000;
 
 //var alarmio = require('socket.io-client');
 //var actual = alarmio.connect(gatewayip + gatewayport);
@@ -17,6 +20,7 @@ var Motion_Type = 7;
 
 function start() {
 	var io = require('socket.io').listen(44606);
+	
 	if(io)
 	{ console.log('MySensor Module Listening on ' + '44606');}
 	
@@ -24,12 +28,12 @@ function start() {
 	io.sockets.on('connection', function(socket){
 	  console.log('Client connected to mysensor Parser');
 	 
-	connect();
-	
+		connect();
+		var offTimeTimer = setInterval(checkOffTimes,offTimeInterval);
 		 socket.on('deviceSwitch',function(NodeId,NodePort,State){
 		 	
 		 	
-		 	console.log("is array " + Array.isArray(NodeId));
+		 //	console.log("is array " + Array.isArray(NodeId));
 		 	if(Array.isArray(NodeId))
 			 	for(var i in NodeId)
 			 	{
@@ -45,6 +49,39 @@ function start() {
 		 	}
 		 });
 		 
+		 
+		 socket.on('switchOff',function(NodeId,NodePort,State,offTime){
+		 	
+		 	var foudIndex = 0;
+		 //	console.log(offTimes);
+		 	for(var i = 0;i<offTimes.length;i++){
+		 		
+		 		if(offTimes[i]['data']['node'] == NodeId && offTimes[i]['data']['port'] == NodePort){
+		 			
+		 			offTimes[i]['data']['offTime'] = offTime;
+		 			offTimes[i]['data']['state'] = State;
+		 			foudIndex = 1;
+		 			
+		 		}
+		 		
+		 		
+		 	}
+		 	
+		 	if(foudIndex == 0)
+		 	{
+			 	offTimesObjects.node = NodeId;
+			 	offTimesObjects.port = NodePort;
+			 	offTimesObjects.state = State;
+			 	offTimesObjects.offTime = offTime;
+			 	
+			 	
+			 	
+			 	offTimes.push({data: offTimesObjects});
+		 	}
+		 	foundIndex = 0;
+		 	offTimesObjects = {};
+		 //	console.log(offTimes);
+		 });
 		 
 		 
 		 
@@ -64,7 +101,15 @@ function start() {
 	    			sendNewId();
 	    			
 	    		}
+	    		if(data[4] == 18){  //id request
+	    			
+	    		//	console.log("Alive received");
+	    		
+	    			
+	    		}
+	    		
 	    	}
+	    	
 	    	
 	    	
 	    	
@@ -80,7 +125,9 @@ function start() {
 					    console.log('Mysensors: Gateway connected');
 					    
 				        socket.emit("gatewayConnected",1);
-	                	if(retrytimer)clearInterval(retrytimer);                
+	                	if(retrytimer)clearInterval(retrytimer);      
+	                	
+	                	
 					});
 					
 					
@@ -155,48 +202,53 @@ function start() {
 	  
 		});
 		
+		
+		
+		
 	    	
 	    	
 	    function sendData(NodeId,NodePort,State){		
+	    //	console.log("data: " + NodeId + " " +NodePort  );
 	    		
-	    		db.getdata('Items',{Select: 'Item_Type,Item_Is_Toggle,Item_Toggle_Delay',whereClause:'Node_Id = ' + NodeId.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+	    		db.getdata('Items',{Select: 'Item_Type,Item_Is_Toggle,Item_Toggle_Delay,Item_Current_Value',whereClause:'Node_Id = ' + NodeId.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
 	    			 if(data_receive[0]){
-	    			 	
-	    			 	if(data_receive[0].Item_Type == Access_Type && data_receive[0].Item_Is_Toggle == 1 ){
-				    	 	if(State == 0){
-					    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;0\n',function(){
-				       
-				                       //console.log('data sent');
-				                   });
-					    	 	
-					    	 }else{
-				    	 		actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
-				       
-				                       //console.log('data sent');
-				                   });
-					    	 }
-		    			 }else 	if(data_receive[0].Item_Type == Irrigation_Type && data_receive[0].Item_Is_Toggle == 1 ){
-					    	 
-					    	 if(State == 0){
-					    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;0\n',function(){
-				       
-				                       //console.log('data sent');
-				                   });
-					    	 	
-					    	 }else{
-						    	 actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
-						       
-						                      // console.log(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay);
-						                   });
-					    	 }
-		    			  }else 
-		    			 {
-		    			 	
-		    			 	actual.write(NodeId.toString() + ';' + NodePort.toString()+';1;1;2;' + State.toString() +'\n',function(){
+	    			 	if(data_receive[0].Item_Current_Value != State){
+		    			 	if(data_receive[0].Item_Type == Access_Type && data_receive[0].Item_Is_Toggle == 1 ){
+					    	 	if(State == 0){
+						    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;0\n',function(){
 					       
 					                       //console.log('data sent');
-					                   });	
-		    			 }
+					                   });
+						    	 	
+						    	 }else{
+					    	 		actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
+					       
+					                       //console.log('data sent');
+					                   });
+						    	 }
+			    			 }else 	if(data_receive[0].Item_Type == Irrigation_Type && data_receive[0].Item_Is_Toggle == 1 ){
+						    	 
+						    	 if(State == 0){
+						    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;0\n',function(){
+					       
+					                       //console.log('data sent');
+					                   });
+						    	 	
+						    	 }else{
+							    	 actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
+							       
+							                      // console.log(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay);
+							                   });
+						    	 }
+			    			  }else 
+			    			 {
+			    			 	
+			    			 	actual.write(NodeId.toString() + ';' + NodePort.toString()+';1;1;2;' + State.toString() +'\n',function(){
+						       
+						                       //console.log('data sent');
+						                   });	
+			    			 }
+	    			 	}
 				                   
 		    	}else 
 		        if(err)
@@ -236,11 +288,37 @@ function start() {
 	                   
 	                   
 		}
+		
+		
 	
+		function checkOffTimes(){
+		 var time = new Date().getTime()	
+			//console.log(time);
+			//console.log(offTimes);
+        	//return t.setSeconds(t.getSeconds() + onTime);
+			for(var i = 0;i < offTimes.length;i++){
+				//console.log(offTimes[i]['data']['offTime']);
+				if(time >= offTimes[i]['data']['offTime']){
+					
+					sendData(offTimes[i]['data']['node'],offTimes[i]['data']['port'],offTimes[i]['data']['state']);
+					
+					offTimes.splice(i, 1);
+					console.log("Switch Off");
+					i--;
+				}
+				
+				
+				
+			}
+		
+		
+		}
 	
 	});
+	
+	
 }
 
-
+	
                    
 exports.start = start;                   

@@ -6,7 +6,7 @@ var db = require('./dbhandler');
 exports.checkRule = function(rule,callback){
     console.log("Checking rule: "  + rule);
     
-   data = {'Select':'Conditions,Result','whereClause':'Id = ' + rule };
+   data = {'Select':'Conditions,Result,RuleOnTime','whereClause':'Id = ' + rule + ' AND Rule_Enabled = 1'  };
     
     db.getdata('Rules',data,function(err,result){
        
@@ -36,11 +36,11 @@ exports.checkRule = function(rule,callback){
               
            }
            //console.log(ids);
-            var where = "Id IN (" + ids + ") ORDER BY FIELD (Id," + ids + ")";
+            var where = "Id IN (" + ids + ") AND Secondary_Item = 0 ORDER BY FIELD (Id," + ids + ")";
         
            
            
-           data = {'Select':'Status,Id','whereClause':where };
+           data = {'Select':'Status,Second_Id','whereClause':where };
     
             db.getdata('Rule_Items',data,function(err,result2){
                
@@ -59,7 +59,7 @@ exports.checkRule = function(rule,callback){
                          
                          
                         for(var j = 0;j<result2.length;j++){
-                            if(result2[j].Id == res[i]){
+                            if(result2[j].Second_Id == res[i]){
                                 cond += result2[j].Status;
                             }
                         } 
@@ -79,7 +79,9 @@ exports.checkRule = function(rule,callback){
                   var executeRule = eval(cond);
                   
                   if(executeRule > 0){
+                      
                       var res2 = result[0].Result.split(';');
+                      var onTime = result[0].RuleOnTime;
                       var nodes = [];
                       var ports = [];
                       var values = [];
@@ -87,19 +89,20 @@ exports.checkRule = function(rule,callback){
                       for(var i = 0;i< res2.length/3;i++){
                        data = {'Select':'Node_Id,Node_Port','whereClause':"Id = " + res2[i*3] };
                         value = res2[i*3+2];
+                        var ID = res2[i*3];
                         db.getdata('Items',data,function(err,result3){
                            
                            if(err){
                                
                                console.log(err);
-                               callback(null,null,null); 
+                               callback(false,null,null,null); 
                                
                            }else if(result3){
                                console.log(result3[0]);
                               
                               // console.log(nodes[i] + " " + ports[i] + " " + values[i] );
                              // setTimeout(function () {
-                                callback(result3[0].Node_Id,result3[0].Node_Port,value);
+                                callback(true,result3[0].Node_Id,result3[0].Node_Port,value,ID,onTime);
                               //}, 2000);
                               
                            }

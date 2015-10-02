@@ -18,6 +18,7 @@ timer = setTimeout(function() {
     var mySensor = require('./mySensorsParse.js');
     var Suncalc = require('./SunCalc.js');
     var Time = require('./timeUpdate');
+    var Weather = require('./weatherUpdate');
    // var Rules = require('./Rule_Evaluate.js');
     
     
@@ -28,6 +29,7 @@ timer = setTimeout(function() {
     Server.start();
     Suncalc.start();
     Time.start();
+    Weather.start();
   //  Rules.start();
     
     

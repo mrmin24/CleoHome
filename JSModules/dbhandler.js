@@ -123,7 +123,28 @@ exports.getLast = function(table,data,callback) {
     });
 }
 
+exports.getSQL = function(sql,callback) {
 
+   pool.getConnection(function(err, connection){
+    
+    //console.log(data);
+   
+    connection.query(sql, function(err, result) {
+      
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+       
+       connection.release();
+        if(err) {
+             callback(err,null);
+            }
+            else {
+             callback(null,result);
+            }
+            
+    });
+   
+    });
+}
 
 //connection.query('UPDATE users SET Name = ? WHERE UserID = ?', [name, userId])
 

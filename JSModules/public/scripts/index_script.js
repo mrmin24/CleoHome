@@ -19,21 +19,38 @@
    const Last_Seen_Error = 601000;
    
     showAllEvents(numEvents2,false);
-   
-
+  var Items = null;
+  
+    j = 1;
     
+    setUpDropdowns();
+   
    $(function(){
 
     $(".dropdown-menu li a").click(function(){
 
       eventdroptext = $(this).text();
-      $("#dropdownMenu1").text(eventdroptext );
-     document.getElementById('dropdownMenu1').innerHTML +=  '<span class="caret"></span>';
+      console.log($(this));
+          $("#dropdownMenuEvents").text(eventdroptext );
+         document.getElementById('dropdownMenuEvents').innerHTML +=  '<span class="caret"></span>';
 
         });
+        
+        
 
     });
     
+    $( document ).ready(function() {
+        setUpDropdowns();
+        getWeather();
+    });
+    
+
+           
+        
+
+        
+        
      function switchHomeTab(){
          $("#Alarm_Panel").removeClass().addClass('col-xs-12 col-lg-12');
         $("#Event_Panel").removeClass().addClass('col-xs-12 ');
@@ -47,6 +64,8 @@
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
          $("#Nodes_Panel").removeClass().addClass('hidden');
+          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
+          $("#Rules_Panel").removeClass().addClass('hidden');
         document.getElementById('checkbox4').checked = true;
          btnPress = false;
             $( "#accordion2" ).accordion({ active: false});
@@ -54,6 +73,7 @@
      }
      
      function settings(){
+         getusers();
          $("#Alarm_Panel").removeClass().addClass('col-xs-12 col-lg-12');
         $("#Event_Panel").removeClass().addClass('col-xs-12 ');
         $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
@@ -65,6 +85,8 @@
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
          $("#Nodes_Panel").removeClass().addClass('hidden');
+          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
+          $("#Rules_Panel").removeClass().addClass('hidden');
         $("#Settings_Panel").removeClass().addClass('col-xs-12 show');
         document.getElementById('checkbox4').checked = true;
          btnPress = false;
@@ -78,7 +100,7 @@
       
   }
      
-     
+   
      
      function switchEventsTab(){
          $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
@@ -92,8 +114,9 @@
          $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
-         
+         $("#Rules_Panel").removeClass().addClass('hidden');
      }
      
      function switchAlarmTab(){
@@ -106,7 +129,9 @@
           $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
+         $("#Rules_Panel").removeClass().addClass('hidden');
          
          
         // $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-2');
@@ -126,7 +151,9 @@
          $("#Devices_Panel").removeClass().addClass('col-xs-12');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
+         $("#Rules_Panel").removeClass().addClass('hidden');
          
      }
      
@@ -140,8 +167,9 @@
          $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('col-xs-12');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
-         
+         $("#Rules_Panel").removeClass().addClass('hidden');
      }
      
      function switchIrrigationTab(){
@@ -154,7 +182,9 @@
           $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('col-xs-12');
+          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
+         $("#Rules_Panel").removeClass().addClass('hidden');
          
      }
      
@@ -168,12 +198,178 @@
           $("#Devices_Panel").removeClass().addClass('hidden');
          $("#Access_Panel").removeClass().addClass('hidden');
          $("#Irrigation_Panel").removeClass().addClass('hidden');
+          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('col-xs-12');
+          $("#Rules_Panel").removeClass().addClass('hidden');
          socket.emit("getNodesStatus",function(){});
      }
      
+     function switchRulesTab(){
+         getrules();
+         $("#Alarm_Panel").removeClass().addClass('hidden ');
+         $("#Event_Panel").removeClass().addClass('hidden');
+        $("#Event_Panel_Title").removeClass().addClass('hidden');
+         $("#event_controls").removeClass().addClass('well hidden');
+         $("#alarm_controls").removeClass().addClass('well hidden');
+         $("#Settings_Panel").removeClass().addClass('hidden');
+          $("#Devices_Panel").removeClass().addClass('hidden');
+         $("#Access_Panel").removeClass().addClass('hidden');
+         $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Motion_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
+         $("#Rules_Panel").removeClass().addClass('col-xs-12');
+         
+     }
      
+     $('#rulesAddModal').on('shown.bs.modal', function (e) {
+      // do something...
+        socket.emit('getItems',function(err,data){});
      
+        socket.on('sendItems',function(items,alarm_items){ 
+         //$('#item_options').value = '';
+         
+         Items = items;
+         AlarmItems = alarm_items;
+         for(var i = 0;i<items.length;i++)
+         {
+             $('#item_options').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+             $('#item_options_action').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+        
+           // console.log(items[i]['Item_Name']);
+         }
+         
+         for(var i = 0;i<AlarmItems.length;i++)
+         {
+             $('#item_options').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+             $('#item_options_action').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+        
+           // console.log(items[i]['Item_Name']);
+         }
+         
+         setUpDropdowns();
+         
+     });
+    })
+    
+    
+    
+    $('#addAND').on( 'click', function() {
+        j++;
+        //var tablerowhtml = '<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item<span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options" aria-labelledby="dropdownMenu1"><!--<li><a href="#">Action</a></li><li><a href="#">Another action</a></li><li><a href="#">Something else here</a></li><li><a href="#">Separated link</a></li>--></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td></tr>';
+        $("#if_Statements").append('<tr><th colspan="5" id="operator'+j+'"><strong>AND</strong></th></tr>');
+        $("#if_Statements").append('<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuReq'+j+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item <span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options'+j+'" aria-labelledby="dropdownMenuReq'+j+'"></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="equalsValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="greaterValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="lessValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="notEqualValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td></tr>');
+        for(var i = 0;i<Items.length;i++)
+         {
+             $('#item_options'+j).append('<li><a href="#">'+Items[i]['Item_Name']+'</a></li>');
+             
+        
+            console.log(Items[i]['Item_Name']);
+         }
+          for(var i = 0;i<AlarmItems.length;i++)
+         {
+          $('#item_options'+j).append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+         
+         }
+        setUpDropdowns();
+        
+    });
+    
+    $('#addOR').on( 'click', function() {
+       
+        j++;
+        //var tablerowhtml = '<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item<span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options" aria-labelledby="dropdownMenu1"><!--<li><a href="#">Action</a></li><li><a href="#">Another action</a></li><li><a href="#">Something else here</a></li><li><a href="#">Separated link</a></li>--></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td></tr>';
+        $("#if_Statements").append('<tr><th colspan="5" id="operator'+j+'"><strong>OR</strong></th></tr>');
+        $("#if_Statements").append('<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuReq'+j+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item <span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options'+j+'" aria-labelledby="dropdownMenuReq'+j+'"></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="equalsValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="greaterValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="lessValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="notEqualValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td></tr>');
+        for(var i = 0;i<Items.length;i++)
+         {
+             
+             $('#item_options'+j).append('<li><a href="#">'+Items[i]['Item_Name']+'</a></li>');
+             
+        
+            console.log(Items[i]['Item_Name']);
+         }
+         
+          for(var i = 0;i<AlarmItems.length;i++)
+         {
+          $('#item_options'+j).append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+         
+         }
+          setUpDropdowns();
+         
+       
+    });
+    
+    function setUpDropdowns(){
+       
+
+            $(".dropdown-menu li a").click(function(){
+                $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
+                 $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
+        
+           });
+        
+        
+        
+    }
+    
+    
+    function saveRule(){
+        
+        var ruleData = {};
+        
+        
+         ruleData['description'] = document.getElementById('ruleDescription').value;
+        var k = 1;
+        while(document.getElementById('dropdownMenuReq'+k))
+        {
+            
+            ruleData['dropdownMenuReq'+k] = $('#dropdownMenuReq'+k).text();
+            ruleData['equalsValueReq'+k] = $('#equalsValueReq'+k).val();
+            ruleData['greaterValueReq'+k] = $('#greaterValueReq'+k).val();
+            ruleData['lessValueReq'+k] = $('#lessValueReq'+k).val();
+            ruleData['notEqualValueReq'+k] = $('#notEqualValueReq'+k).val();
+            
+            if(k > 1)
+            {
+              ruleData['operator'+ k] = $('#operator'+ k).text();  
+                
+            }
+            k++
+            
+        }
+        
+        
+        ruleData['dropdownMenuAction1'] = $('#dropdownMenuAction1').text();
+        ruleData['ActionValue1'] = $('#ActionValue1').val();
+        ruleData['ActionOnValue1'] = $('#ActionOnValue1').val();
+        ruleData['length'] = k-1;
+        
+        socket.emit('saveRule',ruleData);
+        console.log(ruleData);
+    }
+    
+    function deleteRule(){
+			
+
+		}
+    
+     function getWeather(){
+        
+        socket.emit('getWeather');
+        
+    }  
+    
+    
+    socket.on('sendWeather',function(temp,wind){
+       
+     $('#temp').html(temp);
+     $('#wind').html(wind);
+     
+        
+    });
+    
+    
+    
      function showAllEvents(numEvents,btnpress){
         
          if(btnPress){
@@ -460,6 +656,12 @@
          
      }
      
+     
+     function panicAlarm(){
+         socket.emit('panic',function(){});
+         
+     }
+     
       socket.on("user_deleted",function(){
         
          $("<div>User Deleted!</div>" ).dialog();
@@ -549,7 +751,7 @@
         if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] != Access_Type && data['Item_Type'] != Irrigation_Type && data['Item_Type'] != Motion_Type && data['Item_Type'] != 'Node') 
         {
             
-            addDevices(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
+            addDevices(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port'],data['Item_Enabled_Value']);
           
             
         }
@@ -608,7 +810,7 @@
         }
         
         
-        $('#node'+data['Id']).html(data['Device'] + " (" + lastseen + ")");
+        $('#nodebadge'+data['Id']).html( lastseen);
         
         
         
@@ -834,6 +1036,26 @@
         
     }) ;   
     
+    
+    
+    socket.on("sendRules",function(rules){
+        //console.log(rules);
+        var newrules = document.getElementById('rulesTableBody');
+         newrules.innerHTML = '';
+        var newHtml;
+        for(var i in rules){
+            
+              newHtml = '<tr><td>'+ rules[i].Id  +'</td><td>'+ rules[i].Comments  +'</td></tr>';
+              
+             newrules.innerHTML += newHtml;
+          
+       if(i == rules.length - 1)
+        setrulestable();
+        }
+        
+        
+    }) ;  
+    
     socket.on('config',function(config_receive){
         
        // console.log(config_receive);
@@ -937,7 +1159,7 @@
     
     
     $(document).ready(function() {
-        getusers();
+       // getusers();
        
         
         
@@ -947,6 +1169,11 @@
     function getusers(){
         
         socket.emit('getusers',function(){  });
+    }
+    
+    function getrules(){
+        
+        socket.emit('getrules',function(){  });
     }
     
     function setusertable(){
@@ -982,6 +1209,46 @@
         
         
     }
+    
+    
+    function setrulestable(){
+        
+        var table = new $('#rules_table').DataTable();
+     
+        $('#rules_table tbody').on( 'click', 'tr', function () {
+            if ( $(this).hasClass('selected') ) {
+                $(this).removeClass('selected');
+            }
+            else {
+                table.$('tr.selected').removeClass('selected');
+                $(this).addClass('selected');
+                selectedRow = $(this);
+                
+            }
+        } );
+     
+       
+        
+        $('#Rules_Edit_Btn').click( function () {
+           //socket.emit("delete_user_token",selectedRow[0].children[1].innerHTML);
+            //console.log(selectedRow[0].children[0].innerHTML);
+            //table.row('.selected').remove().draw( false );
+            
+        } );
+        $('#Rules_Add_Btn').click( function () {
+           // $('#rulesAddModal').appendTo("body").modal('show');
+           // $('#rulesAddModal').modal('show');
+           //socket.emit("delete_user_token",selectedRow[0].children[1].innerHTML);
+            //console.log(selectedRow[0].children[0].innerHTML);
+            //table.row('.selected').remove().draw( false );
+            
+        } );
+        
+        
+        
+    }
+    
+    
     
     function showAlarmAlerts(data){
         eventdata.length = 0;
@@ -1070,13 +1337,19 @@
     }
     
     
-    function addDevices(id,device,state,NodeID,NodePort){
+    function addDevices(id,device,state,NodeID,NodePort,enabledState){
         
         
         if(state == 1)
         {
           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
+           if(enabledState == 1){
+            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
+           }
+           else
+           {
+                var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
+           }
         }
         else
         {
@@ -1236,12 +1509,12 @@
         if(time > Last_Seen_Error)
         {
           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" style="white-space: normal" >'+ device + " (" + lastseen + ")"+'</button></span>';
+           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" style="white-space: normal" >'+ device +'    ' + '<span class="badge" id = "nodebadge'+id+'">'+ lastseen + ' </span> </button></span>';
         }
         else
         {
             
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off"  style="white-space: normal" >'+ device + " (" + lastseen + ")"+'</button></span>';
+            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off"  style="white-space: normal" >'+ device +'    '+ '<span class="badge" id = "nodebadge'+id+'">'+ lastseen + ' </span> </button></span>';
             
            // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
         }
@@ -1385,3 +1658,5 @@ function showdatepicker2(){
 
        
 }
+
+
