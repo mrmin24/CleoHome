@@ -15,6 +15,7 @@
     var btnPress = false;
     var config;
     var selectedRow;
+    var selectedRuleRow;
    
    const Last_Seen_Error = 601000;
    
@@ -257,7 +258,7 @@
         j++;
         //var tablerowhtml = '<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item<span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options" aria-labelledby="dropdownMenu1"><!--<li><a href="#">Action</a></li><li><a href="#">Another action</a></li><li><a href="#">Something else here</a></li><li><a href="#">Separated link</a></li>--></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td></tr>';
         $("#if_Statements").append('<tr><th colspan="5" id="operator'+j+'"><strong>AND</strong></th></tr>');
-        $("#if_Statements").append('<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuReq'+j+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item <span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options'+j+'" aria-labelledby="dropdownMenuReq'+j+'"></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="equalsValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="greaterValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="lessValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="notEqualValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td></tr>');
+        $("#if_Statements").append('<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuReq'+j+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item <span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options'+j+'" aria-labelledby="dropdownMenuReq'+j+'"></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="equalsValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="greaterValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="lessValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="notEqualValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td align="center"><div class="input-group" style="display:inline-block; "><input id="secondaryRuleCheck'+j+'" type="checkbox" class="big-checkbox"></div></td><td><img src = "/resources/deleteicon.png" class="btnDelete" /></td></tr>');
         for(var i = 0;i<Items.length;i++)
          {
              $('#item_options'+j).append('<li><a href="#">'+Items[i]['Item_Name']+'</a></li>');
@@ -279,7 +280,7 @@
         j++;
         //var tablerowhtml = '<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item<span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options" aria-labelledby="dropdownMenu1"><!--<li><a href="#">Action</a></li><li><a href="#">Another action</a></li><li><a href="#">Something else here</a></li><li><a href="#">Separated link</a></li>--></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td></tr>';
         $("#if_Statements").append('<tr><th colspan="5" id="operator'+j+'"><strong>OR</strong></th></tr>');
-        $("#if_Statements").append('<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuReq'+j+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item <span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options'+j+'" aria-labelledby="dropdownMenuReq'+j+'"></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="equalsValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="greaterValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="lessValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="notEqualValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td></tr>');
+        $("#if_Statements").append('<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuReq'+j+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item <span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options'+j+'" aria-labelledby="dropdownMenuReq'+j+'"></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="equalsValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="greaterValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="lessValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="notEqualValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td align="center"><div class="input-group" style="display:inline-block; "><input id="secondaryRuleCheck'+j+'" type="checkbox" class="big-checkbox"></div></td><td><img src = "/resources/deleteicon.png" class="btnDelete" /></td></tr>');
         for(var i = 0;i<Items.length;i++)
          {
              
@@ -308,7 +309,7 @@
         
            });
         
-        
+        $(".btnDelete").bind("click", DeleteRow);
         
     }
     
@@ -320,21 +321,32 @@
         
          ruleData['description'] = document.getElementById('ruleDescription').value;
         var k = 1;
-        while(document.getElementById('dropdownMenuReq'+k))
+        var next = 1;
+        while(next<=j)
         {
-            
-            ruleData['dropdownMenuReq'+k] = $('#dropdownMenuReq'+k).text();
-            ruleData['equalsValueReq'+k] = $('#equalsValueReq'+k).val();
-            ruleData['greaterValueReq'+k] = $('#greaterValueReq'+k).val();
-            ruleData['lessValueReq'+k] = $('#lessValueReq'+k).val();
-            ruleData['notEqualValueReq'+k] = $('#notEqualValueReq'+k).val();
-            
-            if(k > 1)
+            if($('#operator'+ next).text() || k == 1)
             {
-              ruleData['operator'+ k] = $('#operator'+ k).text();  
+               
+            
+            
+                ruleData['dropdownMenuReq'+k] = $('#dropdownMenuReq'+next).text();
+                ruleData['equalsValueReq'+k] = $('#equalsValueReq'+next).val();
+                ruleData['greaterValueReq'+k] = $('#greaterValueReq'+next).val();
+                ruleData['lessValueReq'+k] = $('#lessValueReq'+next).val();
+                ruleData['notEqualValueReq'+k] = $('#notEqualValueReq'+next).val();
+                ruleData['secondaryRuleCheck'+k] = $('#secondaryRuleCheck'+next).is(':checked')? 1:0;
                 
+                if(k > 1)
+                {
+                  ruleData['operator'+ k] = $('#operator'+ next).text();  
+                    
+                }
+            }else
+            {
+                k--;
             }
-            k++
+            k++;
+            next++;
             
         }
         
@@ -349,6 +361,10 @@
     }
     
     function deleteRule(){
+			console.log("delete");
+			console.log(selectedRuleRow[0].children[0].innerHTML);
+		//	console.log(selectedRuleRow[0].children[1].innerHTML);
+			socket.emit("deleteRule",selectedRuleRow[0].children[0].innerHTML);
 			
 
 		}
@@ -668,8 +684,16 @@
     });
     
     socket.on("user_token_deleted",function(){
-        console.log("test");
+        //console.log("test");
          $( "<div>User Token Deleted!</div>" ).dialog();
+        
+    });
+    
+    socket.on("ruleDeleted",function(){
+       
+         $(" <div title='Rule Deleted'>Rule Deleted!</div>" ).dialog();
+        //console.log(selectedRuleRow);
+        selectedRuleRow.remove();
         
     });
      
@@ -1158,12 +1182,7 @@
    
     
     
-    $(document).ready(function() {
-       // getusers();
-       
-        
-        
-    } );
+    
     
     
     function getusers(){
@@ -1222,7 +1241,7 @@
             else {
                 table.$('tr.selected').removeClass('selected');
                 $(this).addClass('selected');
-                selectedRow = $(this);
+                selectedRuleRow = $(this);
                 
             }
         } );
@@ -1552,6 +1571,24 @@
         
         
     }
+    
+    
+    function DeleteRow(){
+        
+        var par = $(this).parent().parent(); 
+       
+         var par2 = $(this).parent().parent().prev()[0]; 
+         par.remove();
+         
+        
+        
+         par2.remove();
+         
+       
+        
+        
+    }; 
+
     
     
     function clearBypassStatus(){

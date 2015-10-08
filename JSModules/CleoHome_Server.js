@@ -21,7 +21,7 @@ var db = require('./dbhandler');
 
 var bypassedZones = [];
 
-var lastArmTime = Date.now();
+var lastArmTime = Date();
 var getconfig = require('../JSModules/GetConfig.js');
 var writeXML = require('../JSModules/WriteConfig.js');
 var configure = getconfig.data;
@@ -208,6 +208,14 @@ io.on('connection', function(socket){
      
   });
   
+  socket.on('deleteRule',function(rule){
+      //console.log(userId);
+      
+         deleteRule(rule);
+          
+     
+  });
+  
   
  /* socket.on('AlarmDisconnect',function(){   
       console.log('disconnect requested');
@@ -292,7 +300,8 @@ io.on('connection', function(socket){
     
  socket.on('clearBypassZone',function(){
     
-        bypassedZones.length = 0;
+       clearBypass();
+        
    
     }); 
     
@@ -418,20 +427,20 @@ io.on('connection', function(socket){
                  
                  if(ruleData['equalsValueReq'+(g+1)])  //also add secondary rule value in where
                  {
-                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Equals = "'+ ruleData['equalsValueReq'+(g+1)] +'"';
+                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Equals = "'+ ruleData['equalsValueReq'+(g+1)] +'" AND Secondary_Item = "'+ ruleData['secondaryRuleCheck'+(g+1)] +'"';
                     
                      
                  }else if(ruleData['greaterValueReq'+(g+1)]){
                     
-                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Greater_Than = "'+ ruleData['greaterValueReq'+(g+1)] +'"';
+                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Greater_Than = "'+ ruleData['greaterValueReq'+(g+1)] +'" AND Secondary_Item = "'+ ruleData['secondaryRuleCheck'+(g+1)] +'"';
                      
                  }else if(ruleData['lessValueReq'+(g+1)]){
                     
-                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Less_Than = "'+ ruleData['lessValueReq'+(g+1)] +'"';
+                    newWhereClause = 'Item_Id = "' + ids[g] +'" AND Less_Than = "'+ ruleData['lessValueReq'+(g+1)] +'" AND Secondary_Item = "'+ ruleData['secondaryRuleCheck'+(g+1)] +'"';
                      
                  }else if(ruleData['notEqualValueReq'+(g+1)]){
                     
-                     newWhereClause = 'Item_Id = "' + ids[g] +'" AND Not_Equal = "'+ ruleData['notEqualValueReq'+(g+1)] +'"';
+                     newWhereClause = 'Item_Id = "' + ids[g] +'" AND Not_Equal = "'+ ruleData['notEqualValueReq'+(g+1)] +'" AND Secondary_Item = "'+ ruleData['secondaryRuleCheck'+(g+1)] +'"';
                      
                  }else{}
              
@@ -549,7 +558,7 @@ io.on('connection', function(socket){
                                               {
                                                   
                                                  
-                                                db.insert('Rule_Items', {Second_Id:ids2[isNull[m]],Rule_Id:ruleId, Item_Id: ids[isNull[m]],Equals: ruleData['equalsValueReq'+ (isNull[m]+1)]?ruleData['equalsValueReq'+ (isNull[m]+1)]:null  , Greater_Than: ruleData['greaterValueReq'+ (isNull[m]+1)]?ruleData['greaterValueReq'+ (isNull[m]+1)]:null ,Less_Than: ruleData['lessValueReq'+ (isNull[m]+1)]?ruleData['lessValueReq'+ (isNull[m]+1)]:null ,Not_Equal:  ruleData['notEqualValueReq'+ (isNull[m]+1)]?ruleData['notEqualValueReq'+ (isNull[m]+1)]:null , Secondary_Item: 0  ,Status: 0, Comments: ''  });
+                                                db.insert('Rule_Items', {Second_Id:ids2[isNull[m]],Rule_Id:ruleId, Item_Id: ids[isNull[m]],Equals: ruleData['equalsValueReq'+ (isNull[m]+1)]?ruleData['equalsValueReq'+ (isNull[m]+1)]:null  , Greater_Than: ruleData['greaterValueReq'+ (isNull[m]+1)]?ruleData['greaterValueReq'+ (isNull[m]+1)]:null ,Less_Than: ruleData['lessValueReq'+ (isNull[m]+1)]?ruleData['lessValueReq'+ (isNull[m]+1)]:null ,Not_Equal:  ruleData['notEqualValueReq'+ (isNull[m]+1)]?ruleData['notEqualValueReq'+ (isNull[m]+1)]:null , Secondary_Item:  ruleData['secondaryRuleCheck'+ (isNull[m]+1)]  ,Status: 0, Comments: ''  });
                                               
                                                 if(m == b){
                                                   console.log('Rules Saved');
@@ -802,6 +811,142 @@ function sendrules(){
     });
 }  
 
+function deleteRule(rule){
+    console.log("Deleting Rules...");
+      db.getdata('Rules',{Select: 'Conditions',whereClause:'Id = ' + rule},function(err,result){
+                      // console.log('test1'); 
+           if(result){
+                var res = result[0].Conditions.split(';');
+           
+          
+                   var ids = "";
+                  
+                   for(var i = 0; i < res.length ; i++){
+                       if(!isNaN(res[i])){
+                                 
+                          if(ids.indexOf(res[i]) == -1){
+                              if(ids.length > 0 ){
+                               ids += ",";
+                              }
+                            ids += res[i] ;          
+                          
+                              
+                          }
+                        }
+                      
+                   }
+                  
+                
+                     //delete rule_item
+                      db.deletedata('Rule_Items',{whereClause:'Rule_Id = ' + rule },function(err, result){
+                        if(err){
+                            console.log(err);
+                        }else
+                        {
+                        console.log('Rule_Item Deleted: '  );
+                      
+                        }
+                     // io.emit("user_token_deleted");
+                    });
+                     
+                 
+                 
+                 
+                
+                 
+               
+            
+                db.deletedata('Rules',{whereClause:'Id = ' + rule  },function(err, result){
+                    if(err){
+                        console.log(err);
+                    }else
+                    {
+                        console.log('Rule Deleted');
+                        io.emit("ruleDeleted");
+                    }
+                  
+                });
+                
+                 //console.log(ids);
+                    var where = "Second_Id IN (" + ids + ")  ORDER BY FIELD (Second_Id," + ids + ")";
+                   
+                   data = {'Select':'Second_Id,Rule_Id','whereClause':where };
+            
+                    db.getdata('Rule_Items',data,function(err,result2){
+                       
+                       if(err){
+                           
+                           console.log(err);
+                           
+                       }else if(result2){
+                           console.log(result2);
+                           //console.log(result2);
+                           var cond = "";
+                           var newRuleId = "";
+                           
+                          // var j = 0;
+                           for(var i = 0; i < res.length ; i++){
+                               
+                            
+                             
+                             if(result2[i].Rule_Id.indexOf(';') != -1){
+                                
+                                 
+                                 if(result2[i].Rule_Id.indexOf(rule) == 0)
+                                 {
+                                    newRuleId = result2[i].Rule_Id.substring(3);
+                                     
+                                 }else{
+                                    newRuleId = result2[i].Rule_Id.substring(0,result2[i].Rule_Id.indexOf(rule)-1) + result2[i].Rule_Id.substring(result2[i].Rule_Id.indexOf(rule)+rule.length);
+                                 }
+                                 
+                                
+                                 data = {Set:'Rule_Id',Current_State:newRuleId,Where:"Second_Id",Name:res[i]};
+                                db.update("Rule_Items",data,function(err,data_receive){
+                                          
+                                          
+                                        
+                                         if(data_receive){
+                                            // console.log(ID + " " + State);
+                                             console.log("Rule_Items Updated");
+                                             
+                                             
+                                         }else
+                                         {
+                                            console.log(err); 
+                                             
+                                         }
+                                        
+                                }); 
+                                 
+                             }
+                             
+                           }
+                           
+                        
+                               
+                           
+                       }
+                       
+                       
+                        
+                    });
+            
+            
+        }else{
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR (GetRules) : ",err);            
+            }
+        
+            
+        }
+
+
+    });
+}  
+
+
 
 
 function senditems(){
@@ -991,6 +1136,10 @@ alarmsocket.on('connect', function() {
                    lastArmTime = null; 
                 }
                 
+               if(data.Ready && !data.Bypass){
+                   clearBypass();
+                } 
+                
              io.emit("keypadLedState",{Bypass:data.Bypass, Memory:data.Memory,Armed:data.Armed,Ready:data.Ready,Night:night,Connected:connect});
             }
           });
@@ -1107,8 +1256,12 @@ function getState(requiredState,callback){
                             console.log("ERROR1 : ",err);            
                         } else {            
                         // code to execute on data retrieval
-                        if(data_receive[0])
+                        if(data_receive[0]){
+                        
+                           
+                        
                           callback(data_receive[0]['State']);
+                        }
                         else
                           callback(false);
                         }
@@ -1345,7 +1498,20 @@ function updateNodeStatus(){
 
 
 
-
+function clearBypass(){
+     console.log("Clear bypass");
+     
+     $(".bypass-warning").each(function(){
+        this.removeClass( "bypass-warning" );
+    
+        });
+  
+    
+        bypassedZones.length = 0;
+       // console.log(bypassedZones);
+      return;  
+       
+}
 
 function getEvents(numEvents){
     var done = false;
@@ -1535,7 +1701,9 @@ function getAlarmTriggers(lastArmTime){
         if(err){
             console.log(err);    
         }else if(data_receive[0]){
-            if(data_receive[0]['Time'] > lastArmTime){
+           
+            //console.log( Date.parse(data_receive[0]['Time']) - Date.parse(lastArmTime));
+            if(Date.parse(data_receive[0]['Time']) > Date.parse(lastArmTime)){
              console.log("New alarm event");
                 io.emit("alarmTrigger",{Event:data_receive[0]["Zone"],Time:data_receive[0]["Time"]});
             }

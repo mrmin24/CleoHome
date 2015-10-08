@@ -57,7 +57,7 @@ function checkWeather(city){
     		console.log('Weather Update: ' + chunk["wind"]['speed']);
     		
     		logData("Wind Speed", chunk["wind"]['speed']);
-    		logData("Temperature",(chunk["main"]['temp']-273).toFixed(2));
+    		logData("Temperature",(chunk["main"]['temp_max']-273).toFixed(2));
     		//console.log('DNS Proxy Update: OK');
     		backup = 0;
         }else

@@ -369,7 +369,7 @@
                                                 <button class="btn btn-default" type="button" id="Rules_Edit_Btn"  onclick = ""  >Edit</button>
                                             </span>
                                             <span>
-                                                <button id="deleteBtn" class="btn btn-default " data-toggle="modal" data-target="#confirm-delete">
+                                                <button id="deleteBtn" class="btn btn-default " data-toggle="modal" data-target="#confirm-deleteRule">
                                     		   		Delete
                                     			</button>
                                             </span>
@@ -411,7 +411,7 @@
              <!--Rules Add Modal -->  
                
             
-                <div class="modal fade" id="rulesAddModal" tabindex="-1" role="dialog" aria-labelledby="rulesAddModalLabel">
+                <div class="modal fade " id="rulesAddModal" tabindex="-1" role="dialog" aria-labelledby="rulesAddModalLabel">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
@@ -434,7 +434,7 @@
                                     <th>Greater Than</th>
                                     <th>Less Than</th>
                                     <th>Not Equal</th>
-                                   
+                                    <th>Secondary Item</th>
                                     
                                 </thead>
                                 <tbody>
@@ -477,6 +477,13 @@
                                           
                                         </div>
                                       </td>
+                                      <td align="center">
+                                         <div class="input-group" style="display:inline-block; ">
+                                           <input id="secondaryRuleCheck1" type="checkbox" class="big-checkbox">
+                                          
+                                        </div>
+                                      </td>
+                                      
                                   </tr>
                               
                               </tbody>

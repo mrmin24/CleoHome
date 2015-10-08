@@ -36,7 +36,7 @@ exports.checkRule = function(rule,callback){
               
            }
            //console.log(ids);
-            var where = "Id IN (" + ids + ") AND Secondary_Item = 0 ORDER BY FIELD (Id," + ids + ")";
+            var where = "Second_Id IN (" + ids + ") AND Secondary_Item = 0 ORDER BY FIELD (Second_Id," + ids + ")";
         
            
            

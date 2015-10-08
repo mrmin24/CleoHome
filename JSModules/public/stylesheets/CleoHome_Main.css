@@ -20,6 +20,11 @@ h2{
     color:#FF9933;
 }
 
+#rulesAddModal .modal-dialog
+{
+    width: 50%; /* your width */
+}
+
 #alarm_blackout{
     background-color:yellow;
     z-index:9;
@@ -78,3 +83,7 @@ h2{
 th {
     white-space: nowrap;
 }
+
+.big-checkbox {width: 20px; height: 20px; }
+
+

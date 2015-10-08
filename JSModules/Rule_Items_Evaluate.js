@@ -78,7 +78,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    status = 0;
                }else
                {
-                   data = {'Set':'Status','Where':'Id','Current_State':0,'Name':result[i].Id};
+                   data = {'Set':'Status','Where':'Second_Id','Current_State':0,'Name':result[i].Second_Id};
                 
                    db.update('Rule_Items',data,function(){});
                    status = 0;
