@@ -1,5 +1,5 @@
 var net = require('net');
-//var log = require('./logger.js');
+var log = require('./logger.js');
 
 var gatewayip = '10.0.0.22';
 var gatewayport = '5003';
@@ -10,6 +10,7 @@ var db = require('./dbhandler');
 var Access_Type = 5;
 var Irrigation_Type = 6; 
 var Motion_Type = 7;
+var Power_Type = 10;
 var offTimes = [];
 var offTimesObjects = {};
 var offTimeInterval = 1000;
@@ -87,12 +88,55 @@ function start() {
 		 
 		function processData(data){
 	    	socket.emit("nodeAlive",data[0]);
+	    	var sensorTypes = ['17','0','8','38','39'];// ['0','1','17','18','35','38','39'];
+	    	if(data[2] == 1 && sensorTypes.indexOf(data[4]) == -1 ){
+	    	   console.log("Mysensor: Device updated");
+	    		
+	    		
+    			db.getdata('Items',{Select:'Item_Current_Value',whereClause:'Node_Id = "' + data[0] + '"AND Node_Port = "' + data[1] +'"'},function(err,data_receive){
+    			
+	    			if(data_receive){
+	    				
+	    				if(data_receive[0].Item_Current_Value - data[5] > 0.3 || data_receive[0].Item_Current_Value - data[5] < -0.3){
+	    					socket.emit("deviceStatusChange",data[0],data[1],data[5]);
+	    					//	log.logger('Device', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
+	    						log.logger('Device', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');	
+	    				}
+	    			}else
+	    			{
+	    					socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
+    					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
+    					log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
+	    				console.log(err);
+	    			}
+	    		});
 	    	
-	    	if(data[2] == 1){
-	    		socket.emit("deviceStatusChange",data[0],data[1],data[5]);
+	    		
+	    	}else if(data[2] == 1 && sensorTypes.indexOf(data[4]) != -1 ){
+	    		console.log("Mysensor: Sensor updated");
+	    		
+	    		
+	    		
+	    		db.getdata('Items',{Select:'Item_Current_Value',whereClause:'Node_Id = "' + data[0] + '"AND Node_Port = "' + data[1] +'"'},function(err,data_receive){
+	    			
+	    			if(data_receive){
+	    				
+	    				if(data_receive[0].Item_Current_Value - data[5] > 0.3 || data_receive[0].Item_Current_Value - data[5] < -0.3){
+	    					socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
+	    					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
+	    					log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
+	    				}
+	    			}else{
+	    				socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
+    					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
+    					log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
+	    			}
+	    		});
 	    		
 	    		
 	    	}
+	    	
+	    
 	    	
 	    	if(data[2] == 3){
 	    		if(data[4] == 3){  //id request

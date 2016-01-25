@@ -34,7 +34,7 @@ if(io)
 
 
 io.sockets.on('connection', function(socket){
-  console.log('Client connected');
+  console.log('Event Handler: Client connected');
  // var data = 'Alarm';
   
   socket.on('register',function(data,callback){

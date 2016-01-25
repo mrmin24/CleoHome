@@ -24,7 +24,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/jquery/jquery-ui.min.js"></script>
     <script src="/jquery/jquery.dataTables.min.js"></script>
-    
+    <script src="./scripts/Chart.min.js"></script>
     
     
      
@@ -73,6 +73,9 @@
                             <li onclick="switchEventsTab()">
                                 <a href="#Events" data-toggle="tab">Events</a>
                             </li>
+                            <li onclick="switchGraphsTab()">
+                                <a href="#Graphs" data-toggle="tab">Graphs</a>
+                            </li>
                             <li onclick="settings()">
                                 <a href="#" data-toggle="tab">Settings</a>
                             </li>
@@ -100,6 +103,14 @@
                     
                     <button class="btn btn-default" type="button">
                       Wind <span class="badge" id = 'wind'></span>
+                    </button>
+                    
+                    <button class="btn btn-default" type="button">
+                      Mains Power <span class="badge" id = 'device128'>0</span>
+                    </button>
+                    
+                    <button class="btn btn-default" type="button">
+                      Geyser Power <span class="badge" id = 'device129'>0</span>
                     </button>
                    
                  <!-- container-fluid-->
@@ -148,40 +159,48 @@
                                          
                                     <!--<label id = "event_dropdown_btn" class="hidden">-->
                                     <div class="btn-toolbar" role="toolbar">
-                                        <div class="btn-group">
+                                       
+                                             
+                                            
                                             <span>
                                                 <button class="btn btn-danger" type="button" id="Away_Arm_Btn" onclick = "armDisarmAlarm('Away')" >Away Arm </button>
                                             </span>
                                             
+                                          
+                                            
                                             <span>
                                                 <button class="btn btn-warning" type="button" id="Stay_Arm_Btn"  onclick = "armDisarmAlarm('Stay')"  >Stay Arm </button>
                                             </span>
+                                           
+                                            
                                             <span>
                                                 <button class="btn btn-success" type="button" id="Disarm_Btn" onclick = "armDisarmAlarm('Disarm')" >Disarm </button>
                                             </span>
+                                            
                                             <span>
                                                 <button class="btn btn-purple" type="button" id="Night_Arm_Btn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
                                             </span>
                                             
                                            <!-- </label>-->
                                             </span>
-                                        </div>
+                                     
                                         
-                                        <div class="btn-group">
+                                       
                                             <span>
                                                 <button class="btn btn-primary" type="button" id="Bypass_Btn" onclick = "bypassAlarm()" >Bypass </button>
                                             </span>
                                             
                                            
-                                        </div>
-                                        <div class="btn-group">
+                                        
                                             <span>
                                                 <button class="btn btn-primary" type="button" id="Panic_Btn" onclick = "panicAlarm()" >Panic </button>
                                             </span>
                                             
                                            
+                                        
+                                        
                                         </div>
-                                    </div>
+                                    
                             </div> <!-- <well>-->
                             
                            
@@ -341,6 +360,30 @@
                     
                 </div>
                 
+                
+                 <!---------------------Graphs PANEL----------------->
+                
+                
+                
+                 <div class = "col-xs-12 hidden " id="Graphs_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Graphs  </strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="graphs_container">
+                        
+                        
+                           
+                               
+                              <!-- <canvas id="myChart" width="400" class="col-xs-12"></canvas>-->
+                           
+                        </div>
+                    </div>
+        </div>            
                 
                 <!---------------------Rules PANEL----------------->
                 
@@ -760,6 +803,24 @@
                                                </div>
                                             </div> <!-- WELL -->
                               
+                             <h4>PushOver</h4>
+                                <div class = "well">
+                                    
+                                      <div class="form-group col-xs-8">
+                                          <label for="pushUser" class="col-xs-3 control-label">Push Over User Token</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="pushUser" placeholder="">
+                                          </div> 
+                                         </div>
+                                         <div class="form-group col-xs-8">
+                                          <label for="pushToken" class="col-xs-3 control-label">Push Over Token</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="pushToken" placeholder="">
+                                          </div>
+                                       </div>
+                                    </div> <!-- WELL -->
+                                    
+                                    
                                   </div>
                               </div>
                               

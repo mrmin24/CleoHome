@@ -39,7 +39,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                        if(!isNaN(res[i])){
                            var rulenr = res[i];
                            //console.log(res[i]);
-                          rule.checkRule(res[i],function(ruleValid,node,port,state,Id,onTime){
+                            rule.checkRule(res[i],function(ruleValid,node,port,state,Id,onTime,func){
                                // console.log(Id);
                             if(node && port && state && ruleValid ){
                                 console.log("Executing rule: " + rulenr); 
@@ -49,7 +49,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                                    cancelTime = setTimer(onTime);
                                    // console.log(cancelTime);
                                 }
-                                callback(node,port,state,cancelTime);
+                                callback(node,port,state,cancelTime,func);
                                 
                             }
                             else if(ruleValid){
@@ -62,7 +62,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                                     
                                    cancelTime = setTimer(onTime);
                                 }
-                                callback(null,null,null,cancelTime);
+                                callback(null,null,null,cancelTime,func);
                             }
                             else
                             {

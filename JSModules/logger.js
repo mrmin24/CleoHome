@@ -6,7 +6,6 @@ var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
-var pushOver = require('../JSModules/public/scripts/pushOver.js');
 
 
 
@@ -31,8 +30,8 @@ exports.ownDb = function(type,data) {
 	
 	
 	 getID(data.Name,function(ID){
-        evaluate.evaluateChange(ID,data.Current_State,function(node,port,state,cancelTime,func){
-            eval(func);   
+        evaluate.evaluateChange(ID,data.Current_State,function(node,port,state){
+                 
              if(node && port && state){
               mySensorsocket.emit('deviceSwitch',node,port,state);
              }

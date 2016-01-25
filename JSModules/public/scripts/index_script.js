@@ -2,6 +2,7 @@
     const Access_Type = 5;
     const Irrigation_Type = 6; 
     const Motion_Type = 7;
+    const Power_Type = 10;
     
     var socket = io();
     var eventdroptext = 10;
@@ -44,6 +45,7 @@
     $( document ).ready(function() {
         setUpDropdowns();
         getWeather();
+        getPower();
     });
     
 
@@ -67,6 +69,7 @@
          $("#Nodes_Panel").removeClass().addClass('hidden');
           $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
           $("#Rules_Panel").removeClass().addClass('hidden');
+          $("#Graphs_Panel").removeClass().addClass('hidden');
         document.getElementById('checkbox4').checked = true;
          btnPress = false;
             $( "#accordion2" ).accordion({ active: false});
@@ -88,6 +91,7 @@
          $("#Nodes_Panel").removeClass().addClass('hidden');
           $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
           $("#Rules_Panel").removeClass().addClass('hidden');
+          $("#Graphs_Panel").removeClass().addClass('hidden');
         $("#Settings_Panel").removeClass().addClass('col-xs-12 show');
         document.getElementById('checkbox4').checked = true;
          btnPress = false;
@@ -118,6 +122,7 @@
           $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('hidden');
+         $("#Graphs_Panel").removeClass().addClass('hidden');
      }
      
      function switchAlarmTab(){
@@ -133,6 +138,7 @@
           $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('hidden');
+         $("#Graphs_Panel").removeClass().addClass('hidden');
          
          
         // $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-2');
@@ -155,6 +161,7 @@
           $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('hidden');
+         $("#Graphs_Panel").removeClass().addClass('hidden');
          
      }
      
@@ -171,6 +178,7 @@
           $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('hidden');
+         $("#Graphs_Panel").removeClass().addClass('hidden');
      }
      
      function switchIrrigationTab(){
@@ -186,6 +194,7 @@
           $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('hidden');
+         $("#Graphs_Panel").removeClass().addClass('hidden');
          
      }
      
@@ -202,6 +211,7 @@
           $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
          $("#Nodes_Panel").removeClass().addClass('col-xs-12');
           $("#Rules_Panel").removeClass().addClass('hidden');
+          $("#Graphs_Panel").removeClass().addClass('hidden');
          socket.emit("getNodesStatus",function(){});
      }
      
@@ -219,6 +229,26 @@
          $("#Motion_Panel").removeClass().addClass('hidden');
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('col-xs-12');
+         $("#Graphs_Panel").removeClass().addClass('hidden');
+         
+     }
+     
+     function switchGraphsTab(){
+         console.log("Graphs");
+         getgraphs();
+         $("#Alarm_Panel").removeClass().addClass('hidden ');
+         $("#Event_Panel").removeClass().addClass('hidden');
+        $("#Event_Panel_Title").removeClass().addClass('hidden');
+         $("#event_controls").removeClass().addClass('well hidden');
+         $("#alarm_controls").removeClass().addClass('well hidden');
+         $("#Settings_Panel").removeClass().addClass('hidden');
+          $("#Devices_Panel").removeClass().addClass('hidden');
+         $("#Access_Panel").removeClass().addClass('hidden');
+         $("#Irrigation_Panel").removeClass().addClass('hidden');
+         $("#Motion_Panel").removeClass().addClass('hidden');
+         $("#Nodes_Panel").removeClass().addClass('hidden');
+         $("#Rules_Panel").removeClass().addClass('hidden');
+         $("#Graphs_Panel").removeClass().addClass('col-xs-12');
          
      }
      
@@ -375,11 +405,25 @@
         
     }  
     
+    function getPower(){
+         
+        socket.emit('getPower');
+        
+    }  
+    
     
     socket.on('sendWeather',function(temp,wind){
        
      $('#temp').html(temp);
      $('#wind').html(wind);
+     
+        
+    });
+    
+    socket.on('sendPower',function(pow1,pow2){
+       
+     $('#power1').html(pow1);
+     $('#power2').html(pow2);
      
         
     });
@@ -607,8 +651,17 @@
      }
      
      function armDisarmAlarm(type){
-         //console.log("Arm / Disarm");
-        socket.emit('armDisarmAlarm',type,function(err,data){   });
+         console.log(type);
+        socket.emit('armDisarmAlarm',type,function(err,data){
+            
+            if(err){
+                console.log(err);
+            }
+            else
+            {
+                console.log(data);
+            }
+        });
          
          
      }
@@ -865,6 +918,15 @@
     
     });
     
+    socket.on('SensorEvent', function(data) {
+    
+    
+       // console.log(data);
+        document.getElementById('device' + data['Id']).innerHTML = data['Current_State'] + "A / " + (((data['Current_State'])*230)/1000).toFixed(2)  + 'KW';
+    
+    
+    });
+    
     
     
     
@@ -877,7 +939,7 @@
           
           clearBypassStatus();
           
-           socket.emit('clearBypassZone');
+          socket.emit('clearBypassZone');
       }else if(data['Current_State'] == "Armed in Stay Mode"){
           $('#partition1').removeClass().addClass("label label-warning");
           
@@ -1080,6 +1142,454 @@
         
     }) ;  
     
+    
+    
+    
+    
+    function graphd3(data){
+        
+        //var data = {"step_plot_4": {"x_axis": ["12-Jul-14", "14-Jul-14", "16-Jul-14", "18-Jul-14", "20-Jul-14", "22-Jul-14", "24-Jul-14", "26-Jul-14", "28-Jul-14", "30-Jul-14", "01-Aug-14"], "y_axis": [0, 3.7399996781255571, 4.1165090983021901, 5.2234708249494757, 3.3339103629814177, 3.7140085760060746, 4.3276262114041755, 6.8512925627236267, 3.6917800293224392, 4.3655969051243977, 4.0856638509855392]}}  
+
+
+/* Format data into a D3.js acceptable format. */
+    var parseDate = d3.time.format("%d-%b-%y %H:%M:%S %p").parse,
+        bisectDate = d3.bisector(function(d) { return d.x; }).left;
+
+    var graph_data = data["step_plot_4"];
+    var x_axis = graph_data["x_axis"];
+    //var x_axis2 = graph_data["x_axis2"];
+    var y_axis = graph_data["y_axis"];
+
+    var formatted_data = [];
+    for (var i = 0; i < x_axis.length; i++){
+        formatted_data[i] = {"x": parseDate(x_axis[i]), "y": +y_axis[i]};
+    };
+
+
+    /* Graph related details */
+    var margin = {top: 20, right: 40, bottom: 30, left: 50},
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+    var x = d3.time.scale()
+            .range([0, width]);
+
+    var y = d3.scale.linear()
+            .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+            .scale(x)
+            .orient("bottom");
+
+    var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
+    var line = d3.svg.line()
+            .x(function (d) {
+                   return x(d.x);
+               })
+            .y(function (d) {
+                   return y(+d.y);
+               })
+            .interpolate("step-after");
+
+    var svg = d3.select("#graphs_container").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    svg.append("clipPath").attr("id", "canvasClip")
+    .append("rect")
+    .attr("height", height)
+    .attr("width", width)
+
+    x.domain(d3.extent(x_axis, function (d) {
+        return parseDate(d);
+    }));
+
+    y.domain([d3.min(y_axis) - d3.min(y_axis)/10, d3.max(y_axis) + d3.max(y_axis)/10]);
+
+    svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("x", width)
+            .attr("y", -6)
+            .style("text-anchor", "end")
+            .text("Date");
+
+    svg.append("g")
+            .attr("class", "y axis")
+            .call(yAxis)
+            .append("text")
+            .attr("class", "label")
+            .attr("transform", "rotate(-90)")
+            .attr("y", 6)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Watt");
+
+    svg.append("path")
+            .datum(formatted_data)
+            .attr("class", "line")
+            .attr("d", line)
+    .attr("clip-path", "url(#canvasClip)")
+
+    var focus = svg.append("g")
+      .attr("class", "focus")
+      .style("display", "none");
+
+    focus.append("circle")
+      .attr("r", 4.5);
+
+    focus.append("text")
+      .attr("x", 9)
+      .attr("dy", ".35em");
+
+    svg.append("rect")
+      .attr("class", "overlay")
+      .attr("width", width)
+      .attr("height", height)
+      .on("mouseover", function() { focus.style("display", null); })
+      .on("mouseout", function() { focus.style("display", "none"); })
+      .on("mousemove", mousemove);
+
+    function mousemove() {
+      var x0 = x.invert(d3.mouse(this)[0]),
+          i = bisectDate(formatted_data, x0, 1),
+          d0 = formatted_data[i - 1],
+          d1 = formatted_data[i],
+          d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+      focus.attr("transform", "translate(" + x(d.x) + "," + y(d.y) + ")");
+      focus.select("text").text(d.y);
+  }
+  
+  
+  
+    }
+    socket.on("sendGraphs",function(graphs){
+        
+     
+      //  console.log(graphs.sort());
+        var data2 = [[],[]];
+        var nodes = [];
+        var ports = [];
+        var nodes_ports = [];
+        function compareNode(a,b) {
+            node1 = JSON.parse(a.Event).node;
+            node2 = JSON.parse(b.Event).node;
+            
+          if (node1 > node2)
+            return 1;
+          if (node1 < node2)
+            return -1;
+          return 0;
+        }
+        
+        function comparePort(a,b) {
+            port1 = JSON.parse(a.Event).port;
+            port2 = JSON.parse(b.Event).port;
+           
+          if (port1 > port2)
+            return 1;
+          if (port1 < port2)
+            return -1;
+          return 0;
+        }
+        
+        
+        //*** This code is copyright 2002-2003 by Gavin Kistner, !@phrogz.net
+//*** It is covered under the license viewable at http://phrogz.net/JS/_ReuseLicense.txt
+//*** Reuse or modification is free provided you abide by the terms of that license.
+//*** (Including the first two lines above in your source code satisfies the conditions.)
+
+// Include this code (with notice above ;) in your library; read below for how to use it.
+
+function customFormat(formatString,date){
+	var YYYY,YY,MMMM,MMM,MM,M,DDDD,DDD,DD,D,hhh,hh,h,mm,m,ss,s,ampm,AMPM,dMod,th;
+	var dateObject = date;
+	YY = ((YYYY=dateObject.getFullYear())+"").slice(-2);
+	MM = (M=dateObject.getMonth()+1)<10?('0'+M):M;
+	MMM = (MMMM=["January","February","March","April","May","June","July","August","September","October","November","December"][M-1]).substring(0,3);
+	DD = (D=dateObject.getDate())<10?('0'+D):D;
+	DDD = (DDDD=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dateObject.getDay()]).substring(0,3);
+	th=(D>=10&&D<=20)?'th':((dMod=D%10)==1)?'st':(dMod==2)?'nd':(dMod==3)?'rd':'th';
+	formatString = formatString.replace("#YYYY#",YYYY).replace("#YY#",YY).replace("#MMMM#",MMMM).replace("#MMM#",MMM).replace("#MM#",MM).replace("#M#",M).replace("#DDDD#",DDDD).replace("#DDD#",DDD).replace("#DD#",DD).replace("#D#",D).replace("#th#",th);
+
+	h=(hhh=dateObject.getHours());
+	if (h==0) h=24;
+	if (h>12) h-=12;
+	hh = h<10?('0'+h):h;
+	AMPM=(ampm=hhh<12?'am':'pm').toUpperCase();
+	mm=(m=dateObject.getMinutes())<10?('0'+m):m;
+	ss=(s=dateObject.getSeconds())<10?('0'+s):s;
+	return formatString.replace("#hhh#",hhh).replace("#hh#",hh).replace("#h#",h).replace("#mm#",mm).replace("#m#",m).replace("#ss#",ss).replace("#s#",s).replace("#ampm#",ampm).replace("#AMPM#",AMPM);
+}
+
+        
+        function compare(a,b) {
+             node1 = JSON.parse(a.Event).node;
+            node2 = JSON.parse(b.Event).node;
+            
+          if (node1 > node2)
+            return 1;
+          if (node1 < node2)
+            return -1;
+         
+         if(node1 == node2)
+         {
+            port1 = JSON.parse(a.Event).port;
+            port2 = JSON.parse(b.Event).port;
+           
+          if (port1 > port2)
+            return 1;
+          if (port1 < port2)
+            return -1;
+            
+          if(port1 == port2){
+              
+            time1 = a.TimeStamp;
+            time2 = b.TimeStamp;
+           
+          if (time1 > time2)
+            return 1;
+          if (time1 < time2)
+            return -1;
+            
+            if(time1 == time2){
+              id1 = a.Id;
+              id2 = b.Id;
+               
+              if (id1 > id2)
+                return 1;
+              if (id1 < id2)
+                return -1;
+                
+                return 0;
+                
+            }    
+         
+              
+          }  
+            
+            
+          
+         }
+         
+          
+          
+          
+          
+             
+        }
+        
+       // graphs.sort(compareNode);
+        
+       // graphs.sort(comparePort);
+        graphs.sort(compare);
+       // console.log(graphs);
+        var old_node = -1;
+        var old_port = -1;
+        var count = -1;
+        var count2 = -1;
+        var newdata = [];
+        var labels = [[],[]];
+        
+        for(var j = 0;j < graphs.length;j++){
+            var node2 = JSON.parse(graphs[j].Event).node;
+           
+            if(node2 != old_node){
+                nodes.push(j);
+                old_node = node2;
+                
+             while(JSON.parse(graphs[j].Event).node == old_node){
+                 port =  JSON.parse(graphs[j].Event).port;
+                
+                   old_port = port;
+                    
+                  while(JSON.parse(graphs[j].Event).port == old_port){
+                       newdata.push(parseInt((JSON.parse(graphs[j].Event).value * 230).toFixed(2)));
+                       j++;
+                     
+                       if(j < graphs.length){
+                             continue;
+                         }
+                         else
+                         {  
+                             break;
+                         }
+                         
+                  }
+                  
+                
+                     
+                      count++; 
+                      
+                   
+                function pushArray(arr, arr2) {
+                    arr.push.apply(arr, arr2);
+                }
+                 
+                
+              
+                 
+                 if(j < graphs.length){
+                    
+                       // console.log(newdata); 
+                      pushArray(data2[count],newdata);
+                      newdata.length = 0;
+                      nodes_ports.push([old_node,port]);
+                     
+                     continue;
+                 }
+                 else
+                 {   //console.log(newdata);
+                    //  pushArray(data2[count],newdata);
+                      newdata.length = 0;
+                     
+                     
+                      old_port = -1;
+                     break;
+                 }
+                 
+             }
+             
+                
+            } 
+            
+        }
+        
+        
+       // console.log(graphs[0].TimeStamp - graphs[data2[0].length - 1].TimeStamp);
+       // for(var count3 = 0;count3 < data2.length;count3++){
+            for(var k = 0;k < data2[0].length;k++){
+               
+                var d = new Date(graphs[k].TimeStamp);
+                labels[0][k] = customFormat("#DD#-#MMM#-#YY# #h#:#mm#:#ss# #AMPM#",d);
+              //  labels[1][k] = graphs[k].TimeStamp;//graphs[k].Time;
+            }
+       //} 
+       
+   
+        
+   var data3 = {"step_plot_4": {"x_axis": labels[0], "y_axis": data2[0] }}
+ // var data3 = {};
+   
+  
+   console.log(data3);
+        graphd3(data3);  
+        
+      /*  datasetDataArray = [];
+        
+        
+     
+      
+      for(var num = 0;num < data2.length;num++){
+          col = 220 - num*20;
+       datasetdata = {
+            label: "My First dataset",
+            fillColor: "rgba(220,"+ col + "," + col +",0.2)",
+            strokeColor: "rgba(220,220,220,1)",
+            pointColor: "rgba(220,220,220,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(220,220,220,1)",
+            data: data2[num]
+        }
+        
+        datasetDataArray.push(datasetdata);
+      }
+       
+        
+        var data = {
+    labels: labels[0],
+    datasets: datasetDataArray
+    
+    
+};
+//console.log(data);
+
+
+  
+
+    // Boolean - If we want to override with a hard coded scale
+   // Chart.defaults.global.scaleOverride = true;
+
+    // ** Required if scaleOverride is true **
+    // Number - The number of steps in a hard coded scale
+  //  Chart.defaults.global.scaleSteps = data2[0].length;
+    // Number - The value jump in the hard coded scale
+   // Chart.defaults.global.scaleStepWidth = 2;
+    // Number - The scale starting value
+   // Chart.defaults.global.scaleStartValue = 1;
+
+    
+        
+       var ctx = document.getElementById("myChart").getContext("2d");
+      
+        var options = {
+
+    ///Boolean - Whether grid lines are shown across the chart
+    scaleShowGridLines : true,
+
+    scaleShowLabels : true,
+
+    //String - Colour of the grid lines
+    scaleGridLineColor : "rgba(0,0,0,.05)",
+
+    //Number - Width of the grid lines
+    scaleGridLineWidth : 1,
+
+    //Boolean - Whether to show horizontal lines (except X axis)
+    scaleShowHorizontalLines: true,
+
+    //Boolean - Whether to show vertical lines (except Y axis)
+    scaleShowVerticalLines: false,
+
+    //Boolean - Whether the line is curved between points
+    bezierCurve : false,
+
+    //Number - Tension of the bezier curve between points
+    bezierCurveTension : 0.4,
+
+    //Boolean - Whether to show a dot for each point
+    pointDot : false,
+
+    //Number - Radius of each point dot in pixels
+    pointDotRadius : 4,
+
+    //Number - Pixel width of point dot stroke
+    pointDotStrokeWidth : 1,
+
+    //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
+    pointHitDetectionRadius : 20,
+
+    //Boolean - Whether to show a stroke for datasets
+    datasetStroke : false,
+
+    //Number - Pixel width of dataset stroke
+    datasetStrokeWidth : 2,
+
+    //Boolean - Whether to fill the dataset with a colour
+    datasetFill : true,
+
+    //String - A legend template
+    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
+
+};
+        
+        
+       var myLineChart = new Chart(ctx).Line(data, options);
+        
+        */
+    }) ;  
+    
+    
+  
     socket.on('config',function(config_receive){
         
        // console.log(config_receive);
@@ -1093,6 +1603,8 @@
          socket.emit('refreshIP');
         
     }
+    
+    
     
     
     
@@ -1134,7 +1646,9 @@
        //Authentication
        $('#tokentimeout').val(config.authentication[0].timeout[0]) ;
        
-        
+       //PushOver
+       $('#pushUser').val(config.pushOver[0].user[0]) ;
+       $('#pushToken').val(config.pushOver[0].token[0]) ; 
     }
     
     function saveConfig(){
@@ -1171,6 +1685,10 @@
        
        //Authentication
        config.authentication[0].timeout[0] = $('#tokentimeout').prop('value') ;
+       
+       //PushOver
+       config.pushOver[0].user[0] = $('#pushUser').prop('value') ;
+       config.pushOver[0].token[0] = $('#pushToken').prop('value') ;
         
         console.log(config.toString());
         
@@ -1194,6 +1712,13 @@
         
         socket.emit('getrules',function(){  });
     }
+    
+    
+    function getgraphs(){
+        
+        socket.emit('getgraphs',function(){  });
+    }
+    
     
     function setusertable(){
         
@@ -1667,10 +2192,10 @@
     
     /**************************************************************************************************/
     function test(){
-        $( "<div>hello!</div>" ).dialog();
-       // socket.emit('test',function(err,ack){                  //testing purposes only
-        // return    
-        //});
+       // $( "<div>hello!</div>" ).dialog();
+        socket.emit('test',function(err,ack){                  //testing purposes only
+         return    
+        });
         
         }
         

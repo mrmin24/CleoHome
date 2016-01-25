@@ -2,7 +2,7 @@ var nap = require('./nodealarmproxy.js');
 var config = require('./config.js'); //comment this out
 var log = require('./logger.js');
 var db = require('./dbhandler');
-
+var pushOver = require('../JSModules/public/scripts/pushOver.js');
 
 var configure = require('../JSModules/GetConfig.js');
 var configure2 = configure.data.xml;
@@ -245,8 +245,10 @@ function logdata(data) {
                 
                 console.log("GettingID");
                  getID('Zone_' + data.zone,function(ID){
-                    evaluate.evaluateChange(ID,data.send,function(node,port,state){
-                             
+                    evaluate.evaluateChange(ID,data.send,function(node,port,state,cancelTime,func){
+                   
+                    eval(func);  
+                    
                          if(node && port && state){
                           mySensorsocket.emit('deviceSwitch',node,port,state);
                          }
@@ -787,7 +789,7 @@ function sleep(time, callback) {
 
 function armDisarm(type){
     
-
+            console.log("Alarm: " + type + " requested");
 
 
                 if (type == 'Away') {

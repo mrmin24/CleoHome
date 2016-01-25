@@ -3,10 +3,14 @@ var express = require('express');
 var passport = require('passport');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+
 //var ip = require('external-ip');
 //var routes = require('./routes');
 //var router = express.Router();
+
+
+
+
 
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -15,7 +19,7 @@ var morgan = require('morgan');
 var logger = morgan('combined');
 require('./public/scripts/passport.js')(passport); // pass passport for configuration
 var email = require('./public/scripts/email.js');
-
+var pushOver = require('./public/scripts/pushOver.js');
 var path = require('path'); 
 var db = require('./dbhandler');
 
@@ -39,10 +43,15 @@ var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0]
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
-const Virtual_Item_Type = 15;
+const Virtual_Item_Type = 15
+const Virtual_Alarm_Item_Type = 18;
 var nodeCheckInterval = 60000;
 
 var port = configure2.server[0].port[0];   
+
+
+
+
 var externalip = "127.0.0.1";
 
    //  var morgan = require('morgan');
@@ -76,6 +85,20 @@ var externalip = "127.0.0.1";
 
 require('./routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
+/*var https = require('https');
+var fs = require('fs');
+
+var options = {
+  key: fs.readFileSync('../ssl/minny-key.pem'),
+  cert: fs.readFileSync('../ssl/minny-cert.pem')
+};
+
+https.createServer(options, function (req, res) {
+  res.writeHead(200);
+  res.end("hello world\n");
+}).listen(443);*/
+var io = require('socket.io')(http);
+
 http.listen(port);
 
 
@@ -94,8 +117,10 @@ function start() {
         
         	if(oldip != externalip)
         	{
-             if(configure2.server[0].dnsupdate[0] == 'true')  
+             if(configure2.server[0].dnsupdate[0] == 'true')  {
     		    updatedns(ip,function(){});
+    		    updatednshome(ip,function(){});  
+             }
     		 
     		 if(configure2.server[0].dnsemail[0] == 'true')  
     		    sendemail("Your current IP is http://" + ip);   
@@ -119,7 +144,8 @@ function start() {
       
 
 io.on('connection', function(socket){
-  console.log('Client Connected');
+   // console.log(socket);
+  console.log('Server: Client Connected');
   //console.log(lastArmTime);
   getAlarmTriggers(lastArmTime);
   getAlarmStatus();
@@ -132,7 +158,7 @@ io.on('connection', function(socket){
      
      
      
-     console.log('Client Disconnected');
+     console.log('Server: Client Disconnected');
      
       if(this.server.sockets.sockets.length ==0)
      {
@@ -170,6 +196,12 @@ io.on('connection', function(socket){
   socket.on('getrules',function(){
       
       sendrules();
+      
+  });
+  
+  socket.on('getgraphs',function(){
+      
+      sendgraphs();
       
   });
   
@@ -258,7 +290,7 @@ io.on('connection', function(socket){
 
  socket.on('armDisarmAlarm',function(type){
     
-    
+   console.log(type + " requested") 
    alarmsocket.emit('armDisarmAlarm',type);
     
     
@@ -308,13 +340,9 @@ io.on('connection', function(socket){
     
  socket.on('panic',function(){
     
-    
+    panic();
    
-     alarmsocket.emit('panic',function(){
-         console.log('Panic');
-        
-       
-     });
+     
     });    
     
  socket.on('refreshIP',function(){
@@ -324,7 +352,7 @@ io.on('connection', function(socket){
             if(ip){
                
     		    updatedns(ip,function(){});
-    		 
+    		  updatednshome(ip,function(){});
     		 
     		    sendemail("Your current IP is http://" + ip);   
     		    
@@ -342,6 +370,13 @@ io.on('connection', function(socket){
     
     socket.on('getWeather',function(){
         getWeather();
+        
+   
+    });
+    
+    socket.on('getPower',function(){
+         //  console.log('test1'); 
+        getPower();
         
    
     });
@@ -367,7 +402,7 @@ io.on('connection', function(socket){
       	      
       	   if(data_receive[0].Item_Current_Value == 1 )
       	   {
-          	     if(data_receive[0].Item_Type == Virtual_Item_Type)
+          	     if(data_receive[0].Item_Type == Virtual_Item_Type ||  data_receive[0].Item_Type == Virtual_Alarm_Item_Type)
           	    {
           	       virtualDeviceStatusChange(Id,0);
           	    }else
@@ -375,7 +410,7 @@ io.on('connection', function(socket){
                  mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
           	    }
             }else
-            {    if(data_receive[0].Item_Type == Virtual_Item_Type)
+            {    if(data_receive[0].Item_Type == Virtual_Item_Type || data_receive[0].Item_Type == Virtual_Alarm_Item_Type)
       	        {
       	            virtualDeviceStatusChange(Id,1);
       	        }else
@@ -648,8 +683,8 @@ function virtualDeviceStatusChange(Id,State){
                          if(data_receive){
                             // console.log(ID + " " + State);
                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
-                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime){
-                             
+                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
+                             eval(func);
                              if(node && port && state){
                               mySensorsocket.emit('deviceSwitch',node,port,state);
                              }
@@ -699,8 +734,9 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
                          if(data_receive){
                             // console.log(ID + " " + State);
                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
-                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime){
-                            
+                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
+                                
+                             eval(func);
                              if(node && port && state){
                               mySensorsocket.emit('deviceSwitch',node,port,state);
                              }
@@ -733,6 +769,61 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
     
 });
 
+
+
+mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
+    //console.log("Device Status Change");
+   // console.log(NodePort);
+   var evaluate = require('../JSModules/Rule_Items_Evaluate');
+   
+   
+     db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+        // console.log(data_receive);
+         if(data_receive[0]){
+                    //console.log(data_receive);
+                    ID = data_receive[0].Id;
+                    
+                     data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                    db.update("Items",data,function(err,data_receive){
+                          
+                          //	console.log("Server: Sensor updated");
+                        
+                         if(data_receive){
+                            // console.log(ID + " " + State);
+                             io.emit('SensorEvent', {Id:ID,Current_State:State});
+                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
+                            eval(func);
+                             if(node && port && state){
+                              mySensorsocket.emit('deviceSwitch',node,port,state);
+                             }
+                             
+                             if(cancelTime){
+                                 
+                                 mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                             }
+                             //console.log(data_receive[0]);
+                             });
+                             
+                             
+                         }else
+                         {
+                            console.log(err); 
+                             
+                         }
+                        
+                    }); 
+        }else 
+        if(err)
+        {
+            console.log(err);
+        }
+         
+     });
+    
+   
+    
+    
+});
 
 mySensorsocket.on('gatewayConnected',function(gatewayState){
     gatewayStatus = gatewayState;
@@ -810,6 +901,32 @@ function sendrules(){
 
     });
 }  
+
+
+function sendgraphs(){
+    console.log("Getting Graphs...");
+     
+      db.getdata('Event_Log',{Select: 'Id,Type,Event,TimeStamp',whereClause:'Type LIKE "Sensor" ORDER BY Id DESC LIMIT 500'},function(err,data_receive){
+                      // console.log('test1'); 
+           if(data_receive[0]){
+            
+           // console.log(data_receive);
+            
+            io.emit("sendGraphs",data_receive);
+            
+        }else{
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR (GetRules) : ",err);            
+            }
+        
+            
+        }
+
+
+    });
+} 
+
 
 function deleteRule(rule){
     console.log("Deleting Rules...");
@@ -1012,14 +1129,41 @@ function getWeather(){
     
 }
 
+function getPower(){
+      // console.log('test1'); 
+     db.getdata('Items',{Select: 'Id,Item_Current_Value',whereClause:'Item_Type = "10"'},function(err,data_receive){
+                      // console.log('test1'); 
+       
+           if(data_receive[0]){
+            //console.log(data_receive);
+          //  io.emit("sendWeather",data_receive[0].Item_Current_Value,data_receive[1].Item_Current_Value);
+            io.emit('SensorEvent', {Id:data_receive[0].Id,Current_State:data_receive[0].Item_Current_Value});
+             io.emit('SensorEvent', {Id:data_receive[1].Id,Current_State:data_receive[1].Item_Current_Value});
+          //  io.emit('SensorEvent', {Id:ID,Current_State:State2});
+            
+        }else{
+            if (err) {
+                // error handling code goes here
+                console.log("ERROR (GetItems) : ",err);            
+            }
+        
+            
+        }
+
+
+    });
+    
+    
+    
+    
+}
+
 
 
 function test(){
     
     console.log("testing triggers");
-       io.emit("alarmTrigger",{Event:"Left Garage",Time:Date().toString()});
-                   db.insert('Alarm_Triggers', {Zone: "Garage", Time: Date()  });
-                  //  sendemail("An alarm has been triggered by zone " + "Garage");
+      pushOver.push('test');
                     
                     
 }
@@ -1139,7 +1283,7 @@ alarmsocket.on('connect', function() {
                if(data.Ready && !data.Bypass){
                    clearBypass();
                 } 
-                
+                // console.log(data.Bypass + " " + data.Memory + " " + data.Armed + " " + data.Ready);
              io.emit("keypadLedState",{Bypass:data.Bypass, Memory:data.Memory,Armed:data.Armed,Ready:data.Ready,Night:night,Connected:connect});
             }
           });
@@ -1162,6 +1306,7 @@ alarmsocket.on('connect', function() {
                    if(data_receive[0]){
                     console.log("Sending Email for Alarm Trigger, zone " + data_receive[0]['Description']);
                      sendemail("An alarm has been triggered by zone " + data_receive[0]['Description']);
+                       pushOver.push("An alarm has been triggered by zone " + data_receive[0]['Description']);
                      db.insert('Alarm_Triggers', {Zone: data_receive[0]['Description'], Time: Date().toString()  });
                     io.emit("alarmTrigger",{Event:data_receive[0]['Description'],Time:time});
                     
@@ -1178,6 +1323,7 @@ alarmsocket.on('connect', function() {
                     db.insert('Alarm_Triggers', {Zone: "unknown", Time: Date().toString()  });
                     
                     sendemail("An alarm has been triggered by unknown zone " + data);
+                    pushOver.push("An alarm has been triggered by unknown zone " + data);
                 }
 		
        
@@ -1229,10 +1375,12 @@ alarmsocket.on('connect', function() {
              if(code == '8411'){
                 io.emit("ac",true);
                // sendemail("Trouble Event Restored");
+               
                 log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 0 });
              }else if(code == '8401'){
                  io.emit("ac",false);
                  sendemail("Trouble Event");
+                   pushOver.push('AC Power Off');
                  console.log("Server: Trouble Condition: Sending Email");
                  log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
              }
@@ -1393,7 +1541,7 @@ function getDeviceStatus(){
                         } else {       
                             
                         // code to execute on data retrieval
-                        var device = [1 , 2 , 3 , 4 , 5,6,7,11,15];
+                        var device = [1 , 2 , 3 , 4 , 5,6,7,11,15,18];
                         
                            for(var i in data_receive){
                               // console.log(data_receive[i]['Item_Name']);  
@@ -1500,16 +1648,10 @@ function updateNodeStatus(){
 
 function clearBypass(){
      console.log("Clear bypass");
+    
+    bypassedZones.length = 0;
+    // console.log(bypassedZones);
      
-     $(".bypass-warning").each(function(){
-        this.removeClass( "bypass-warning" );
-    
-        });
-  
-    
-        bypassedZones.length = 0;
-       // console.log(bypassedZones);
-      return;  
        
 }
 
@@ -1936,6 +2078,45 @@ callback2();
 
 }
 
+function updatednshome(ip,callback2){
+    
+    var http2 = require('http');
+    //var username = configure2.server[0].dnsusername[0];
+   // var password = configure2.server[0].dnspassword[0];
+    var pass = configure2.server[0].dnspassword2[0];
+    //var auth = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
+   // var header = { 'Authorization': auth};
+    //'Host': 'https://ydns.eu/api/v1/update/?host=example.ydns.eu&ip='+ip,
+  // console.log(pass);
+    var options = {
+      host: 'minny.co.za',
+      path: ':' + pass + '@dyn.dns.he.net/nic/update?hostname=minny.co.za&myip=' + ip,//&ip='+ip.substring(0,15),
+      port: '80',
+      //This is the only line that is new. `headers` is an object with the headers to request
+    //  headers: header 
+    };
+    
+  var req = http2.request(options, function(res) {
+  //	console.log('STATUS: ' + res.statusCode);
+  //	console.log('HEADERS: ' + JSON.stringify(res.headers));
+  	res.setEncoding('utf8');
+  	res.on('data', function (chunk) {
+    		console.log('DNS Update: ' + chunk);
+  	});
+  });
+
+req.on('error', function(e) {
+  console.log('problem with request: ' + e.message);
+});
+
+// write data to request body
+//req.write('data\n');
+//req.write('data\n');
+req.end();	
+callback2();
+
+}
+
 function updatednsproxy(callback2){
     var http2 = require('http');
    
@@ -1975,6 +2156,18 @@ req.on('error', function(e) {
 //req.write('data\n');
 req.end();	
 callback2();
+    
+}
+
+
+
+
+function panic(){
+    alarmsocket.emit('panic',function(){
+         console.log('Panic');
+        
+       
+     });
     
 }
 

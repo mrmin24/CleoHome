@@ -1,7 +1,7 @@
 
 var db = require('./dbhandler');
 var evaluate = require('../JSModules/Rule_Items_Evaluate');
-
+var pushOver = require('./public/scripts/pushOver.js');
 var intervaltime = 10 * 60 * 1000;
 
 
@@ -128,8 +128,8 @@ function logData(item,weatherData){
                     console.log(err);
                 }
             });   
-            evaluate.evaluateChange(result[0].Id,weatherData,function(node,port,state,cancelTime){
-                                                     
+            evaluate.evaluateChange(result[0].Id,weatherData,function(node,port,state,cancelTime,func){
+                   eval(func);                                  
                  if(node && port && state){
                   mySensorsocket.emit('deviceSwitch',node,port,state);
                  }

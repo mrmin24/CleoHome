@@ -16,6 +16,10 @@ h2{
     color:white;
 }
 
+.btn{
+    margin-left: 5px;
+}
+
 .bypass-warning{
     color:#FF9933;
 }
@@ -87,3 +91,18 @@ th {
 .big-checkbox {width: 20px; height: 20px; }
 
 
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus circle {
+  fill: none;
+  stroke: steelblue;
+}

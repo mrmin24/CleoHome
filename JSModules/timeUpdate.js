@@ -2,7 +2,7 @@ var db = require('./dbhandler');
 var evaluate = require('../JSModules/Rule_Items_Evaluate');
 
 var calcTime = require('../JSModules/compareTime');
-
+var pushOver = require('./public/scripts/pushOver.js');
 
 var intervaltime = 1 * 60 * 1000;
 
@@ -53,8 +53,8 @@ function timeUpdate(){
                         
                 db.update('Items',data,function(){});   
                  
-                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime){
-                                     
+                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime,func){
+                      eval(func);               
                      if(node && port && state){
                       mySensorsocket.emit('deviceSwitch',node,port,state);
                      }
@@ -127,8 +127,9 @@ function dayMinutesUpdate(){
                         
                 db.update('Items',data,function(){});   
                  
-                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime){
-                                     
+                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime,func){
+                    
+                      eval(func);               
                      if(node && port && state){
                       mySensorsocket.emit('deviceSwitch',node,port,state);
                      }
@@ -177,8 +178,8 @@ function weekDayUpdate(){
             
          db.update('Items',data,function(){});   
          
-         evaluate.evaluateChange(result[0].Id,day,function(node,port,state,cancelTime){
-                             
+         evaluate.evaluateChange(result[0].Id,day,function(node,port,state,cancelTime,func){
+              eval(func);               
              if(node && port && state){
               mySensorsocket.emit('deviceSwitch',node,port,state);
              }

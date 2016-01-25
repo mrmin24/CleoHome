@@ -10,7 +10,10 @@
     <authentication>
         <timeout>30</timeout>     <!-- time in days  -->
     </authentication>
-    
+    <pushOver>
+            <user></user>
+            <token></token>
+    </pushOver>
     
     <alarm>
         <envisPassword></envisPassword>

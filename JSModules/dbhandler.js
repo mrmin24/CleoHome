@@ -75,6 +75,30 @@ exports.getdata = function(table,data,callback) {
     });
 }
 
+
+exports.getquery = function(query) {
+
+   pool.getConnection(function(err, connection){
+    
+    //console.log(data.whereClause);
+   
+    connection.query(query, function(err, result) {
+      
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+      // console.log(result);
+       connection.release();
+        if(err) {
+             callback(err,null);
+            }
+            else {
+             callback(null,result);
+            }
+            
+    });
+   
+    });
+}
+
 exports.deletedata = function(table,data,callback) {
 //console.log(data.whereClause);
    pool.getConnection(function(err, connection){

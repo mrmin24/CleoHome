@@ -2,7 +2,7 @@ var SunCalc = require('suncalc');
 var db = require('./dbhandler');
 var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var calcTime = require('../JSModules/compareTime');
-
+var pushOver = require('../JSModules/public/scripts/pushOver.js');
 var latitude = -25.825848;
 var longitude = 28.269367;
 var intervaltime = 5 * 60 * 1000;
@@ -74,8 +74,8 @@ function checkSunCalc(){
                         
                 db.update('Items',data,function(){});   
                  
-                 evaluate.evaluateChange(result[0].Id,isDark,function(node,port,state,cancelTime){
-                                     
+                 evaluate.evaluateChange(result[0].Id,isDark,function(node,port,state,cancelTime,func){
+                        eval(func);             
                      if(node && port && state){
                       mySensorsocket.emit('deviceSwitch',node,port,state);
                      }

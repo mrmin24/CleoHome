@@ -6,7 +6,7 @@ var db = require('./dbhandler');
 exports.checkRule = function(rule,callback){
     console.log("Checking rule: "  + rule);
     
-   data = {'Select':'Conditions,Result,RuleOnTime','whereClause':'Id = ' + rule + ' AND Rule_Enabled = 1'  };
+   data = {'Select':'Conditions,Result,RuleOnTime,FunctionName','whereClause':'Id = ' + rule + ' AND Rule_Enabled = 1'  };
     
     db.getdata('Rules',data,function(err,result){
        
@@ -35,7 +35,7 @@ exports.checkRule = function(rule,callback){
                 }
               
            }
-           //console.log(ids);
+          // console.log(ids);
             var where = "Second_Id IN (" + ids + ") AND Secondary_Item = 0 ORDER BY FIELD (Second_Id," + ids + ")";
         
            
@@ -50,7 +50,7 @@ exports.checkRule = function(rule,callback){
                    
                }else if(result2){
                   // console.log(result2);
-                   //console.log(result2);
+                
                    var cond = "";
                   // var j = 0;
                    for(var i = 0; i < res.length ; i++){
@@ -77,45 +77,52 @@ exports.checkRule = function(rule,callback){
                   // console.log(eval(cond));
                    
                   var executeRule = eval(cond);
-                  
+                 // console.log(cond);
                   if(executeRule > 0){
                       
                       var res2 = result[0].Result.split(';');
                       var onTime = result[0].RuleOnTime;
+                      var func = result[0].FunctionName;
                       var nodes = [];
                       var ports = [];
                       var values = [];
                       
-                      for(var i = 0;i< res2.length/3;i++){
-                       data = {'Select':'Node_Id,Node_Port','whereClause':"Id = " + res2[i*3] };
-                        value = res2[i*3+2];
-                        var ID = res2[i*3];
-                        db.getdata('Items',data,function(err,result3){
-                           
-                           if(err){
-                               
-                               console.log(err);
-                               callback(false,null,null,null); 
-                               
-                           }else if(result3){
-                               console.log(result3[0]);
+                      if(res2[0] != 0){
+                          for(var i = 0;i< res2.length/3;i++){
                               
-                              // console.log(nodes[i] + " " + ports[i] + " " + values[i] );
-                             // setTimeout(function () {
-                                callback(true,result3[0].Node_Id,result3[0].Node_Port,value,ID,onTime);
-                              //}, 2000);
-                              
-                           }
+                               data = {'Select':'Node_Id,Node_Port','whereClause':"Id = " + res2[i*3] };
+                                value = res2[i*3+2];
+                                var ID = res2[i*3];
+                                db.getdata('Items',data,function(err,result3){
+                                   
+                                   if(err){
+                                       
+                                       console.log(err);
+                                       callback(false,null,null,null,null,null,func); 
+                                       
+                                   }else if(result3){
+                                       console.log(result3[0]);
+                                      
+                                      // console.log(nodes[i] + " " + ports[i] + " " + values[i] );
+                                     // setTimeout(function () {
+                                        callback(true,result3[0].Node_Id,result3[0].Node_Port,value,ID,onTime,func);
+                                      //}, 2000);
+                                      
+                                   }
+                                   
+                                });
+                            
                            
-                        });
-                        
-                       
-                        
+                            
+                          
+                            }
+                      
+                            //callback(result3[0].Node_Id,result3[0].Node_Port,res2[(i*3)+2]);
+                      
+                      
+                      }else{
+                          callback(true,null,null,null,null,null,func);   
                       }
-                      
-                      //callback(result3[0].Node_Id,result3[0].Node_Port,res2[(i*3)+2]);
-                      
-                      
                   }else
                   {
                     callback(null,null,null);    
