@@ -49,7 +49,7 @@ var nodeCheckInterval = 60000;
 
 var port = configure2.server[0].port[0];   
 
-
+var myconsole = require('./myconsole.js');
 
 
 var externalip = "127.0.0.1";
@@ -104,6 +104,7 @@ http.listen(port);
 
 
 function start() {
+    //log(debug);
     var oldip = externalip;    
 
     var nodeinterval = setInterval(updateNodeStatus,nodeCheckInterval);
@@ -137,16 +138,16 @@ function start() {
 });
         
      
-       // console.log('test');
+       // myconsole.log('test');
     } ,1000*60*configure2.server[0].dnsinterval[0]);
     
 
       
 
 io.on('connection', function(socket){
-   // console.log(socket);
-  console.log('Server: Client Connected');
-  //console.log(lastArmTime);
+   // myconsole.log(socket);
+  myconsole.log('Server: Client Connected');
+  //myconsole.log(lastArmTime);
   getAlarmTriggers(lastArmTime);
   getAlarmStatus();
   getDeviceStatus();
@@ -158,24 +159,24 @@ io.on('connection', function(socket){
      
      
      
-     console.log('Server: Client Disconnected');
+     myconsole.log('Server: Client Disconnected');
      
       if(this.server.sockets.sockets.length ==0)
      {
                          
-         console.log('All clients disconnected');
+         myconsole.log('All clients disconnected');
         
      }
   });
   
   socket.on('updateconfig',function(config_receive){
-     // console.log(config_receive);
+     // myconsole.log(config_receive);
      writeXML.json2xml(config_receive,'xml',function(xml){
          getconfig.config(function(){
           var configure3 = getconfig.data;
-           // console.log("2  " + configure3.xml.server[0].dnsupdate[0]);
+           // myconsole.log("2  " + configure3.xml.server[0].dnsupdate[0]);
              configure2 = configure3.xml; 
-            //console.log(configure2.server[0].dnsupdate[0]);
+            //myconsole.log(configure2.server[0].dnsupdate[0]);
            io.emit("config",configure2); 
          });
        
@@ -199,9 +200,9 @@ io.on('connection', function(socket){
       
   });
   
-  socket.on('getgraphs',function(){
+  socket.on('getgraphs',function(type){
       
-      sendgraphs();
+      sendgraphs(type);
       
   });
   
@@ -212,13 +213,13 @@ io.on('connection', function(socket){
   });
   
   socket.on('delete_user',function(userId,username){
-      //console.log(userId);
+      //myconsole.log(userId);
       db.deletedata('users',{whereClause:'id = "' + userId + '"'},function(){
           
-          console.log('User Deleted');
+          myconsole.log('User Deleted');
           db.deletedata('user_logins',{whereClause:'Username = "' + username + '"'},function(){
           
-          console.log('User Token Deleted');
+          myconsole.log('User Token Deleted');
           io.emit("user_deleted");
           sendusers();
         });
@@ -229,11 +230,11 @@ io.on('connection', function(socket){
       
   });
   socket.on('delete_user_token',function(username){
-      //console.log(userId);
+      //myconsole.log(userId);
       
           db.deletedata('user_logins',{whereClause:'Username = "' + username + '"'},function(){
           
-          console.log('User Token Deleted');
+          myconsole.log('User Token Deleted');
           io.emit("user_token_deleted");
         });
           
@@ -241,7 +242,7 @@ io.on('connection', function(socket){
   });
   
   socket.on('deleteRule',function(rule){
-      //console.log(userId);
+      //myconsole.log(userId);
       
          deleteRule(rule);
           
@@ -250,7 +251,7 @@ io.on('connection', function(socket){
   
   
  /* socket.on('AlarmDisconnect',function(){   
-      console.log('disconnect requested');
+      myconsole.log('disconnect requested');
      alarmsocket.disconnect(); 
       
   });*/
@@ -258,7 +259,7 @@ io.on('connection', function(socket){
   socket.on('getEvents',function(data){
     
     
-   // console.log(data);
+   // myconsole.log(data);
     
     getEvents(data['numEvents']);
     
@@ -269,7 +270,7 @@ io.on('connection', function(socket){
  socket.on('getImportantEvents',function(data){
     
     
-   // console.log(data);
+   // myconsole.log(data);
     
     getImportantEvents(data['numEvents']);
     
@@ -280,7 +281,7 @@ io.on('connection', function(socket){
  socket.on('getLastAlarm',function(data){
     
     
-   // console.log(data);
+   // myconsole.log(data);
     
     getLastAlarm();
     
@@ -290,7 +291,7 @@ io.on('connection', function(socket){
 
  socket.on('armDisarmAlarm',function(type){
     
-   console.log(type + " requested") 
+   myconsole.log(type + " requested") 
    alarmsocket.emit('armDisarmAlarm',type);
     
     
@@ -303,14 +304,14 @@ io.on('connection', function(socket){
     cancelBypass.length = 0;
    
      alarmsocket.emit('bypassZones',zones,function(err,ack,zones){
-         //console.log(zones);
+         //myconsole.log(zones);
         
         for(var i in zones){
-           // console.log(zones[i][0]);
+           // myconsole.log(zones[i][0]);
             
             
             var index = bypassedZones.indexOf(zones[i][0]);
-           // console.log(index);
+           // myconsole.log(index);
             if(index > -1){
                 
                 cancelBypass.push(bypassedZones[index]);
@@ -322,7 +323,7 @@ io.on('connection', function(socket){
             }
             
         }
-        console.log("Bypassed zones are " + bypassedZones);
+        myconsole.log("Bypassed zones are " + bypassedZones);
        callback(err,ack,bypassedZones,cancelBypass);
          
          
@@ -375,7 +376,7 @@ io.on('connection', function(socket){
     });
     
     socket.on('getPower',function(){
-         //  console.log('test1'); 
+         //  myconsole.log('test1'); 
         getPower();
         
    
@@ -389,12 +390,12 @@ io.on('connection', function(socket){
     });
     
     socket.on("getNodesStatus",function(){
-       // console.log("test");
+       // myconsole.log("test");
         updateNodeStatus();
     });
     
     socket.on('deviceSwitch',function(Id){
-      //console.log(userId);
+      //myconsole.log(userId);
       
         db.getdata('Items',{Select: 'Item_Type,Item_Current_Value,Node_Id,Node_Port',whereClause:'Id = ' + Id.toString()},function(err,data_receive){
       	
@@ -430,7 +431,7 @@ io.on('connection', function(socket){
       var ids2 = [];
       var ruleItemsId = [];
       
-      console.log(ruleData);
+      myconsole.log(ruleData);
       var j = 0;
       for(var i = 0;i<ruleData['length'];i++)
       {
@@ -481,7 +482,7 @@ io.on('connection', function(socket){
              
                  
                   db.getdata('Rule_Items',{Select: 'Second_Id,Rule_Id',whereClause:newWhereClause},function(err,data_receive){
-                        //console.log("Returned: " + data_receive[0]);
+                        //myconsole.log("Returned: " + data_receive[0]);
                         
                          if(data_receive[0]){
                             
@@ -492,7 +493,7 @@ io.on('connection', function(socket){
                         
                          }else if(err)
                          {
-                             console.log(err);
+                             myconsole.log(err);
                          }else{
                              ids2[h] = null;
                              selectedItemRules[h] = null;
@@ -549,7 +550,7 @@ io.on('connection', function(socket){
                                             
                                           action =  data_receive[0]['Id'] + ';=;' + ruleData['ActionValue1'] ;  
                                           onTime = ruleData['ActionOnValue1'] ;
-                                          console.log(action);
+                                          myconsole.log(action);
                                           
                                           
                                           
@@ -576,7 +577,7 @@ io.on('connection', function(socket){
                                                           
                                                         
                                                      if(data_receive){
-                                                         console.log("success");
+                                                         myconsole.log("success");
                                                          
                                                      }else
                                                      {
@@ -596,7 +597,7 @@ io.on('connection', function(socket){
                                                 db.insert('Rule_Items', {Second_Id:ids2[isNull[m]],Rule_Id:ruleId, Item_Id: ids[isNull[m]],Equals: ruleData['equalsValueReq'+ (isNull[m]+1)]?ruleData['equalsValueReq'+ (isNull[m]+1)]:null  , Greater_Than: ruleData['greaterValueReq'+ (isNull[m]+1)]?ruleData['greaterValueReq'+ (isNull[m]+1)]:null ,Less_Than: ruleData['lessValueReq'+ (isNull[m]+1)]?ruleData['lessValueReq'+ (isNull[m]+1)]:null ,Not_Equal:  ruleData['notEqualValueReq'+ (isNull[m]+1)]?ruleData['notEqualValueReq'+ (isNull[m]+1)]:null , Secondary_Item:  ruleData['secondaryRuleCheck'+ (isNull[m]+1)]  ,Status: 0, Comments: ''  });
                                               
                                                 if(m == b){
-                                                  console.log('Rules Saved');
+                                                  myconsole.log('Rules Saved');
                                                  
                                                  }
                                               }
@@ -605,7 +606,7 @@ io.on('connection', function(socket){
                                                  
                                                  }else
                                                  {
-                                                     console.log(err);
+                                                     myconsole.log(err);
                                                  }
                                              
                                           });
@@ -615,7 +616,7 @@ io.on('connection', function(socket){
                                          
                                          }else
                                          {
-                                             console.log(err);
+                                             myconsole.log(err);
                                          }
                                      
                                      
@@ -625,11 +626,11 @@ io.on('connection', function(socket){
                                          
                                      
                                   
-                                  //console.log('Rules Saved');
+                                  //myconsole.log('Rules Saved');
                              
                              }else
                              {
-                                 console.log(err);
+                                 myconsole.log(err);
                              }
                              
                           });
@@ -650,7 +651,7 @@ io.on('connection', function(socket){
             
              }else
              {
-                 console.log(err);
+                 myconsole.log(err);
              }
                
                
@@ -670,9 +671,9 @@ function virtualDeviceStatusChange(Id,State){
    if(State > 0){State = 1;}
    
      db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Id = ' + Id},function(err,data_receive){
-        // console.log(data_receive);
+        // myconsole.log(data_receive);
          if(data_receive[0]){
-                    //console.log(data_receive);
+                    //myconsole.log(data_receive);
                     ID = data_receive[0].Id;
                     enabledValue = data_receive[0].Item_Enabled_Value;
                      data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
@@ -681,7 +682,7 @@ function virtualDeviceStatusChange(Id,State){
                           
                         
                          if(data_receive){
-                            // console.log(ID + " " + State);
+                            // myconsole.log(ID + " " + State);
                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
                              evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
                              eval(func);
@@ -693,13 +694,13 @@ function virtualDeviceStatusChange(Id,State){
                                  
                                  mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                              }
-                             //console.log(data_receive[0]);
+                             //myconsole.log(data_receive[0]);
                              });
                              
                              
                          }else
                          {
-                            console.log(err); 
+                            myconsole.log(err); 
                              
                          }
                         
@@ -707,7 +708,7 @@ function virtualDeviceStatusChange(Id,State){
         }else 
         if(err)
         {
-            console.log(err);
+            myconsole.log(err);
         }
          
      });
@@ -715,15 +716,15 @@ function virtualDeviceStatusChange(Id,State){
 }
 
 mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
-    //console.log("Device Status Change");
-   // console.log(NodePort);
+    //myconsole.log("Device Status Change");
+   // myconsole.log(NodePort);
    var evaluate = require('../JSModules/Rule_Items_Evaluate');
    if(State > 0){State = 1;}
    
      db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
-        // console.log(data_receive);
+        // myconsole.log(data_receive);
          if(data_receive[0]){
-                    //console.log(data_receive);
+                    //myconsole.log(data_receive);
                     ID = data_receive[0].Id;
                     enabledValue = data_receive[0].Item_Enabled_Value;
                      data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
@@ -732,7 +733,7 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
                           
                         
                          if(data_receive){
-                            // console.log(ID + " " + State);
+                            // myconsole.log(ID + " " + State);
                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
                              evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
                                 
@@ -745,13 +746,13 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
                                  
                                  mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                              }
-                             //console.log(data_receive[0]);
+                             //myconsole.log(data_receive[0]);
                              });
                              
                              
                          }else
                          {
-                            console.log(err); 
+                            myconsole.log(err); 
                              
                          }
                         
@@ -759,7 +760,7 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
         }else 
         if(err)
         {
-            console.log(err);
+            myconsole.log(err);
         }
          
      });
@@ -772,24 +773,24 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
 
 
 mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
-    //console.log("Device Status Change");
-   // console.log(NodePort);
+    //myconsole.log("Device Status Change");
+   // myconsole.log(NodePort);
    var evaluate = require('../JSModules/Rule_Items_Evaluate');
    
    
      db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
-        // console.log(data_receive);
+        // myconsole.log(data_receive);
          if(data_receive[0]){
-                    //console.log(data_receive);
+                    //myconsole.log(data_receive);
                     ID = data_receive[0].Id;
                     
                      data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
                     db.update("Items",data,function(err,data_receive){
                           
-                          //	console.log("Server: Sensor updated");
+                          //	myconsole.log("Server: Sensor updated");
                         
                          if(data_receive){
-                            // console.log(ID + " " + State);
+                            // myconsole.log(ID + " " + State);
                              io.emit('SensorEvent', {Id:ID,Current_State:State});
                              evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
                             eval(func);
@@ -801,13 +802,13 @@ mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
                                  
                                  mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                              }
-                             //console.log(data_receive[0]);
+                             //myconsole.log(data_receive[0]);
                              });
                              
                              
                          }else
                          {
-                            console.log(err); 
+                            myconsole.log(err); 
                              
                          }
                         
@@ -815,7 +816,7 @@ mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
         }else 
         if(err)
         {
-            console.log(err);
+            myconsole.log(err);
         }
          
      });
@@ -841,13 +842,13 @@ mySensorsocket.on('nodeAlive',function(NodeID){
               
             
              if(data_receive){
-                // console.log(ID + " " + State);
-                 console.log("Node state updated");
+                // myconsole.log(ID + " " + State);
+                 myconsole.log("Node state updated");
                  
                  
              }else
              {
-                console.log(err); 
+                myconsole.log(err); 
                  
              }
             
@@ -859,17 +860,17 @@ mySensorsocket.on('nodeAlive',function(NodeID){
 
   
 function sendusers(){
-    console.log("Getting Users...");
+    myconsole.log("Getting Users...");
       db.getdata('users',{Select: 'id,username',whereClause:'id LIKE "%"'},function(err,data_receive){
-                      // console.log('test1'); 
+                      // myconsole.log('test1'); 
                if(data_receive[0]){
-               // console.log(data_receive);
+               // myconsole.log(data_receive);
                 io.emit("sendUsers",data_receive);
                 
             }else{
                 if (err) {
                     // error handling code goes here
-                    console.log("ERROR (GetUsers) : ",err);            
+                    myconsole.log("ERROR (GetUsers) : ",err);            
                 }
             
                 
@@ -882,17 +883,17 @@ function sendusers(){
   
   
 function sendrules(){
-    console.log("Getting Rules...");
+    myconsole.log("Getting Rules...");
       db.getdata('Rules',{Select: 'Id,Conditions,Result,Comments',whereClause:'Id LIKE "%"'},function(err,data_receive){
-                      // console.log('test1'); 
+                      // myconsole.log('test1'); 
            if(data_receive[0]){
-           // console.log(data_receive);
+           // myconsole.log(data_receive);
             io.emit("sendRules",data_receive);
             
         }else{
             if (err) {
                 // error handling code goes here
-                console.log("ERROR (GetRules) : ",err);            
+                myconsole.log("ERROR (GetRules) : ",err);            
             }
         
             
@@ -903,21 +904,21 @@ function sendrules(){
 }  
 
 
-function sendgraphs(){
-    console.log("Getting Graphs...");
+function sendgraphs(Type){
+    myconsole.log("Getting Graphs...");
      
-      db.getdata('Event_Log',{Select: 'Id,Type,Event,TimeStamp',whereClause:'Type LIKE "Sensor" ORDER BY Id DESC LIMIT 500'},function(err,data_receive){
-                      // console.log('test1'); 
+      db.getdata('Event_Log',{Select: 'Id,Type,Event,TimeStamp',whereClause:'Type LIKE "'+Type+'" ORDER BY Id ASC LIMIT 500'},function(err,data_receive){
+                      // myconsole.log(data_receive); 
            if(data_receive[0]){
             
-           // console.log(data_receive);
+          //  myconsole.log(data_receive);
             
             io.emit("sendGraphs",data_receive);
             
         }else{
             if (err) {
                 // error handling code goes here
-                console.log("ERROR (GetRules) : ",err);            
+                myconsole.log("ERROR (GetRules) : ",err);            
             }
         
             
@@ -929,9 +930,9 @@ function sendgraphs(){
 
 
 function deleteRule(rule){
-    console.log("Deleting Rules...");
+    myconsole.log("Deleting Rules...");
       db.getdata('Rules',{Select: 'Conditions',whereClause:'Id = ' + rule},function(err,result){
-                      // console.log('test1'); 
+                      // myconsole.log('test1'); 
            if(result){
                 var res = result[0].Conditions.split(';');
            
@@ -957,10 +958,10 @@ function deleteRule(rule){
                      //delete rule_item
                       db.deletedata('Rule_Items',{whereClause:'Rule_Id = ' + rule },function(err, result){
                         if(err){
-                            console.log(err);
+                            myconsole.log(err);
                         }else
                         {
-                        console.log('Rule_Item Deleted: '  );
+                        myconsole.log('Rule_Item Deleted: '  );
                       
                         }
                      // io.emit("user_token_deleted");
@@ -975,16 +976,16 @@ function deleteRule(rule){
             
                 db.deletedata('Rules',{whereClause:'Id = ' + rule  },function(err, result){
                     if(err){
-                        console.log(err);
+                        myconsole.log(err);
                     }else
                     {
-                        console.log('Rule Deleted');
+                        myconsole.log('Rule Deleted');
                         io.emit("ruleDeleted");
                     }
                   
                 });
                 
-                 //console.log(ids);
+                 //myconsole.log(ids);
                     var where = "Second_Id IN (" + ids + ")  ORDER BY FIELD (Second_Id," + ids + ")";
                    
                    data = {'Select':'Second_Id,Rule_Id','whereClause':where };
@@ -993,11 +994,11 @@ function deleteRule(rule){
                        
                        if(err){
                            
-                           console.log(err);
+                           myconsole.log(err);
                            
                        }else if(result2){
-                           console.log(result2);
-                           //console.log(result2);
+                           myconsole.log(result2);
+                           //myconsole.log(result2);
                            var cond = "";
                            var newRuleId = "";
                            
@@ -1024,13 +1025,13 @@ function deleteRule(rule){
                                           
                                         
                                          if(data_receive){
-                                            // console.log(ID + " " + State);
-                                             console.log("Rule_Items Updated");
+                                            // myconsole.log(ID + " " + State);
+                                             myconsole.log("Rule_Items Updated");
                                              
                                              
                                          }else
                                          {
-                                            console.log(err); 
+                                            myconsole.log(err); 
                                              
                                          }
                                         
@@ -1053,7 +1054,7 @@ function deleteRule(rule){
         }else{
             if (err) {
                 // error handling code goes here
-                console.log("ERROR (GetRules) : ",err);            
+                myconsole.log("ERROR (GetRules) : ",err);            
             }
         
             
@@ -1067,22 +1068,22 @@ function deleteRule(rule){
 
 
 function senditems(){
-    console.log("Getting Items...");
+    myconsole.log("Getting Items...");
       db.getdata('Items',{Select: 'Id,Item_Name',whereClause:'Id LIKE "%"'},function(err,data_receive){
-                      // console.log('test1'); 
+                      // myconsole.log('test1'); 
            if(data_receive[0]){
-           // console.log(data_receive);
+           // myconsole.log(data_receive);
                 db.getdata('Alarm_Items',{Select: 'Id,Description',whereClause:'Id LIKE "%"'},function(err,data_receive2){
-                          // console.log('test1'); 
+                          // myconsole.log('test1'); 
                    if(data_receive2[0]){
-                   // console.log(data_receive);
+                   // myconsole.log(data_receive);
                     
                         io.emit("sendItems",data_receive,data_receive2);
                    
                      }else{
                     if (err) {
                         // error handling code goes here
-                        console.log("ERROR (GetItems) : ",err);            
+                        myconsole.log("ERROR (GetItems) : ",err);            
                     }
                     
                      }
@@ -1093,7 +1094,7 @@ function senditems(){
         }else{
             if (err) {
                 // error handling code goes here
-                console.log("ERROR (GetItems) : ",err);            
+                myconsole.log("ERROR (GetItems) : ",err);            
             }
         
             
@@ -1106,16 +1107,16 @@ function senditems(){
 
 
 function getWeather(){
-     db.getdata('Items',{Select: 'Item_Current_Value',whereClause:'Item_Name = "Wind Speed" OR Item_Name = "Temperature"'},function(err,data_receive){
-                      // console.log('test1'); 
+     db.getdata('Items',{Select: 'Item_Current_Value',whereClause:'Item_Name = "Wind Speed" OR Item_Name = "Temperature" OR Item_Name = "Rain"'},function(err,data_receive){
+                      // myconsole.log('test1'); 
            if(data_receive[0]){
-            //console.log(data_receive);
-            io.emit("sendWeather",data_receive[1].Item_Current_Value,data_receive[0].Item_Current_Value);
+            //myconsole.log(data_receive);
+            io.emit("sendWeather",data_receive[2].Item_Current_Value,data_receive[0].Item_Current_Value,data_receive[1].Item_Current_Value );
             
         }else{
             if (err) {
                 // error handling code goes here
-                console.log("ERROR (GetItems) : ",err);            
+                myconsole.log("ERROR (GetItems) : ",err);            
             }
         
             
@@ -1130,12 +1131,12 @@ function getWeather(){
 }
 
 function getPower(){
-      // console.log('test1'); 
+      // myconsole.log('test1'); 
      db.getdata('Items',{Select: 'Id,Item_Current_Value',whereClause:'Item_Type = "10"'},function(err,data_receive){
-                      // console.log('test1'); 
+                      // myconsole.log('test1'); 
        
            if(data_receive[0]){
-            //console.log(data_receive);
+            //myconsole.log(data_receive);
           //  io.emit("sendWeather",data_receive[0].Item_Current_Value,data_receive[1].Item_Current_Value);
             io.emit('SensorEvent', {Id:data_receive[0].Id,Current_State:data_receive[0].Item_Current_Value});
              io.emit('SensorEvent', {Id:data_receive[1].Id,Current_State:data_receive[1].Item_Current_Value});
@@ -1144,7 +1145,7 @@ function getPower(){
         }else{
             if (err) {
                 // error handling code goes here
-                console.log("ERROR (GetItems) : ",err);            
+                myconsole.log("ERROR (GetItems) : ",err);            
             }
         
             
@@ -1162,22 +1163,22 @@ function getPower(){
 
 function test(){
     
-    console.log("testing triggers");
+    myconsole.log("testing triggers");
       pushOver.push('test');
                     
                     
 }
 
 eventsocket.on('connect', function() { 
-    console.log('Connected to Event Handler');
+    myconsole.log('Connected to Event Handler');
    // io.emit('ConnectionStatus',{item: 'Event_Handler',status:'connected'});
     
     eventsocket.emit('register',{type:'Alarm',client:'Server'},function(){});
     eventsocket.emit('register',{type:'Motion',client:'Server'},function(){});
     
-    //console.log("testing");
+    //myconsole.log("testing");
     eventsocket.on('Event',function(data){
-         //console.log(data);
+         //myconsole.log(data);
         if(data['Event'].indexOf('Partition') > -1) 
         {
     
@@ -1211,7 +1212,7 @@ eventsocket.on('connect', function() {
         else if(data['Event'].indexOf('Zone') > -1)
         {
             var eventdata = JSON.parse(data['Event']);
-           // console.log(eventdata);
+           // myconsole.log(eventdata);
             constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
                 if(eventstring)
                 {
@@ -1241,16 +1242,16 @@ eventsocket.on('connect', function() {
 
 
 alarmsocket.on('connect', function() { 
-    console.log('Connected to Alarm Module');
+    myconsole.log('Connected to Alarm Module');
     
     alarmsocket.emit('register',{type:'Alarm',client:'Server'},function(){
     
     
     
         alarmsocket.on('AlarmEvent',function(data){
-           //console.log("Alarm event")
+           //myconsole.log("Alarm event")
            if(data['Partition'])
-           {    //console.log("this " + data['Current_State']);
+           {    //myconsole.log("this " + data['Current_State']);
                getState(data['Current_State'],function(realState){
                    
                    
@@ -1260,7 +1261,7 @@ alarmsocket.on('connect', function() {
                
            }else
            {
-               //console.log(data);
+               //myconsole.log(data);
                 io.emit('AlarmZoneEvent', data);
             
            }
@@ -1272,7 +1273,7 @@ alarmsocket.on('connect', function() {
           getModeStatus(function(night,connect,err){
             
              if(err){
-              console.log("Error occured during night mode status retrieval");                          
+              myconsole.log("Error occured during night mode status retrieval");                          
             }else{
                 if(data.Armed){
                     lastArmTime = Date();
@@ -1283,7 +1284,7 @@ alarmsocket.on('connect', function() {
                if(data.Ready && !data.Bypass){
                    clearBypass();
                 } 
-                // console.log(data.Bypass + " " + data.Memory + " " + data.Armed + " " + data.Ready);
+                // myconsole.log(data.Bypass + " " + data.Memory + " " + data.Armed + " " + data.Ready);
              io.emit("keypadLedState",{Bypass:data.Bypass, Memory:data.Memory,Armed:data.Armed,Ready:data.Ready,Night:night,Connected:connect});
             }
           });
@@ -1299,12 +1300,12 @@ alarmsocket.on('connect', function() {
         
         
         alarmsocket.on('alarmTrigger',function(data,time){
-            console.log('Server Module: An alarm was triggered');
-            //console.log(data);
+            myconsole.log('Server Module: An alarm was triggered');
+            //myconsole.log(data);
              db.getdata('Alarm_Items',{Select: 'Description',whereClause:'Name = ' + '"' + 'Zone_' + data + '"'},function(err,data_receive){
-                      // console.log('test1'); 
+                      // myconsole.log('test1'); 
                    if(data_receive[0]){
-                    console.log("Sending Email for Alarm Trigger, zone " + data_receive[0]['Description']);
+                    myconsole.log("Sending Email for Alarm Trigger, zone " + data_receive[0]['Description']);
                      sendemail("An alarm has been triggered by zone " + data_receive[0]['Description']);
                        pushOver.push("An alarm has been triggered by zone " + data_receive[0]['Description']);
                      db.insert('Alarm_Triggers', {Zone: data_receive[0]['Description'], Time: Date().toString()  });
@@ -1315,10 +1316,10 @@ alarmsocket.on('connect', function() {
                 }else{
                     if (err) {
                         // error handling code goes here
-                        console.log("ERROR (Alarm Trigger) : ",err);            
+                        myconsole.log("ERROR (Alarm Trigger) : ",err);            
                     }
                 
-                    console.log("No zone retrieved for Alarm Trigger");
+                    myconsole.log("No zone retrieved for Alarm Trigger");
                     io.emit("alarmTrigger",{Event:"unknown",Time:time});
                     db.insert('Alarm_Triggers', {Zone: "unknown", Time: Date().toString()  });
                     
@@ -1332,7 +1333,7 @@ alarmsocket.on('connect', function() {
         });
         
         alarmsocket.on('power',function(code){
-             console.log("Server: Power:Sending Email");
+             myconsole.log("Server: Power:Sending Email");
             switch(code){
 		    case 800: 
 		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '12' ,Current_State: 0 });
@@ -1381,7 +1382,7 @@ alarmsocket.on('connect', function() {
                  io.emit("ac",false);
                  sendemail("Trouble Event");
                    pushOver.push('AC Power Off');
-                 console.log("Server: Trouble Condition: Sending Email");
+                 myconsole.log("Server: Trouble Condition: Sending Email");
                  log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
              }
              
@@ -1397,11 +1398,11 @@ alarmsocket.on('connect', function() {
 
 
 function getState(requiredState,callback){
-    //console.log(requiredState);
+    //myconsole.log(requiredState);
     db.getdata('Alarm_States',{Select: 'State',whereClause:'Id = ' + requiredState},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR1 : ",err);            
+                            myconsole.log("ERROR1 : ",err);            
                         } else {            
                         // code to execute on data retrieval
                         if(data_receive[0]){
@@ -1423,14 +1424,14 @@ function getAlarmStatus(){
     db.getdata('Alarm_Items',{Select: 'Name,Current_State,Description,Alarm_Event,Type',whereClause:"'Id' LIKE '%'"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR2 : ",err);            
+                            myconsole.log("ERROR2 : ",err);            
                         } else {       
                             
                         // code to execute on data retrieval
                         var zone = [1 , 2 , 3 , 4 , 6];
                         
                            for(var i in data_receive){
-                               //console.log(data_receive[i]['Type'] + " " + data_receive[i]['Name']);  
+                               //myconsole.log(data_receive[i]['Type'] + " " + data_receive[i]['Name']);  
                                 if(zone.indexOf(data_receive[i]['Type']) != -1 )
                                 {
                                     var data = {Zone: data_receive[i]['Name'].substring(5),Current_State: data_receive[i]['Current_State'],Description:data_receive[i]['Description'],Alarm_Event:data_receive[i]['Alarm_Event']};
@@ -1454,7 +1455,7 @@ function getAlarmStatus(){
                                      var bypass,memory,armed,ready;
                                    var flag_bypass = 8,flag_memory = 4, flag_armed = 2,flag_ready = 1;
                                   var code = data_receive[i]['Current_State'];
-                                  // console.log("the code " + code);       
+                                  // myconsole.log("the code " + code);       
                                           
                                    if(code & flag_bypass)
                                    {
@@ -1493,9 +1494,9 @@ function getAlarmStatus(){
                                  
                                  getModeStatus(function(night,connect,err){
                                     if(err){
-                                        console.log("Error occured during night mode status retrieval");
+                                        myconsole.log("Error occured during night mode status retrieval");
                                     }else{
-                                      //  console.log(bypass + " " + memory + " " + armed + " " + ready);
+                                      //  myconsole.log(bypass + " " + memory + " " + armed + " " + ready);
                                      io.emit("keypadLedState",{Bypass:bypass, Memory:memory,Armed:armed,Ready:ready,Night:night,Connected:connect});
                                     }
                                   });
@@ -1537,14 +1538,14 @@ function getDeviceStatus(){
     db.getdata('Items',{Select: 'Id,Item_Name,Item_Current_Value,Item_Type,Node_Id,Node_Port,Item_Enabled_Value',whereClause:"'Id' LIKE '%' ORDER BY Item_Sort_Position ASC"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR2 : ",err);            
+                            myconsole.log("ERROR2 : ",err);            
                         } else {       
                             
                         // code to execute on data retrieval
                         var device = [1 , 2 , 3 , 4 , 5,6,7,11,15,18];
                         
                            for(var i in data_receive){
-                              // console.log(data_receive[i]['Item_Name']);  
+                              // myconsole.log(data_receive[i]['Item_Name']);  
                                 if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
                                 {
                                     var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value']};
@@ -1576,14 +1577,14 @@ function getNodeStatus(){
     db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
     if (err) {
     // error handling code goes here
-        console.log("ERROR2 : ",err);            
+        myconsole.log("ERROR2 : ",err);            
     } else {       
         
     // code to execute on data retrieval
    // var device = [1 , 2 , 3 , 4 , 5,6,7,11,15];
     
        for(var i in data_receive){
-          // console.log(data_receive[i]['Item_Name']);  
+          // myconsole.log(data_receive[i]['Item_Name']);  
            // if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
             //{
                 var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node'};
@@ -1610,14 +1611,14 @@ function updateNodeStatus(){
     db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
     if (err) {
     // error handling code goes here
-        console.log("ERROR2 : ",err);            
+        myconsole.log("ERROR2 : ",err);            
     } else {       
         
     // code to execute on data retrieval
    // var device = [1 , 2 , 3 , 4 , 5,6,7,11,15];
     
        for(var i in data_receive){
-           //console.log(data_receive[i]['Item_Name']);  
+           //myconsole.log(data_receive[i]['Item_Name']);  
            // if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
             //{
                 var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node'};
@@ -1647,10 +1648,10 @@ function updateNodeStatus(){
 
 
 function clearBypass(){
-     console.log("Clear bypass");
+     myconsole.log("Clear bypass");
     
     bypassedZones.length = 0;
-    // console.log(bypassedZones);
+    // myconsole.log(bypassedZones);
      
        
 }
@@ -1660,14 +1661,14 @@ function getEvents(numEvents){
     db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Id LIKE '%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR3 : ",err);            
+                            myconsole.log("ERROR3 : ",err);            
                         } else {            
                         // code to execute on data retrieval
                            for(var i = numEvents-1;i>=0;i--){
                                 
                                 var eventData = JSON.parse(data_receive[i]['Event']);
                                 
-                                  //  console.log(eventData);
+                                  //  myconsole.log(eventData);
                                     
                                    
                                      
@@ -1706,7 +1707,7 @@ function getImportantEvents(numEvents){
     db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Event LIKE '%Important%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR4 : ",err);            
+                            myconsole.log("ERROR4 : ",err);            
                         }
                         else 
                         {            
@@ -1770,7 +1771,7 @@ function getLastAlarm(){
     db.getdata('Event_Log',{Select: 'Id',whereClause:"Event LIKE '%12%' ORDER BY Id DESC LIMIT 1"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR5 : ",err);            
+                            myconsole.log("ERROR5 : ",err);            
                         } else {            
                         // code to execute on data retrieval
                         
@@ -1781,7 +1782,7 @@ function getLastAlarm(){
                           db.getdata('Event_Log',{Select: '*',whereClause:"Id > "+ newid +" limit 20"},function(err,data_receives){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR6 : ",err);            
+                            myconsole.log("ERROR6 : ",err);            
                         } else {            
                         // code to execute on data retrieval
                         
@@ -1841,12 +1842,12 @@ function getAlarmTriggers(lastArmTime){
     db.getLast('Alarm_Triggers',{Select: 'Zone,Time',whereClause:"'Zone' LIKE '%'" },function(err,data_receive){
         
         if(err){
-            console.log(err);    
+            myconsole.log(err);    
         }else if(data_receive[0]){
            
-            //console.log( Date.parse(data_receive[0]['Time']) - Date.parse(lastArmTime));
+            //myconsole.log( Date.parse(data_receive[0]['Time']) - Date.parse(lastArmTime));
             if(Date.parse(data_receive[0]['Time']) > Date.parse(lastArmTime)){
-             console.log("New alarm event");
+             myconsole.log("New alarm event");
                 io.emit("alarmTrigger",{Event:data_receive[0]["Zone"],Time:data_receive[0]["Time"]});
             }
         }
@@ -1915,7 +1916,7 @@ function setupexpress(){
 
    
    // http.listen(port, function(){
-  //    console.log('listening on port:'+ port.toString());
+  //    myconsole.log('listening on port:'+ port.toString());
   //  });
     // home page route (http://localhost:8080)
   //  router.get('/', routes.index);
@@ -1957,11 +1958,11 @@ function sendemail(data){
        cc:      configure2.email[0].cc[0],
        subject: data
         }, function(err, message) { 
-       // console.log(err || message); 
+       // myconsole.log(err || message); 
         if(message){
-		console.log("Email sent successfully");
+		myconsole.log("Email sent successfully");
 	}else if(err){
-		console.log("An error occured while sending email");
+		myconsole.log("An error occured while sending email");
 	}
 	
 	return;
@@ -1977,7 +1978,7 @@ function getModeStatus(callback){
          if(data_receive[0]){    
             if(data_receive[0]['Current_State']){
               
-             // console.log("Debug: Night mode is active");
+             // myconsole.log("Debug: Night mode is active");
               
               if(data_receive[1]['Current_State']){
               
@@ -1991,7 +1992,7 @@ function getModeStatus(callback){
                 
             }else if(!data_receive[0]['Current_State']){
             
-           // console.log("Debug: Night mode is NOT active");
+           // myconsole.log("Debug: Night mode is NOT active");
               if(data_receive[1]['Current_State']){
               
               callback(false,true,false);
@@ -2024,7 +2025,7 @@ function getip(callback){
     var ipAddress = '';
     res.on('data', function(chunk) {
         ipAddress += chunk;
-     // console.log(chunk);
+     // myconsole.log(chunk);
      callback(ipAddress); 
         
     });
@@ -2058,16 +2059,16 @@ function updatedns(ip,callback2){
     };
     
   var req = http2.request(options, function(res) {
-  //	console.log('STATUS: ' + res.statusCode);
-  //	console.log('HEADERS: ' + JSON.stringify(res.headers));
+  //	myconsole.log('STATUS: ' + res.statusCode);
+  //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		console.log('DNS Update: ' + chunk);
+    		myconsole.log('DNS Update: ' + chunk);
   	});
   });
 
 req.on('error', function(e) {
-  console.log('problem with request: ' + e.message);
+  myconsole.log('problem with request: ' + e.message);
 });
 
 // write data to request body
@@ -2087,7 +2088,7 @@ function updatednshome(ip,callback2){
     //var auth = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
    // var header = { 'Authorization': auth};
     //'Host': 'https://ydns.eu/api/v1/update/?host=example.ydns.eu&ip='+ip,
-  // console.log(pass);
+  // myconsole.log(pass);
     var options = {
       host: 'minny.co.za',
       path: ':' + pass + '@dyn.dns.he.net/nic/update?hostname=minny.co.za&myip=' + ip,//&ip='+ip.substring(0,15),
@@ -2097,16 +2098,16 @@ function updatednshome(ip,callback2){
     };
     
   var req = http2.request(options, function(res) {
-  //	console.log('STATUS: ' + res.statusCode);
-  //	console.log('HEADERS: ' + JSON.stringify(res.headers));
+  //	myconsole.log('STATUS: ' + res.statusCode);
+  //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		console.log('DNS Update: ' + chunk);
+    		myconsole.log('DNS Update: ' + chunk);
   	});
   });
 
 req.on('error', function(e) {
-  console.log('problem with request: ' + e.message);
+  myconsole.log('problem with request: ' + e.message);
 });
 
 // write data to request body
@@ -2138,17 +2139,17 @@ function updatednsproxy(callback2){
     };
     
   var req = http2.request(options, function(res) {
-  //	console.log('STATUS: ' + res.statusCode);
-  //	console.log('HEADERS: ' + JSON.stringify(res.headers));
+  //	myconsole.log('STATUS: ' + res.statusCode);
+  //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		//console.log('DNS Proxy Update: ' + chunk);
-    		console.log('DNS Proxy Update: OK');
+    		//myconsole.log('DNS Proxy Update: ' + chunk);
+    		myconsole.log('DNS Proxy Update: OK');
   	});
   });
 
 req.on('error', function(e) {
-  console.log('problem with request: ' + e.message);
+  myconsole.log('problem with request: ' + e.message);
 });
 
 // write data to request body
@@ -2164,7 +2165,7 @@ callback2();
 
 function panic(){
     alarmsocket.emit('panic',function(){
-         console.log('Panic');
+         myconsole.log('Panic');
         
        
      });

@@ -1,10 +1,10 @@
 var db = require('./dbhandler');
 
-
+var myconsole = require('./myconsole.js');
 
 
 exports.checkRule = function(rule,callback){
-    console.log("Checking rule: "  + rule);
+    myconsole.log("Checking rule: "  + rule);
     
    data = {'Select':'Conditions,Result,RuleOnTime,FunctionName','whereClause':'Id = ' + rule + ' AND Rule_Enabled = 1'  };
     
@@ -12,10 +12,10 @@ exports.checkRule = function(rule,callback){
        
        if(err){
            
-           console.log(err);
+           myconsole.log(err);
            
        }else if(result){
-           //console.log(result[0]);
+           //myconsole.log(result[0]);
            var res = result[0].Conditions.split(';');
            
           
@@ -35,7 +35,7 @@ exports.checkRule = function(rule,callback){
                 }
               
            }
-          // console.log(ids);
+          // myconsole.log(ids);
             var where = "Second_Id IN (" + ids + ") AND Secondary_Item = 0 ORDER BY FIELD (Second_Id," + ids + ")";
         
            
@@ -46,10 +46,10 @@ exports.checkRule = function(rule,callback){
                
                if(err){
                    
-                   console.log(err);
+                   myconsole.log(err);
                    
                }else if(result2){
-                  // console.log(result2);
+                  // myconsole.log(result2);
                 
                    var cond = "";
                   // var j = 0;
@@ -73,11 +73,11 @@ exports.checkRule = function(rule,callback){
                      }
                      
                    }
-                  // console.log(cond);
-                  // console.log(eval(cond));
+                  // myconsole.log(cond);
+                  // myconsole.log(eval(cond));
                    
                   var executeRule = eval(cond);
-                 // console.log(cond);
+                 // myconsole.log(cond);
                   if(executeRule > 0){
                       
                       var res2 = result[0].Result.split(';');
@@ -97,13 +97,13 @@ exports.checkRule = function(rule,callback){
                                    
                                    if(err){
                                        
-                                       console.log(err);
+                                       myconsole.log(err);
                                        callback(false,null,null,null,null,null,func); 
                                        
                                    }else if(result3){
-                                       console.log(result3[0]);
+                                       myconsole.log(result3[0]);
                                       
-                                      // console.log(nodes[i] + " " + ports[i] + " " + values[i] );
+                                      // myconsole.log(nodes[i] + " " + ports[i] + " " + values[i] );
                                      // setTimeout(function () {
                                         callback(true,result3[0].Node_Id,result3[0].Node_Port,value,ID,onTime,func);
                                       //}, 2000);
@@ -139,7 +139,7 @@ exports.checkRule = function(rule,callback){
            
            
            
-         // console.log(res);
+         // myconsole.log(res);
           
        }
        

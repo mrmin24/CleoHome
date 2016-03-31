@@ -1,3 +1,5 @@
+var myconsole = require('./myconsole.js');
+
 exports.json2xml = function(json, root, cb){
 	var recursion = 0;
 	var xml = '' ;
@@ -35,7 +37,7 @@ exports.json2xml = function(json, root, cb){
 					if(key === '#'){
 					    xml += value;
 					} else {
-					    //console.log(key);
+					    //myconsole.log(key);
 						xml +=  value ;
 					}
 				}
@@ -62,10 +64,10 @@ exports.json2xml = function(json, root, cb){
 		    
 		    fs.writeFile('./config.xml',xml, function(err, data) {
                 if(err)
-                    console.log(err);
+                    myconsole.log(err);
                
                 if (err) throw err;
-                 {   console.log('It\'s saved!');
+                 {   myconsole.log('It\'s saved!');
                 
                 
                     cb(xml);

@@ -8,6 +8,7 @@ var port     = process.env.PORT || 8080;
 
 var passport = require('passport');
 var flash    = require('connect-flash');
+var myconsole = require('./myconsole.js');
 
 // configuration ===============================================================
 // connect to our database
@@ -36,4 +37,4 @@ require('./app/routes.js')(app, passport); // load our routes and pass in our ap
 
 // launch ======================================================================
 app.listen(port);
-console.log('The magic happens on port ' + port);
+myconsole.log('The magic happens on port ' + port);

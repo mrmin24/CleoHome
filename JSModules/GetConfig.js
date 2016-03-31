@@ -1,4 +1,4 @@
-
+var myconsole = require('./myconsole.js');
 exports.data;
 
 exports.config = function(callback) {
@@ -8,18 +8,18 @@ exports.config = function(callback) {
         xml2js = require('xml2js');
     
     var parser = new xml2js.Parser();
-    console.log('Initialising config');
-   // console.log(__DIRNAME);
+    myconsole.log('Initialising config');
+   // myconsole.log(__DIRNAME);
     fs.readFile(__dirname+'/config.xml', function(err, data) {
         if(err)
-            console.log(err);
+            myconsole.log(err);
         parser.parseString(data, function (err, result) {
         if(err)
-            console.log(err);
+            myconsole.log(err);
             
         exports.data = result;
-        //console.log(result);
-        console.log('Config Initialised');
+        //myconsole.log(result);
+        myconsole.log('Config Initialised');
         
         callback();
         });

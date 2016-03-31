@@ -1,11 +1,11 @@
 var getconfig = require('../../GetConfig.js');
 var configure = getconfig.data;
 var configure2 = configure.xml;
-
+var myconsole = require('../../myconsole.js');
 
 exports.push = function(message){
         
-        console.log('pushing message');
+        myconsole.log('pushing message');
         var user = configure2.pushOver[0].user[0];
         var token = configure2.pushOver[0].token[0];
        // var message = 'test';
@@ -24,12 +24,12 @@ exports.push = function(message){
         // A callback function is defined:
         push.send(user, "Cleopatra", message, function (err, res){
             if(err){
-                console.log("We have an error:");
-                console.log(err);
-                console.log(err.stack);
+                myconsole.log("We have an error:");
+                myconsole.log(err);
+                myconsole.log(err.stack);
             }else{
-                console.log("Message send successfully");
-               // console.log(res);
+                myconsole.log("Message send successfully");
+               // myconsole.log(res);
             }
         });
         

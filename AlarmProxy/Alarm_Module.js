@@ -2,7 +2,10 @@ var nap = require('./nodealarmproxy.js');
 var config = require('./config.js'); //comment this out
 var log = require('./logger.js');
 var db = require('./dbhandler');
+var myconsole = require('../JSModules/myconsole.js');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
+
+var evaluate = require('../JSModules/Rule_Items_Evaluate');
 
 var configure = require('../JSModules/GetConfig.js');
 var configure2 = configure.data.xml;
@@ -17,10 +20,11 @@ var oldconnectionstatus = null;
 
 
 function start() {
+   // myconsole.log(debug);
 
     var io = require('socket.io').listen(port);
     if (io) {
-        console.log('Alarm Module Listening on ' + port.toString());
+        myconsole.log('Alarm Module Listening on ' + port.toString());
     }
 
 
@@ -52,11 +56,11 @@ function start() {
   
 
         io.sockets.on('connection', function(socket) {
-            //console.log('Client connected to Alarm Module');
+            //myconsole.log('Client connected to Alarm Module');
             // var data = 'Alarm';
             sockets = socket;
             socket.on('register', function(data, callback) {
-                console.log(data.client + ' registered for ' + data.type + ' updates');
+                myconsole.log(data.client + ' registered for ' + data.type + ' updates');
                 client = 1;
                 
                 callback();
@@ -65,11 +69,11 @@ function start() {
 
             socket.on('disconnect', function() {
 
-                console.log('Alarm Module: Client Disconnected from alarm updates');
+                myconsole.log('Alarm Module: Client Disconnected from alarm updates');
 
                 if (this.server.sockets.sockets.length == 0) {
                     client = 0;
-                    console.log('All clients disconnected from alarm module');
+                    myconsole.log('All clients disconnected from alarm module');
                 }
             });
 
@@ -134,7 +138,7 @@ function start() {
 
         alarm.on('keypadLedState', function(data) {
             //sockets.emit('keypadLedState', {state: data});
-            // console.log("keypad is " + data['code'] + " " +data['ledState']);
+            // myconsole.log("keypad is " + data['code'] + " " +data['ledState']);
             logdata(data);
 
         });
@@ -156,7 +160,7 @@ function start() {
         alarm.on('Alarms_connection_status', function(status,connected) {
            
            
-         //  console.log(status + "  " + oldconnectionstatus);
+         //  myconsole.log(status + "  " + oldconnectionstatus);
             
             
             
@@ -170,7 +174,7 @@ function start() {
                  sockets.emit('AlarmConnectionState', status,connected);
             }
             
-                 console.log("Alarm Status " + status);
+                 myconsole.log("Alarm Status " + status);
                 
                  log.ownDb('Alarm_Items', {
                     Set: 'Current_State',
@@ -217,21 +221,48 @@ function start() {
 
 
 var watchevents = ['500', '510', '601', '602', '609', '610', '650', '651', '653', '625', '626', '652', '654', '655', '656', '657', /*'659'*/ , '670', '700', '701', '702', '750', '751', '800', '801', '802', '803', '829'];
-var alarmcode = ['601', '605', '620', '621', '625', '654'];
+var alarmcode = ['601', '605', '620', '621', '625', '654'];  //alarm trigger events
 var armDisarmZone = [configure2.alarm[0].awayArmZone[0],configure2.alarm[0].stayArmZone[0]];
 var zoneOpenedCode = '609';
 
 function logdata(data) {
 
     var important = isImportant(data);
-    //console.log(important);
+    //myconsole.log(important);
     if (important) {
         log.logger('Alarm', '{"Important":"' + important + '"}');
     }
 
+
+
     if (watchevents.indexOf(data.code) != -1) {
-        //console.log(data.pre +' ' + data.zone + ' ' + data.post);
+       // myconsole.log(data.pre +' ' + data.zone + ' ' + data.post);
         if (data.pre == 'Zone') {
+             //*****************************************************************************************************  Used for control based on alarm zone opened
+          
+                
+               getID('Zone_' + data.zone,function(ID){
+                   // myconsole.log(ID);
+                     
+                    
+                    evaluate.evaluateChange(ID,data.send,function(node,port,state,cancelTime,func){
+                        
+                     
+                         if(func){
+                             
+                           eval(func);
+                         }
+                         
+                         if(node && port && state){
+                          mySensorsocket.emit('deviceSwitch',node,port,state);
+                         }
+                     //myconsole.log(data_receive[0]);
+                    });
+                
+                });
+            
+            //***********************************************************************************************
+            
             if (alarmcode.indexOf(data.code) != -1) {
                 lastzone = data.zone;
             
@@ -243,21 +274,10 @@ function logdata(data) {
                     Alarm_Event: Date()
                 });
                 
-                console.log("GettingID");
-                 getID('Zone_' + data.zone,function(ID){
-                    evaluate.evaluateChange(ID,data.send,function(node,port,state,cancelTime,func){
-                   
-                    eval(func);  
-                    
-                         if(node && port && state){
-                          mySensorsocket.emit('deviceSwitch',node,port,state);
-                         }
-                     //console.log(data_receive[0]);
-                    });
+                //myconsole.log("GettingID");
                 
-                });
 
-                //console.log(data.zone + " test 1");
+                //myconsole.log(data.zone + " test 1");
                 if (client) {
                     sockets.emit('AlarmEvent', {
                         Zone: data.zone,
@@ -267,7 +287,7 @@ function logdata(data) {
                 }
             }
             else if(armDisarmZone.indexOf(data.zone) > -1 && data.code == zoneOpenedCode){
-                console.log("Alarm: Arm / Disarm: " + data.zone + " / " + data.code )
+                myconsole.log("Alarm: Arm / Disarm: " + data.zone + " / " + data.code )
                 db.getdata('Alarm_Items', {
                         Select: 'Current_State',
                         whereClause: "Type LIKE '9' ORDER BY Id DESC LIMIT 1"
@@ -275,13 +295,13 @@ function logdata(data) {
 
                         if (err) {
 
-                            console.log(err);
+                            myconsole.log(err);
                         }
                         else if (data_receive) {
 
                             var armStates = [6,7,8,9,10,12,13,14];
                             var currentState = data_receive[0]['Current_State'];
-                            console.log(currentState);
+                            myconsole.log(currentState);
                             
                             if(data.zone == configure2.alarm[0].awayArmZone[0]){
                                 
@@ -290,7 +310,7 @@ function logdata(data) {
                                     armDisarm("Away");    
                                     
                                 }else if(armStates.indexOf(currentState) > -1 ){
-                                    console.log("Disarm");
+                                    myconsole.log("Disarm");
                                     armDisarm("Disarm");
                                 }
                             
@@ -323,8 +343,13 @@ function logdata(data) {
                 
             }else {
                 lastzone = data.zone;
-            //console.log(lastzone);
-            //console.log(data.send);
+          
+            
+            
+           
+            
+            
+            
                 log.ownDb('Alarm_Items', {
                     Set: 'Current_State',
                     Where: 'Name',
@@ -336,9 +361,9 @@ function logdata(data) {
                 
                 
                 
-                // console.log(data.zone + " test 3");
+                // myconsole.log(data.zone + " test 3");
                 if (client) {
-                    // console.log(data.zone + " test 2");
+                    // myconsole.log(data.zone + " test 2");
 
                     sockets.emit('AlarmEvent', {
                         Zone: data.zone,
@@ -455,7 +480,7 @@ function logdata(data) {
                     Name: 'Partition_' + data.partition,
                     Current_State: data.send
                 });
-                console.log('Alarm Module: An alarm was triggered');
+                myconsole.log('Alarm Module: An alarm was triggered');
                 sockets.emit('alarmTrigger', lastzone,Date.now());
             }if (data.code == '656') {
                 log.ownDb('Alarm_Items', {
@@ -464,7 +489,7 @@ function logdata(data) {
                     Name: 'Partition_' + data.partition,
                     Current_State: data.send
                 });
-                console.log('Alarm Module: Exit delay');
+                myconsole.log('Alarm Module: Exit delay');
                 //sockets.emit('alarmTrigger', lastzone,Date.now());
             }
             else {
@@ -486,7 +511,7 @@ function logdata(data) {
             }
         }
         else if (data.code == '510') {
-            //console.log("test " + data.code + " " + data.ledState);
+            //myconsole.log("test " + data.code + " " + data.ledState);
             var bypass, memory, armed, ready;
             var flag_bypass = 8,
                 flag_memory = 4,
@@ -525,9 +550,9 @@ function logdata(data) {
             }
 
 
-            // console.log('Partition_' + data.partition + '_ledState');
-           // console.log(code);
-           // console.log(client);
+            // myconsole.log('Partition_' + data.partition + '_ledState');
+           // myconsole.log(code);
+           // myconsole.log(client);
             if (client) {
                 sockets.emit('keypadLedState', {
                     Bypass: bypass,
@@ -573,7 +598,7 @@ function getState(requiredState, callback) {
     }, function(err, data_receive) {
         if (err) {
             // error handling code goes here
-            console.log("ERROR1 : ", err);
+            myconsole.log("ERROR1 : ", err);
         }
         else {
             // code to execute on data retrieval
@@ -589,11 +614,11 @@ function isImportant(data) {
     var zoneAlarms = ['601', '603', '605'];
     var importantZones = ['001', '016'];
     var importantZoneEvents = ['609'];
-    // console.log("Checking for important Event " + data.code + " " + data.zone);
+    // myconsole.log("Checking for important Event " + data.code + " " + data.zone);
 
     if (important.indexOf(data.code) != -1) {
 
-        //console.log("Important Event " + data.code);
+        //myconsole.log("Important Event " + data.code);
         if (zoneAlarms.indexOf(data.code) != -1) {
             var message = data.pre + "_" + data.zone + " " + data.post;
         }
@@ -609,7 +634,7 @@ function isImportant(data) {
     else {
         if (importantZones.indexOf(data.zone) != -1 && importantZoneEvents.indexOf(data.code) != -1) {
 
-            // console.log("Important Event " + data.code);   
+            // myconsole.log("Important Event " + data.code);   
             var message = "Zone_" + data.zone + " " + data.post;
             return message;
 
@@ -710,36 +735,36 @@ function bypassZones(zones, callback) {
 
 function sendPanic(){
     
-     nap.manualCommand('0603' , false, function(ack, nack, retry) {
+    nap.manualCommand('0603' , false, function(ack, nack, retry) {
             if (nack) {
-                console.log("nack");
+                myconsole.log("nack");
                 
                 return;
             }
             else if (ack) {
 
-                console.log("ack"); 
+                myconsole.log("ack"); 
 
             }
             
 
 
         });
-     console.log('send panic 2');
+    // myconsole.log('send panic 2');
 }
 
 var nextzone, nextzone, bypassedZones = [];
 
 function bypassOne(zone, zones, callback) {
-    //console.log(zones);
-    //console.log(zone);
+    //myconsole.log(zones);
+    //myconsole.log(zone);
     nextzone = zone;
     sleep(250, function() {
         // executes after one second, and blocks the thread
 
         nap.manualCommand('0711*1' + zone + '#', false, function(ack, nack, retry) {
             if (nack) {
-                console.log("nack");
+                myconsole.log("nack");
                 nextzone = null;
                 nextzone = null;
                 callback(true, false);
@@ -748,7 +773,7 @@ function bypassOne(zone, zones, callback) {
             else if (ack) {
 
                 if (zones.length == 0) {
-                    console.log("Zone " + nextzone + " bypassed");
+                    myconsole.log("Zone " + nextzone + " bypassed");
                     bypassedZones.push(nextzone);
                     nextzone = null;
                     nextzone = null;
@@ -758,7 +783,7 @@ function bypassOne(zone, zones, callback) {
                 }
                 else {
 
-                    console.log("Zone " + nextzone + " bypassed");
+                    myconsole.log("Zone " + nextzone + " bypassed");
                     bypassedZones.push(nextzone);
                     nextzone = zones.splice(0, 1);
                     nextzones = zones;
@@ -767,7 +792,7 @@ function bypassOne(zone, zones, callback) {
 
             }
             else if (retry) {
-                console.log("Retry Zone " + nextzone);
+                myconsole.log("Retry Zone " + nextzone);
                 bypassOne(nextzone, nextzones, callback);
 
             }
@@ -789,7 +814,7 @@ function sleep(time, callback) {
 
 function armDisarm(type){
     
-            console.log("Alarm: " + type + " requested");
+            myconsole.log("Alarm: " + type + " requested");
 
 
                 if (type == 'Away') {
@@ -798,13 +823,13 @@ function armDisarm(type){
 
                         if (ack) {
 
-                            console.log('Away mode');
+                            myconsole.log('Away mode');
 
 
                         }
                         else if (nack) {
 
-                            console.log('Away mode failed');
+                            myconsole.log('Away mode failed');
 
 
                         }
@@ -820,13 +845,13 @@ function armDisarm(type){
 
                         if (ack) {
 
-                            console.log('Stay mode');
+                            myconsole.log('Stay mode');
 
 
                         }
                         else if (nack) {
 
-                            console.log('Stay mode failed');
+                            myconsole.log('Stay mode failed');
 
 
                         }
@@ -850,7 +875,7 @@ function armDisarm(type){
 
                         if (err) {
 
-                            console.log(err);
+                            myconsole.log(err);
                         }
                         else if (data_receive) {
 
@@ -858,7 +883,7 @@ function armDisarm(type){
                             var currentState = data_receive[0]['Current_State'];
 
 
-                            // console.log(currentState);
+                            // myconsole.log(currentState);
 
                             if (currentState == 1) {
                                 nap.manualCommand('0711*1', false, function(ack, nack, retry) {
@@ -871,14 +896,14 @@ function armDisarm(type){
                                             Name: "11",
                                             Current_State: 0
                                         });
-                                        console.log('Night mode cancelled');
+                                        myconsole.log('Night mode cancelled');
 
                                         sleep(1000, function() {
                                             nap.manualCommand('0401', true, function(ack, nack, retry) {
 
                                                 if (ack) {
 
-                                                    console.log('Disarmed');
+                                                    myconsole.log('Disarmed');
 
 
 
@@ -886,16 +911,16 @@ function armDisarm(type){
                                                 }
                                                 else if (nack) {
 
-                                                    console.log('Disarm Failed');
+                                                    myconsole.log('Disarm Failed');
 
 
                                                 }
                                                 else if (retry) {
 
-                                                    console.log("Debug: Retry required");
+                                                    myconsole.log("Debug: Retry required");
                                                 }
                                                 else {
-                                                    console.log("Debug: Something is not right");
+                                                    myconsole.log("Debug: Something is not right");
                                                 }
 
 
@@ -907,13 +932,13 @@ function armDisarm(type){
                                     }
                                     else if (nack) {
 
-                                        console.log('Night mode cancel failed');
+                                        myconsole.log('Night mode cancel failed');
 
 
                                     }
                                     else if (retry) {
 
-                                        console.log("Debug: Retry required");
+                                        myconsole.log("Debug: Retry required");
                                     }
 
 
@@ -928,19 +953,19 @@ function armDisarm(type){
 
 
                                     if (ack) {
-                                        console.log('Disarmed');
+                                        myconsole.log('Disarmed');
 
 
                                     }
                                     else if (nack) {
 
-                                        console.log('Disarm failed');
+                                        myconsole.log('Disarm failed');
 
 
                                     }
                                     else if (retry) {
 
-                                        console.log("Debug: Retry required");
+                                        myconsole.log("Debug: Retry required");
                                     }
                                 });
 
@@ -954,7 +979,7 @@ function armDisarm(type){
                 }
 
                 else if (type == 'Night') {
-                    console.log("debug: Night mode selected");
+                    myconsole.log("debug: Night mode selected");
 
                     db.getdata('Alarm_Items', {
                         Select: 'Current_State',
@@ -962,23 +987,23 @@ function armDisarm(type){
                     }, function(err, data_receive) {
 
                         if (err) {
-                            console.log(err);
+                            myconsole.log(err);
 
                         }
                         else if (data_receive) {
 
 
                             var currentState = data_receive[0]['Current_State'];
-                            //console.log("debug: State before night mode is: " + currentState);
+                            //myconsole.log("debug: State before night mode is: " + currentState);
 
-                            // console.log(currentState);
+                            // myconsole.log(currentState);
 
                             if (currentState == 7  || currentState == 13 ) {
                                 nap.manualCommand('0711*1', false, function(ack, nack, retry) {
 
                                     if (ack) {
 
-                                        console.log('Night mode');
+                                        myconsole.log('Night mode');
                                         log.ownDb('Alarm_Items', {
                                             Set: 'Current_State',
                                             Where: 'Type',
@@ -989,13 +1014,13 @@ function armDisarm(type){
                                     }
                                     else if (nack) {
 
-                                        console.log('Night mode failed');
+                                        myconsole.log('Night mode failed');
 
 
                                     }
                                     else if (retry) {
 
-                                        console.log("Debug: Retry required");
+                                        myconsole.log("Debug: Retry required");
                                     }
 
 
@@ -1011,13 +1036,13 @@ function armDisarm(type){
 
 
                                     if (ack) {
-                                        console.log('Stay mode');
+                                        myconsole.log('Stay mode');
 
                                         nap.manualCommand('0711*1', false, function(ack, nack, retry) {
 
                                             if (ack) {
 
-                                                console.log('Night mode');
+                                                myconsole.log('Night mode');
                                                 log.ownDb('Alarm_Items', {
                                                     Set: 'Current_State',
                                                     Where: 'Type',
@@ -1028,13 +1053,13 @@ function armDisarm(type){
                                             }
                                             else if (nack) {
 
-                                                console.log('Night mode failed');
+                                                myconsole.log('Night mode failed');
 
 
                                             }
                                             else if (retry) {
 
-                                                console.log("Debug: Retry required");
+                                                myconsole.log("Debug: Retry required");
 
                                             }
 
@@ -1043,13 +1068,13 @@ function armDisarm(type){
                                     }
                                     else if (nack) {
 
-                                        console.log('Stay mode failed');
+                                        myconsole.log('Stay mode failed');
 
 
                                     }
                                     else if (retry) {
 
-                                        console.log("Debug: Retry required");
+                                        myconsole.log("Debug: Retry required");
                                     }
                                 });
 
@@ -1076,7 +1101,7 @@ function armDisarm(type){
                                             if (ack) {
 
 
-                                                console.log('Night mode cancelled');
+                                                myconsole.log('Night mode cancelled');
                                                 log.ownDb('Alarm_Items', {
                                                     Set: 'Current_State',
                                                     Where: 'Type',
@@ -1087,13 +1112,13 @@ function armDisarm(type){
                                             }
                                             else if (nack) {
 
-                                                console.log('Night mode cancel failed');
+                                                myconsole.log('Night mode cancel failed');
 
 
                                             }
                                             else if (retry) {
 
-                                                console.log("Debug: Retry required");
+                                                myconsole.log("Debug: Retry required");
                                             }
 
 
@@ -1109,7 +1134,27 @@ function armDisarm(type){
                 }
 }
 
+function getID(name,callback){
+    
+    db.getdata('Alarm_Items', {
+        Select: 'Id',
+        whereClause: "Name = '" + name + "'"
+    }, function(err, data_receive) {
 
+        if (err) {
+            myconsole.log(err);
+        }
+        else if (data_receive[0]['Id']) {
+           //myconsole.log(data_receive[0]['Id']);
+           callback(data_receive[0]['Id']);
+        }
+        
+        
+    });
+                                
+                                
+
+}
    
 
 exports.start = start;

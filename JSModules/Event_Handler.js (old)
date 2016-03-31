@@ -9,7 +9,7 @@ var timer1;
 
 
 io.on('connection', function(socket){
-  console.log('Client connected');
+  myconsole.log('Client connected');
   //var data = 'Alarm';
   
   socket.on('register',function(data){
@@ -37,12 +37,12 @@ io.on('connection', function(socket){
      
      clearInterval(timer1);
      
-     console.log('Client Disconnected');
+     myconsole.log('Client Disconnected');
      
      if(!this.sockets)
      {
          
-         console.log('All clients disconnected');
+         myconsole.log('All clients disconnected');
      }
      
  });   
@@ -61,7 +61,7 @@ app.get('/', function(req, res){
 
 
 http.listen(44602, function(){
-  console.log('listening on *:44602');
+  myconsole.log('listening on *:44602');
 });
 
 
@@ -72,7 +72,7 @@ function setListen(type,lastId,callback,timer1){
         db.getdata('Event_Log',{Select: 'Id, Event, Time',whereClause:'Type = ' + type + ' AND Id > '+ lastId},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            console.log("ERROR : ",err);            
+                            myconsole.log("ERROR : ",err);            
                         } else {            
                         // code to execute on data retrieval
                           if(data_receive.length > 0){
@@ -85,7 +85,7 @@ function setListen(type,lastId,callback,timer1){
                    });
         
      
-        console.log('test');
+        myconsole.log('test');
     } ,1000);
     
     
@@ -97,7 +97,7 @@ function getLast(type,callback){
         if (err) 
         {
          // error handling code goes here
-            console.log("ERROR : ",err);            
+            myconsole.log("ERROR : ",err);            
             }
             else {            
         // code to execute on data retrieval

@@ -4,6 +4,8 @@ var mysql = require('mysql');
 var bcrypt = require('bcrypt-nodejs');
 //var dbconfig = require('./database');
 var config = require('../GetConfig.js');
+var myconsole = require('../myconsole.js');
+
 var config2 = config.data.xml.database[0];
 
 
@@ -28,7 +30,7 @@ module.exports = function(app, passport) {
 	// HOME PAGE (with login links) ========
 	// =====================================
 	app.get('/', function(req, res) {
-		//console.log(req.session.cookie.maxAge);
+		//myconsole.log(req.session.cookie.maxAge);
 	//	if(req.session.cookie.maxAge == false || req.session.cookie.maxAge == null){
 			
 		//	res.redirect('/login');
@@ -71,7 +73,7 @@ module.exports = function(app, passport) {
                     if (err)
                         return done(err);
                     if (!rows.length) {
-                        console.log("Invalid Login: User not found in login list");
+                        myconsole.log("Invalid Login: User not found in login list");
                         req.cookies.Username = false;
             	  		req.cookies.Token = false;
                        validlogin = false; // req.flash is the way to set flashdata using connect-flash
@@ -82,19 +84,19 @@ module.exports = function(app, passport) {
                     for(var i in rows){
                     	users.push(rows[i]['Token']);
                     }
-                   // console.log(users);					// enable to see tokens
+                   // myconsole.log(users);					// enable to see tokens
                     
                     // if the user is found but the password is wrong
                     if (users.indexOf(token) == -1)
                     {
-                        console.log("Invalid login: Token incorrect");
+                        myconsole.log("Invalid login: Token incorrect");
                         clearusertokens(req.cookies.Username,null);
                         req.cookies.Username = false;
             	  		req.cookies.Token = false;   								//  - clear database for user
                         validlogin = false; 
                         
                     }else{
-                    console.log("Login token accepted");
+                    myconsole.log("Login token accepted");
                     // all is well, return successful user						//issue new token    --- future feature
                     validlogin = true;
                     }
@@ -119,7 +121,7 @@ module.exports = function(app, passport) {
                         return done(err);
                     else
                     {
-                    	console.log("User tokens deleted for user " + user);
+                    	myconsole.log("User tokens deleted for user " + user);
                     }
                         
                         
@@ -160,10 +162,10 @@ module.exports = function(app, passport) {
    		            
 
             if (req.body.remember) {
-            	console.log("remember me");	
+            	myconsole.log("remember me");	
             
           
-	            	console.log(token);
+	            	myconsole.log(token);
 	         
            
 					res.cookie('Username', req.user.username, { maxAge: timeout, httpOnly: true });
@@ -187,7 +189,7 @@ module.exports = function(app, passport) {
 	              //req.session.cookie.maxAge = 1000 * 60 * 60 * 24 * 30;
           
             } else {
-            	console.log("No Remember Me");
+            	myconsole.log("No Remember Me");
             	 res.clearCookie('Username');
             	  res.clearCookie('Token');
             	 // res.clearCookie('Session_id');

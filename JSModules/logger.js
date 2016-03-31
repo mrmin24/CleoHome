@@ -5,12 +5,12 @@ var io = require('socket.io')(http);
 var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
-
+var myconsole = require('./myconsole.js');
 
 
 
 exports.logger = function(type,event) {
-    //console.log(event);
+    //myconsole.log(event);
     var data = {Type: type, Event: event, Time: Date().toString()  };
     
    
@@ -22,7 +22,7 @@ exports.logger = function(type,event) {
 
 
 exports.ownDb = function(type,data) {
-   // console.log(data);
+   // myconsole.log(data);
    
     
    
@@ -35,7 +35,7 @@ exports.ownDb = function(type,data) {
              if(node && port && state){
               mySensorsocket.emit('deviceSwitch',node,port,state);
              }
-         //console.log(data_receive[0]);
+         //myconsole.log(data_receive[0]);
         });
     
     });
@@ -54,10 +54,10 @@ function getID(name,callback){
     }, function(err, data_receive) {
 
         if (err) {
-            console.log(err);
+            myconsole.log(err);
         }
         else if (data_receive[0]['Id']) {
-           //console.log(data_receive[0]['Id']);
+           //myconsole.log(data_receive[0]['Id']);
            callback(data_receive[0]['Id']);
         }
         

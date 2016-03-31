@@ -235,7 +235,7 @@
      
      function switchGraphsTab(){
          console.log("Graphs");
-         getgraphs();
+        // getgraphs();
          $("#Alarm_Panel").removeClass().addClass('hidden ');
          $("#Event_Panel").removeClass().addClass('hidden');
         $("#Event_Panel_Title").removeClass().addClass('hidden');
@@ -412,10 +412,11 @@
     }  
     
     
-    socket.on('sendWeather',function(temp,wind){
+    socket.on('sendWeather',function(temp,wind,rain){
        
      $('#temp').html(temp);
      $('#wind').html(wind);
+     $('#rain').html(rain);
      
         
     });
@@ -1146,7 +1147,7 @@
     
     
     
-    function graphd3(data){
+    function graphd3(data,axis_text){
         
         //var data = {"step_plot_4": {"x_axis": ["12-Jul-14", "14-Jul-14", "16-Jul-14", "18-Jul-14", "20-Jul-14", "22-Jul-14", "24-Jul-14", "26-Jul-14", "28-Jul-14", "30-Jul-14", "01-Aug-14"], "y_axis": [0, 3.7399996781255571, 4.1165090983021901, 5.2234708249494757, 3.3339103629814177, 3.7140085760060746, 4.3276262114041755, 6.8512925627236267, 3.6917800293224392, 4.3655969051243977, 4.0856638509855392]}}  
 
@@ -1192,7 +1193,7 @@
             .y(function (d) {
                    return y(+d.y);
                })
-            .interpolate("step-after");
+            .interpolate("step-after");   //https://github.com/mbostock/d3/wiki/SVG-Shapes#wiki-line
 
     var svg = d3.select("#graphs_container").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -1231,7 +1232,7 @@
             .attr("y", 6)
             .attr("dy", ".71em")
             .style("text-anchor", "end")
-            .text("Watt");
+            .text(axis_text);
 
     svg.append("path")
             .datum(formatted_data)
@@ -1398,6 +1399,7 @@ function customFormat(formatString,date){
         var count2 = -1;
         var newdata = [];
         var labels = [[],[]];
+        var axis = "";
         
         for(var j = 0;j < graphs.length;j++){
             var node2 = JSON.parse(graphs[j].Event).node;
@@ -1410,9 +1412,17 @@ function customFormat(formatString,date){
                  port =  JSON.parse(graphs[j].Event).port;
                 
                    old_port = port;
-                    
+                   
                   while(JSON.parse(graphs[j].Event).port == old_port){
-                       newdata.push(parseInt((JSON.parse(graphs[j].Event).value * 230).toFixed(2)));
+                      if(graphs[j].Type == 'Power'){
+                       newdata.push(parseInt((JSON.parse(graphs[j].Event).value * 230).toFixed(2)));  //power multiply
+                       axis = "watt";
+                      }
+                      if(graphs[j].Type == 'RainRate'){
+                          newdata.push(parseInt((JSON.parse(graphs[j].Event).value * 2).toFixed(2)));  //rain factor
+                          axis = "mm";
+                         // console.log(newdata);
+                      }
                        j++;
                      
                        if(j < graphs.length){
@@ -1436,10 +1446,9 @@ function customFormat(formatString,date){
                  
                 
               
-                 
                  if(j < graphs.length){
                     
-                       // console.log(newdata); 
+                       //console.log(newdata); 
                       pushArray(data2[count],newdata);
                       newdata.length = 0;
                       nodes_ports.push([old_node,port]);
@@ -1447,8 +1456,8 @@ function customFormat(formatString,date){
                      continue;
                  }
                  else
-                 {   //console.log(newdata);
-                    //  pushArray(data2[count],newdata);
+                 {  // console.log(newdata);
+                      pushArray(data2[count],newdata);
                       newdata.length = 0;
                      
                      
@@ -1464,7 +1473,7 @@ function customFormat(formatString,date){
         }
         
         
-       // console.log(graphs[0].TimeStamp - graphs[data2[0].length - 1].TimeStamp);
+      // console.log(data2[0].length);
        // for(var count3 = 0;count3 < data2.length;count3++){
             for(var k = 0;k < data2[0].length;k++){
                
@@ -1480,8 +1489,8 @@ function customFormat(formatString,date){
  // var data3 = {};
    
   
-   console.log(data3);
-        graphd3(data3);  
+   //console.log(data3);
+        graphd3(data3,axis);  
         
       /*  datasetDataArray = [];
         
@@ -1714,9 +1723,9 @@ function customFormat(formatString,date){
     }
     
     
-    function getgraphs(){
-        
-        socket.emit('getgraphs',function(){  });
+    function getgraphs(type){
+        console.log(type);
+        socket.emit('getgraphs',type,function(){  });
     }
     
     

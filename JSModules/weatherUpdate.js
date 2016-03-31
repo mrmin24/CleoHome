@@ -2,6 +2,7 @@
 var db = require('./dbhandler');
 var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var pushOver = require('./public/scripts/pushOver.js');
+var myconsole = require('./myconsole.js');
 var intervaltime = 10 * 60 * 1000;
 
 
@@ -16,6 +17,7 @@ const elardus = 1005976;
 const moreletta = 8030071;
 
 function start() {
+   // myconsole.log(debug);
     checkWeather(wingate);
     timerweather = setInterval(function(){
 
@@ -46,19 +48,19 @@ function checkWeather(city){
     };
     
   var req = http2.request(options, function(res) {
-  //	console.log('STATUS: ' + res.statusCode);
-  //	console.log('HEADERS: ' + JSON.stringify(res.headers));
+  //	myconsole.log('STATUS: ' + res.statusCode);
+  //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-  	    //console.log(chunk);
+  	    //myconsole.log(chunk);
   	    
   	    chunk = JSON.parse(chunk)
         if(chunk['cod'] == 200){
-    		console.log('Weather Update: ' + chunk["wind"]['speed']);
+    		myconsole.log('Weather Update: ' + chunk["wind"]['speed']);
     		
     		logData("Wind Speed", chunk["wind"]['speed']);
     		logData("Temperature",(chunk["main"]['temp_max']-273).toFixed(2));
-    		//console.log('DNS Proxy Update: OK');
+    		//myconsole.log('DNS Proxy Update: OK');
     		backup = 0;
         }else
         {
@@ -69,7 +71,7 @@ function checkWeather(city){
   
 
     req.on('error', function(e) {
-      console.log('problem with request: ' + e.message);
+      myconsole.log('problem with request: ' + e.message);
       
       error();
       
@@ -86,21 +88,21 @@ function error(){
     
     if(backup == 0){
         backup++;
-          console.log('checking backup ' + backup);
+          myconsole.log('checking backup ' + backup);
         checkWeather(elardus);
         
       }else if(backup == 1){
           backup++;
-          console.log('checking backup ' + backup);
+          myconsole.log('checking backup ' + backup);
         checkWeather(moreletta);
         
       }else if(backup == 2){
           backup++;
-          console.log('checking backup ' + backup);
+          myconsole.log('checking backup ' + backup);
         checkWeather(rietvlei);
         
       }else{
-          console.log("No more backup weather locations available");
+          myconsole.log("No more backup weather locations available");
           logData("Wind Speed", 0);
           logData("Temperature",0);
       }
@@ -116,7 +118,7 @@ function logData(item,weatherData){
            
            if(err){
                
-               console.log(err);
+               myconsole.log(err);
            }else if(result){
                
              
@@ -125,7 +127,7 @@ function logData(item,weatherData){
             db.update('Items',data,function(err,result){
                 
                 if(err){
-                    console.log(err);
+                    myconsole.log(err);
                 }
             });   
             evaluate.evaluateChange(result[0].Id,weatherData,function(node,port,state,cancelTime,func){
@@ -138,7 +140,7 @@ function logData(item,weatherData){
                                  
                      mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                  }
-             //console.log(data_receive[0]);
+             //myconsole.log(data_receive[0]);
              });
             }     
             

@@ -104,6 +104,9 @@
                     <button class="btn btn-default" type="button">
                       Wind <span class="badge" id = 'wind'></span>
                     </button>
+                     <button class="btn btn-default" type="button">
+                      Rain <span class="badge" id = 'rain'></span>
+                    </button>
                     
                     <button class="btn btn-default" type="button">
                       Mains Power <span class="badge" id = 'device128'>0</span>
@@ -370,9 +373,12 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                            <strong>Graphs  </strong>
+                           <btn class="btn btn-default" id = "Rain" onClick= "getgraphs('RainRate')">Rain</btn>
+                            <btn class="btn btn-default" id = "Power" onClick= "getgraphs('Power')">Power</btn>
                             <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
                             
                         </div>
+                        
                         
                         <div class="panel-body" id="graphs_container">
                         

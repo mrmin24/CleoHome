@@ -1,6 +1,6 @@
 var db = require('./dbhandler');
 var evaluate = require('../JSModules/Rule_Items_Evaluate');
-
+var myconsole = require('../JSModules/myconsole.js');
 var calcTime = require('../JSModules/compareTime');
 var pushOver = require('./public/scripts/pushOver.js');
 
@@ -13,8 +13,9 @@ var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 
 function start() {
+   // myconsole.log(debug);
     
-    console.log("TimeUpdate started");
+    myconsole.log("TimeUpdate started");
    
     timeUpdate();
     dayMinutesUpdate();
@@ -44,7 +45,7 @@ function timeUpdate(){
            
            if(err){
                
-               console.log(err);
+               myconsole.log(err);
            }else if(result){
                
                
@@ -64,25 +65,25 @@ function timeUpdate(){
                                  
                          mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                      }
-                 //console.log(data_receive[0]);
+                 //myconsole.log(data_receive[0]);
                  });
                  
                  
                  
                     
-               // console.log("At time: " + timenow + " IsDark is: " + isDark);    
+               // myconsole.log("At time: " + timenow + " IsDark is: " + isDark);    
                 
                 
             
-            //console.log(sunriseStr);
-            //console.log(sunset);
-            //console.log(position.altitude*180/3.14);
+            //myconsole.log(sunriseStr);
+            //myconsole.log(sunset);
+            //myconsole.log(position.altitude*180/3.14);
            }
         });
 }
 
 function zeroTime(callback){
-    console.log("Waiting to zero time. Can take up to 1 min");
+    myconsole.log("Waiting to zero time. Can take up to 1 min");
     var timezero = 1;
     
      timer = setInterval(function(){
@@ -92,7 +93,7 @@ function zeroTime(callback){
         timezero = date.getSeconds();
         
         if(timezero == 0){
-            console.log("Time zeroed");
+            myconsole.log("Time zeroed");
             clearInterval(timer);
             callback();
         }   
@@ -115,7 +116,7 @@ function dayMinutesUpdate(){
            
            if(err){
                
-               console.log(err);
+               myconsole.log(err);
            }else if(result){
                
                
@@ -138,7 +139,7 @@ function dayMinutesUpdate(){
                                  
                          mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                      }
-                 //console.log(data_receive[0]);
+                 //myconsole.log(data_receive[0]);
                  });
                  
                 
@@ -148,13 +149,13 @@ function dayMinutesUpdate(){
                  }
                  
                     
-               // console.log("At time: " + timenow + " IsDark is: " + isDark);    
+               // myconsole.log("At time: " + timenow + " IsDark is: " + isDark);    
                 
                 
             
-            //console.log(sunriseStr);
-            //console.log(sunset);
-            //console.log(position.altitude*180/3.14);
+            //myconsole.log(sunriseStr);
+            //myconsole.log(sunset);
+            //myconsole.log(position.altitude*180/3.14);
            }
         });
 }
@@ -167,12 +168,12 @@ function weekDayUpdate(){
        
        if(err){
            
-           console.log(err);
+           myconsole.log(err);
        }else if(result){
            
         day = new Date();
         day = day.getDay();
-        console.log("Setting day to: " + day);
+        myconsole.log("Setting day to: " + day);
          
          data = {'Set':'Item_Current_Value','Where':'Id','Current_State':day ,'Name':result[0].Id};
             
@@ -188,7 +189,7 @@ function weekDayUpdate(){
                                  
                  mySensorsocket.emit('switchOff',node,port,0,cancelTime);
              }
-         //console.log(data_receive[0]);
+         //myconsole.log(data_receive[0]);
          });
         }
  

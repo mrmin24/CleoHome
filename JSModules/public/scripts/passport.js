@@ -10,7 +10,8 @@ var bcrypt = require('bcrypt-nodejs');
 
 var config = require('../../GetConfig.js');
 var config2 = config.data.xml.database[0];
-//console.log(config2.host[0]);
+//myconsole.log(config2.host[0]);
+var myconsole = require('../../myconsole.js');
 
 var pool = mysql.createPool({
   host     : config2.host[0],
@@ -115,7 +116,7 @@ module.exports = function(passport) {
                     if (err)
                         return done(err);
                     if (!rows.length) {
-                        console.log("Invalid Login: User not found");
+                        myconsole.log("Invalid Login: User not found");
                         return done(null, false, req.flash('loginMessage', 'No user found.')); // req.flash is the way to set flashdata using connect-flash
                         
                     }
@@ -123,7 +124,7 @@ module.exports = function(passport) {
                     // if the user is found but the password is wrong
                     if (!bcrypt.compareSync(password, rows[0].password))
                     {
-                        console.log("Invalid login: Password incorrect");
+                        myconsole.log("Invalid login: Password incorrect");
                         return done(null, false, req.flash('loginMessage', 'Oops! Wrong password.')); // create the loginMessage and save it to session as flashdata
                     }
                     // all is well, return successful user
@@ -153,7 +154,7 @@ module.exports = function(passport) {
                     if (err)
                         return done(err);
                     if (!rows.length) {
-                        console.log("Invalid Login: User not found in login list");
+                        myconsole.log("Invalid Login: User not found in login list");
                         return done(null, false); // req.flash is the way to set flashdata using connect-flash
                         
                     }
@@ -163,7 +164,7 @@ module.exports = function(passport) {
                     // if the user is found but the password is wrong
                     if (!bcrypt.compareSync(token, rows[0].Token))
                     {
-                        console.log("Invalid login: Token incorrect");
+                        myconsole.log("Invalid login: Token incorrect");
                         return done(null, false); // create the loginMessage and save it to session as flashdata
                     }
                     // all is well, return successful user

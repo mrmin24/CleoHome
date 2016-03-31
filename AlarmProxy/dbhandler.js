@@ -1,5 +1,5 @@
 var mysql      = require('mysql');
-
+var myconsole = require('../JSModules/myconsole.js');
 var config = require('../JSModules/GetConfig.js');
 var config2 = config.data.xml.database[0];
 
@@ -18,15 +18,15 @@ var pool = mysql.createPool({
 
 exports.insert = function(table,data) {
 
-    //console.log(data);
+    //myconsole.log(data);
       pool.getConnection(function(err, connection){
     connection.query('INSERT INTO '+ table +' SET ?', data, function(err, result) {
         connection.release();
         if(err) {
-            console.log(err);
+            myconsole.log(err);
             }
             else {
-                //console.log(result);
+                //myconsole.log(result);
             }
             
     });
@@ -36,15 +36,15 @@ exports.insert = function(table,data) {
 
 exports.update = function(table,data) {
 
-    //console.log(data);
+    //myconsole.log(data);
         pool.getConnection(function(err, connection){
             connection.query('UPDATE '+ table +' SET ' + data.Set + '=? WHERE ' + data.Where + '= ?', [data.Current_State,data.Name], function(err, result) {
                connection.release();
                 if(err) {
-                    console.log(err);
+                    myconsole.log(err);
                     }
                     else {
-                       //console.log(result);
+                       //myconsole.log(result);
                     }
                     
             });
@@ -57,7 +57,7 @@ exports.getdata = function(table,data,callback) {
 
    pool.getConnection(function(err, connection){
     
-   // console.log(data.whereClause);
+   // myconsole.log(data.whereClause);
    
     connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause, [table], function(err, result) {
       
@@ -68,7 +68,7 @@ exports.getdata = function(table,data,callback) {
              callback(err,null);
             }
             else {
-                // console.log(data.whereClause);
+                // myconsole.log(data.whereClause);
              callback(null,result);
             }
             
@@ -82,7 +82,7 @@ exports.getLast = function(table,data,callback) {
 
    pool.getConnection(function(err, connection){
     
-    //console.log(data);
+    //myconsole.log(data);
    
     connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause + ' ORDER BY Id DESC LIMIT 1', [table], function(err, result) {
       

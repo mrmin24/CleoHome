@@ -1,8 +1,10 @@
 var db = require('./dbhandler');
 var rule = require('./Rule_Evaluate');
+var myconsole = require('./myconsole.js');
 
 exports.evaluateChange = function(itemId,itemValue,callback){
-    
+   // myconsole.log(itemId);
+    //myconsole.log(itemValue);
     
     data = {'Select':'Second_Id,Rule_Id,Equals,Greater_Than,Less_Than,Not_Equal','whereClause':'Item_Id = ' + itemId};
     
@@ -10,10 +12,10 @@ exports.evaluateChange = function(itemId,itemValue,callback){
        
        if(err){
            
-           console.log(err);
+           myconsole.log(err);
        }else if(result){
            
-          // console.log(result);
+          // myconsole.log(result);
            var status = 0;
            for(var i in result){
                if(result[i].Equals == itemValue  && result[i].Equals != null){
@@ -38,35 +40,37 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    for(var i = 0; i < res.length ; i++){
                        if(!isNaN(res[i])){
                            var rulenr = res[i];
-                           //console.log(res[i]);
+                           //myconsole.log(res[i]);
                             rule.checkRule(res[i],function(ruleValid,node,port,state,Id,onTime,func){
-                               // console.log(Id);
+                               // myconsole.log(Id);
                             if(node && port && state && ruleValid ){
-                                console.log("Executing rule: " + rulenr); 
+                                myconsole.log("Executing rule(1): " + rulenr); 
                                 var cancelTime = null;
                                 if(onTime > 0 && state == 1){
                                     
                                    cancelTime = setTimer(onTime);
-                                   // console.log(cancelTime);
+                                   // myconsole.log(cancelTime);
                                 }
+                                 
                                 callback(node,port,state,cancelTime,func);
                                 
                             }
                             else if(ruleValid){
-                                 console.log("Executing rule: " + rulenr); 
-                                 data = {'Set':'Item_Current_Value','Where':'Id','Current_State':state,'Name':Id};
+                                 myconsole.log("Executing rule(2): " + rulenr); 
+                               //  data = {'Set':'Item_Current_Value','Where':'Id','Current_State':state,'Name':Id};
                 
-                                db.update('Items',data,function(){});
+                               // db.update('Items',data,function(){});
                                 var cancelTime = null;
                                 if(onTime > 0 && state == 1){
                                     
                                    cancelTime = setTimer(onTime);
                                 }
+                               // myconsole.log(func);
                                 callback(null,null,null,cancelTime,func);
                             }
                             else
                             {
-                                callback(null,null,null);
+                                callback(null,null,null,null,null);
                             }
                            
                         });   

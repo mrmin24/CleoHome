@@ -3,6 +3,7 @@ var db = require('./dbhandler');
 var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var calcTime = require('../JSModules/compareTime');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
+var myconsole = require('../JSModules/myconsole.js');
 var latitude = -25.825848;
 var longitude = 28.269367;
 var intervaltime = 5 * 60 * 1000;
@@ -14,7 +15,8 @@ var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 
 function start() {
-    console.log("SunCalc started");
+    //myconsole.log(debug);
+    myconsole.log("SunCalc started");
    
     checkSunCalc();
     timer = setInterval(function(){
@@ -36,7 +38,7 @@ function checkSunCalc(){
            
            if(err){
                
-               console.log(err);
+               myconsole.log(err);
            }else if(result){
                
                
@@ -84,16 +86,16 @@ function checkSunCalc(){
                                  
                          mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                      }
-                 //console.log(data_receive[0]);
+                 //myconsole.log(data_receive[0]);
                  });
                     
-                console.log("At time: " + timenow + " IsDark is: " + isDark);    
+                myconsole.log("At time: " + timenow + " IsDark is: " + isDark);    
                 
                 
             }
-            //console.log(sunriseStr);
-            //console.log(sunset);
-            //console.log(position.altitude*180/3.14);
+            //myconsole.log(sunriseStr);
+            //myconsole.log(sunset);
+            //myconsole.log(position.altitude*180/3.14);
            }
         });
 }
