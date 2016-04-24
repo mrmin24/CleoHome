@@ -5,9 +5,10 @@ var db = require('./dbhandler');
 var myconsole = require('../JSModules/myconsole.js');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 
-var evaluate = require('../JSModules/Rule_Items_Evaluate');
+//var evaluate = require('../JSModules/Rule_Items_Evaluate');
 
 var configure = require('../JSModules/GetConfig.js');
+var rules = require('../JSModules/Rule_UpdateStates.js');
 var configure2 = configure.data.xml;
 
 var port = configure2.alarmmodule[0].port[0];
@@ -16,8 +17,10 @@ var sockets;
 var lastzone;
 var alarm = null;
 var oldconnectionstatus = null;
-
-
+var mySensorio = require('socket.io-client');
+var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+var retrycount = 0;
+var retryrequest = false;
 
 function start() {
    // myconsole.log(debug);
@@ -95,7 +98,6 @@ function start() {
             });
             
             socket.on('panic', function() {
-
 
 
                 sendPanic();
@@ -220,6 +222,7 @@ function start() {
 
 
 
+
 var watchevents = ['500', '510', '601', '602', '609', '610', '650', '651', '653', '625', '626', '652', '654', '655', '656', '657', /*'659'*/ , '670', '700', '701', '702', '750', '751', '800', '801', '802', '803', '829'];
 var alarmcode = ['601', '605', '620', '621', '625', '654'];  //alarm trigger events
 var armDisarmZone = [configure2.alarm[0].awayArmZone[0],configure2.alarm[0].stayArmZone[0]];
@@ -244,23 +247,61 @@ function logdata(data) {
                getID('Zone_' + data.zone,function(ID){
                    // myconsole.log(ID);
                      
-                    
-                    evaluate.evaluateChange(ID,data.send,function(node,port,state,cancelTime,func){
-                        
+                   
+                   /*let recursivelyDelete = (id) => {
+                      db.items.findOne(id, (err, item) => {
+                        if(err) {
+                          callback(err)
+                        } else {
+                          db.items.remove({ '_id': item._id}, (err, results) => {
+                            if(err) {
+                              callback(err)
+                            } else {
+                              if(item.child_id) {
+                                recursivelyDelete(item.child_id)
+                              } else {
+                                return true
+                              }
+                            }
+                          }
+                        }
+                      }  
+                    }*/
+                 //  myconsole.log("Alarm " + ID);
+                   // evaluate(ID,data.send);
+                   
+                 
+                   rules.updateRuleStates(ID, data.send);
+                   
+                   
+                   
+                   
+                  /*  evaluate.evaluateChange(ID,data.send,function(node,port,state,virtual,cancelTime,func){
+                        eval(func);             
+                     if(node && port && state){
+                      mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                     }
                      
-                         if(func){
-                             
-                           eval(func);
-                         }
+                     if(cancelTime){
+                                 
+                         mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                     }
+                     
+                     if(virtual == 1){
+                         data = {Set:'Item_Current_Value',Where:'Id',Current_State:state,Name:node};
+                        
+                        db.update('Items',data,function(){});  
+                         evaluate(node,state);
                          
-                         if(node && port && state){
-                          mySensorsocket.emit('deviceSwitch',node,port,state);
-                         }
-                     //myconsole.log(data_receive[0]);
-                    });
+                     }
+                 //myconsole.log(data_receive[0]);
+                 });*/
+                    
+               
                 
                 });
-            
+                
+                
             //***********************************************************************************************
             
             if (alarmcode.indexOf(data.code) != -1) {
@@ -287,7 +328,7 @@ function logdata(data) {
                 }
             }
             else if(armDisarmZone.indexOf(data.zone) > -1 && data.code == zoneOpenedCode){
-                myconsole.log("Alarm: Arm / Disarm: " + data.zone + " / " + data.code )
+             /*   myconsole.log("Alarm: Arm / Disarm: " + data.zone + " / " + data.code )
                 db.getdata('Alarm_Items', {
                         Select: 'Current_State',
                         whereClause: "Type LIKE '9' ORDER BY Id DESC LIMIT 1"
@@ -338,7 +379,7 @@ function logdata(data) {
                     });
                 
                 
-                
+                */
                 
                 
             }else {
@@ -374,6 +415,7 @@ function logdata(data) {
 
         }
         else if (data.pre == 'Partition') {
+          //   myconsole.log(data);
             if (data.code == '652') {
                 var state;
                 switch (data.mode) {
@@ -480,15 +522,40 @@ function logdata(data) {
                     Name: 'Partition_' + data.partition,
                     Current_State: data.send
                 });
+                 updateStatus('Partition_1',data.send);
                 myconsole.log('Alarm Module: An alarm was triggered');
                 sockets.emit('alarmTrigger', lastzone,Date.now());
-            }if (data.code == '656') {
+                
+            }else if (data.code == '655') {    //disarmed code
+              log.ownDb('Alarm_Items', {
+                    Set: 'Current_State',
+                    Where: 'Type',
+                    Name: "11",
+                    Current_State: 0
+                });
+                  updateStatus('Night_Mode_Active',0);
+                  
+                   log.ownDb('Alarm_Items', {
+                    Set: 'Current_State',
+                    Where: 'Name',
+                    Name: 'Partition_' + data.partition,
+                    Current_State: data.send
+                });
+                 updateStatus('Partition_1',data.send);
+                 
+                 
+                   sockets.emit('clearBypassZone');
+                myconsole.log('Alarm Module: The alarm was disarmed');
+               
+                
+            }else if (data.code == '656') {
                 log.ownDb('Alarm_Items', {
                     Set: 'Current_State',
                     Where: 'Name',
                     Name: 'Partition_' + data.partition,
                     Current_State: data.send
                 });
+                 updateStatus('Partition_1',data.send);
                 myconsole.log('Alarm Module: Exit delay');
                 //sockets.emit('alarmTrigger', lastzone,Date.now());
             }
@@ -501,7 +568,7 @@ function logdata(data) {
                     Name: 'Partition_' + data.partition,
                     Current_State: data.send
                 });
-
+                 updateStatus('Partition_1',data.send);
                 if (client) {
                     sockets.emit('AlarmEvent', {
                         Partition: data.partition,
@@ -568,6 +635,8 @@ function logdata(data) {
                 Name: 'Partition_' + data.partition + '_ledState',
                 Current_State: code
             });
+            
+            
         }
 
         else {
@@ -580,7 +649,7 @@ function logdata(data) {
 
 function pollAlarm() {
 
-    setInterval(function() {
+   var alarmPollTimer =  setInterval(function() {
         nap.manualCommand('000', false, function(ack, nack, retry) {
 
         })
@@ -602,10 +671,53 @@ function getState(requiredState, callback) {
         }
         else {
             // code to execute on data retrieval
+             updateStatus('Partition_1',data_receive[0]['Id']);
             callback(data_receive[0]['Id']);
         }
     });
 
+}
+
+
+function updateStatus(item,state){
+    
+    data = {'Select':'Id','whereClause':'Name = ' + '"' + item + '"'};
+        
+        db.getdata('Alarm_Items',data,function(err,result){
+           
+           if(err){
+               
+               myconsole.log(err);
+           }else if(result){
+               
+               
+               rules.updateRuleStates(result[0].Id, state);
+               
+              /* evaluate.evaluateChange(result[0].Id,state,function(node,port,state,virtual,cancelTime,func){
+                        eval(func);             
+                     if(node && port && state){
+                      mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                     }
+                     
+                     if(cancelTime){
+                                 
+                         mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                     }
+                     
+                     if(virtual == 1){
+                         data = {Set:'Item_Current_Value',Where:'Id',Current_State:state,Name:node};
+                        
+                        db.update('Items',data,function(){});   
+                         
+                     }
+                 //myconsole.log(data_receive[0]);
+                 });*/
+               
+               
+           }
+           
+        });
+    
 }
 
 function isImportant(data) {
@@ -753,6 +865,11 @@ function sendPanic(){
     // myconsole.log('send panic 2');
 }
 
+function speak(msg){
+    
+        sockets.emit('speak',msg);
+    }
+
 var nextzone, nextzone, bypassedZones = [];
 
 function bypassOne(zone, zones, callback) {
@@ -824,7 +941,13 @@ function armDisarm(type){
                         if (ack) {
 
                             myconsole.log('Away mode');
-
+                             log.ownDb('Alarm_Items', {
+                                            Set: 'Current_State',
+                                            Where: 'Type',
+                                            Name: "11",
+                                            Current_State: 0
+                                        });
+                              updateStatus('Night_Mode_Active',0);
 
                         }
                         else if (nack) {
@@ -846,7 +969,13 @@ function armDisarm(type){
                         if (ack) {
 
                             myconsole.log('Stay mode');
-
+                             log.ownDb('Alarm_Items', {
+                                            Set: 'Current_State',
+                                            Where: 'Type',
+                                            Name: "11",
+                                            Current_State: 0
+                                        });
+                              updateStatus('Night_Mode_Active',0);
 
                         }
                         else if (nack) {
@@ -886,6 +1015,7 @@ function armDisarm(type){
                             // myconsole.log(currentState);
 
                             if (currentState == 1) {
+                               
                                 nap.manualCommand('0711*1', false, function(ack, nack, retry) {
 
                                     if (ack) {
@@ -896,36 +1026,27 @@ function armDisarm(type){
                                             Name: "11",
                                             Current_State: 0
                                         });
+                                          updateStatus('Night_Mode_Active',0);
                                         myconsole.log('Night mode cancelled');
-
+                                        
                                         sleep(1000, function() {
-                                            nap.manualCommand('0401', true, function(ack, nack, retry) {
-
-                                                if (ack) {
-
-                                                    myconsole.log('Disarmed');
-
-
-
-
-                                                }
-                                                else if (nack) {
-
-                                                    myconsole.log('Disarm Failed');
-
-
-                                                }
-                                                else if (retry) {
-
-                                                    myconsole.log("Debug: Retry required");
-                                                }
-                                                else {
-                                                    myconsole.log("Debug: Something is not right");
-                                                }
-
-
-
-                                            });
+                                            
+                                            
+                                          
+                                            
+                                            
+                                             if(retrycount == 0){
+                                                 disarmcommand();
+                                                 sleep(1000,function() {});
+                                                 while(retrycount <= 3 && retryrequest == true ){
+                                                    disarmcommand();
+                                                    sleep(1000,function() {});
+                                                
+                                                 }
+                                               }
+                                            
+                                            
+                                            
                                         });
 
 
@@ -947,14 +1068,32 @@ function armDisarm(type){
 
                             }
                             else {
+                                
+                               
+                               if(retrycount == 0){
+                                 disarmcommand();
+                                 sleep(1000,function() {});
+                                 while(retrycount <= 3 && retryrequest == true ){
+                                    disarmcommand();
+                                    sleep(1000,function() {});
+                                
+                                 }
+                               }
+                                
 
-                                nap.manualCommand('0401', true, function(ack, nack, retry) {
+                               /* nap.manualCommand('0401', true, function(ack, nack, retry) {
 
 
 
                                     if (ack) {
                                         myconsole.log('Disarmed');
-
+                                         log.ownDb('Alarm_Items', {
+                                            Set: 'Current_State',
+                                            Where: 'Type',
+                                            Name: "11",
+                                            Current_State: 0
+                                        });
+                                          updateStatus('Night_Mode_Active',0);
 
                                     }
                                     else if (nack) {
@@ -967,7 +1106,7 @@ function armDisarm(type){
 
                                         myconsole.log("Debug: Retry required");
                                     }
-                                });
+                                });*/
 
 
 
@@ -1010,6 +1149,8 @@ function armDisarm(type){
                                             Name: "11",
                                             Current_State: 1
                                         });
+                                        
+                                         updateStatus('Night_Mode_Active',1);
 
                                     }
                                     else if (nack) {
@@ -1049,6 +1190,8 @@ function armDisarm(type){
                                                     Name: "11",
                                                     Current_State: 1
                                                 });
+                                                
+                                                  updateStatus('Night_Mode_Active',1);
 
                                             }
                                             else if (nack) {
@@ -1108,6 +1251,8 @@ function armDisarm(type){
                                                     Name: "11",
                                                     Current_State: 0
                                                 });
+                                                
+                                                 updateStatus('Night_Mode_Active',0);
 
                                             }
                                             else if (nack) {
@@ -1134,6 +1279,47 @@ function armDisarm(type){
                 }
 }
 
+function disarmcommand(){
+    nap.manualCommand('0401', true, function(ack, nack, retry) {
+    
+        if (ack) {
+    
+             myconsole.log('Disarmed');
+             log.ownDb('Alarm_Items', {
+                Set: 'Current_State',
+                Where: 'Type',
+                Name: "11",
+                Current_State: 0
+            });
+              updateStatus('Night_Mode_Active',0);
+    
+                retrycount = 0;  
+                retryrequest = false;
+          
+    
+        }
+        else if (nack) {
+    
+            myconsole.log('Disarm Failed');
+    
+    
+        }
+         if (retry) {
+           
+            myconsole.log("Debug: Retry required");
+            retrycount++;
+            retryrequest = true;
+          
+        }
+       // else {
+        //    myconsole.log("Debug: Something is not right");
+        //}
+    
+    
+    
+    });  
+}
+
 function getID(name,callback){
     
     db.getdata('Alarm_Items', {
@@ -1155,6 +1341,31 @@ function getID(name,callback){
                                 
 
 }
-   
+
+
+//  function evaluate(id,data){
+     //     myconsole.log("test");              
+    /* evaluate.evaluateChange(id,data,function(node,port,state,virtual,cancelTime,func){
+            eval(func);             
+         if(node && port && state){
+          mySensorsocket.emit('deviceSwitch',node,port,state,1);
+         }
+         
+         if(cancelTime){
+                     
+             mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+         }
+         
+         if(virtual == 1){
+             data = {Set:'Item_Current_Value',Where:'Id',Current_State:state,Name:node};
+            
+            db.update('Items',data,function(){});  
+             evaluate(node,state);
+             
+         }
+     //myconsole.log(data_receive[0]);
+     });*/
+    
+//} 
 
 exports.start = start;

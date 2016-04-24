@@ -10,6 +10,7 @@ var pool = mysql.createPool({
   password : config2.password[0],
   database: config2.name[0],
   users_table: config2.users_table[0]
+ 
 });
 // don't need .connect()
 
@@ -63,6 +64,30 @@ exports.getdata = function(table,data,callback) {
       
   // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
       // myconsole.log(result);
+       connection.release();
+        if(err) {
+             callback(err,null);
+            }
+            else {
+             callback(null,result);
+            }
+            
+    });
+   
+    });
+}
+
+exports.getdataUnion = function(table,table2,data,data2,callback) {
+
+   pool.getConnection(function(err, connection){
+    
+    //myconsole.log(data.whereClause);
+   
+    connection.query('(SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause + ' ) UNION (SELECT ' + data2.Select + ' FROM ?? WHERE ' + data2.whereClause +' )', [table],[table2], function(err, result) {
+      
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+       myconsole.log(result);
+       myconsole.log(err);
        connection.release();
         if(err) {
              callback(err,null);

@@ -15,7 +15,7 @@ exports.checkRule = function(rule,callback){
            myconsole.log(err);
            
        }else if(result){
-           //myconsole.log(result[0]);
+          // myconsole.log(result[0]);
            var res = result[0].Conditions.split(';');
            
           
@@ -36,11 +36,11 @@ exports.checkRule = function(rule,callback){
               
            }
           // myconsole.log(ids);
-            var where = "Second_Id IN (" + ids + ") AND Secondary_Item = 0 ORDER BY FIELD (Second_Id," + ids + ")";
+            var where = "Second_Id IN (" + ids + ")  ORDER BY FIELD (Second_Id," + ids + ")";
         
+           //AND Secondary_Item = 0
            
-           
-           data = {'Select':'Status,Second_Id','whereClause':where };
+           data = {'Select':'Status,Second_Id,Secondary_Item','whereClause':where };
     
             db.getdata('Rule_Items',data,function(err,result2){
                
@@ -90,22 +90,33 @@ exports.checkRule = function(rule,callback){
                       if(res2[0] != 0){
                           for(var i = 0;i< res2.length/3;i++){
                               
-                               data = {'Select':'Node_Id,Node_Port','whereClause':"Id = " + res2[i*3] };
-                                value = res2[i*3+2];
+                               data = {'Select':'Node_Id,Node_Port,Item_IsVirtual','whereClause':"Id = " + res2[i*3] };
+                                
+                               var value = res2[i*3+2];
+                               // myconsole.log(res2 + "  " + i);
                                 var ID = res2[i*3];
                                 db.getdata('Items',data,function(err,result3){
-                                   
+                                 //  value = res2[i*3+2];
                                    if(err){
                                        
                                        myconsole.log(err);
-                                       callback(false,null,null,null,null,null,func); 
+                                       callback(false,null,null,null,null,null,null,func); 
                                        
                                    }else if(result3){
-                                       myconsole.log(result3[0]);
+                                      // myconsole.log(result3[0]);
                                       
                                       // myconsole.log(nodes[i] + " " + ports[i] + " " + values[i] );
                                      // setTimeout(function () {
-                                        callback(true,result3[0].Node_Id,result3[0].Node_Port,value,ID,onTime,func);
+                                    // myconsole.log(result3[0].Item_IsVirtual );
+                                     if(result3[0].Item_IsVirtual == 1){
+                                          //myconsole.log(value);
+                                         callback(true,ID,null,value,result3[0].Item_IsVirtual,ID,onTime,func);
+                                         
+                                     }else{
+                                        callback(true,result3[0].Node_Id,result3[0].Node_Port,value,result3[0].Item_IsVirtual,ID,onTime,func); 
+                                         
+                                     }
+                                        
                                       //}, 2000);
                                       
                                    }
@@ -121,7 +132,7 @@ exports.checkRule = function(rule,callback){
                       
                       
                       }else{
-                          callback(true,null,null,null,null,null,func);   
+                          callback(true,null,null,null,null,null,null,func);   
                       }
                   }else
                   {

@@ -3,17 +3,17 @@ var rule = require('./Rule_Evaluate');
 var myconsole = require('./myconsole.js');
 
 exports.evaluateChange = function(itemId,itemValue,callback){
-   // myconsole.log(itemId);
+    //myconsole.log(itemId);
     //myconsole.log(itemValue);
     
-    data = {'Select':'Second_Id,Rule_Id,Equals,Greater_Than,Less_Than,Not_Equal','whereClause':'Item_Id = ' + itemId};
+    data = {'Select':'Second_Id,Rule_Id,Equals,Greater_Than,Less_Than,Not_Equal,Secondary_Item','whereClause':'Item_Id = ' + itemId };
     
     db.getdata('Rule_Items',data,function(err,result){
        
        if(err){
            
            myconsole.log(err);
-       }else if(result){
+       }else if(result ){
            
           // myconsole.log(result);
            var status = 0;
@@ -33,17 +33,26 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    data = {'Set':'Status','Where':'Second_Id','Current_State':1,'Name':result[i].Second_Id};
                 
                    db.update('Rule_Items',data,function(){});
-                   var res = result[i].Rule_Id.split(';');
-           
+                    if(result[i].Secondary_Item == 0){     //only execute check if Secondary item == 0
+                        var rules = result[i].Rule_Id.split(';');     //determine which rules fit with this ID
+                        
+                    } else {
+                        var rules = null;
+                        
+                    } 
+                  // var ruleValid2 = !result[i].Secondary_Item;
                    var ids = "";
-                  
-                   for(var i = 0; i < res.length ; i++){
-                       if(!isNaN(res[i])){
-                           var rulenr = res[i];
-                           //myconsole.log(res[i]);
-                            rule.checkRule(res[i],function(ruleValid,node,port,state,Id,onTime,func){
+                  // myconsole.log(rules);
+                   for(var j = 0; j < rules.length ; j++){
+                       if(!isNaN(rules[j])){
+                           var rulenr = rules[j];
+                          // myconsole.log(rules[i]);
+                           
+                            rule.checkRule(rules[j],function(ruleValid,node,port,state,virtual,Id,onTime,func){
                                // myconsole.log(Id);
-                            if(node && port && state && ruleValid ){
+                               // myconsole.log(ruleValid + " " + node + " " + port + " " + virtual+ " " + state+ " " + Id+ " " + onTime+ " " + func);
+                               
+                            if(node /*&& port*/ && state != null && ruleValid ){
                                 myconsole.log("Executing rule(1): " + rulenr); 
                                 var cancelTime = null;
                                 if(onTime > 0 && state == 1){
@@ -51,12 +60,28 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                                    cancelTime = setTimer(onTime);
                                    // myconsole.log(cancelTime);
                                 }
-                                 
-                                callback(node,port,state,cancelTime,func);
                                 
-                            }
-                            else if(ruleValid){
-                                 myconsole.log("Executing rule(2): " + rulenr); 
+                                // myconsole.log(node);
+                                //myconsole.log(port);
+                                // myconsole.log(state);
+                                callback(node,port,state,virtual,cancelTime,func);
+                                
+                            }/*else if(node && state && ruleValid ){
+                                myconsole.log("Executing rule(2): " + rulenr);    //duplicate from above but for virtual items
+                                var cancelTime = null;
+                                if(onTime > 0 && state == 1){
+                                    
+                                   cancelTime = setTimer(onTime);
+                                   // myconsole.log(cancelTime);
+                                }
+                                
+                                // myconsole.log(node);
+                               //  myconsole.log(port);
+                                // myconsole.log(state);
+                                callback(node,port,state,virtual,cancelTime,func);
+                                
+                            }*/else if(ruleValid ){
+                                 myconsole.log("Executing rule(3): " + rulenr);     //function call only
                                //  data = {'Set':'Item_Current_Value','Where':'Id','Current_State':state,'Name':Id};
                 
                                // db.update('Items',data,function(){});
@@ -66,14 +91,14 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                                    cancelTime = setTimer(onTime);
                                 }
                                // myconsole.log(func);
-                                callback(null,null,null,cancelTime,func);
-                            }
-                            else
+                                callback(null,null,null,virtual,cancelTime,func);
+                            }else
                             {
-                                callback(null,null,null,null,null);
+                                callback(null,null,null,null,null,null);
                             }
                            
                         });   
+                        
                           
                         }
                       

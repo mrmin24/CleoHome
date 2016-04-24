@@ -1,9 +1,10 @@
 var db = require('./dbhandler');
-var evaluate = require('../JSModules/Rule_Items_Evaluate');
+//var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var myconsole = require('../JSModules/myconsole.js');
 var calcTime = require('../JSModules/compareTime');
 var pushOver = require('./public/scripts/pushOver.js');
 
+var rules = require('./Rule_UpdateStates.js');
 var intervaltime = 1 * 60 * 1000;
 
 
@@ -54,10 +55,13 @@ function timeUpdate(){
                         
                 db.update('Items',data,function(){});   
                  
-                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime,func){
+                 
+                 rules.updateRuleStates(result[0].Id, newTime);
+               
+                /* evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime,func){
                       eval(func);               
                      if(node && port && state){
-                      mySensorsocket.emit('deviceSwitch',node,port,state);
+                      mySensorsocket.emit('deviceSwitch',node,port,state,1);
                      }
                      
                      
@@ -65,8 +69,8 @@ function timeUpdate(){
                                  
                          mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                      }
-                 //myconsole.log(data_receive[0]);
-                 });
+                // myconsole.log(data_receive[0]);
+                 });*/
                  
                  
                  
@@ -75,7 +79,7 @@ function timeUpdate(){
                 
                 
             
-            //myconsole.log(sunriseStr);
+            //myconsole.log("test");
             //myconsole.log(sunset);
             //myconsole.log(position.altitude*180/3.14);
            }
@@ -128,19 +132,27 @@ function dayMinutesUpdate(){
                         
                 db.update('Items',data,function(){});   
                  
-                 evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime,func){
-                    
-                      eval(func);               
+                 rules.updateRuleStates(result[0].Id, newTime);
+                  
+                 /* evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,virtual,cancelTime,func){
+                        eval(func);             
                      if(node && port && state){
-                      mySensorsocket.emit('deviceSwitch',node,port,state);
+                      mySensorsocket.emit('deviceSwitch',node,port,state,1);
                      }
                      
                      if(cancelTime){
                                  
                          mySensorsocket.emit('switchOff',node,port,0,cancelTime);
                      }
+                     
+                     if(virtual == 1){
+                         data = {Set:'Item_Current_Value',Where:'Id',Current_State:state,Name:node};
+                        
+                        db.update('Items',data,function(){});   
+                         
+                     }
                  //myconsole.log(data_receive[0]);
-                 });
+                 });*/
                  
                 
                  
@@ -179,10 +191,14 @@ function weekDayUpdate(){
             
          db.update('Items',data,function(){});   
          
-         evaluate.evaluateChange(result[0].Id,day,function(node,port,state,cancelTime,func){
+         rules.updateRuleStates(result[0].Id, isDark);
+                
+         
+         
+        /* evaluate.evaluateChange(result[0].Id,day,function(node,port,state,cancelTime,func){
               eval(func);               
              if(node && port && state){
-              mySensorsocket.emit('deviceSwitch',node,port,state);
+              mySensorsocket.emit('deviceSwitch',node,port,state,1);
              }
              
              if(cancelTime){
@@ -190,7 +206,7 @@ function weekDayUpdate(){
                  mySensorsocket.emit('switchOff',node,port,0,cancelTime);
              }
          //myconsole.log(data_receive[0]);
-         });
+         });*/
         }
  
     });

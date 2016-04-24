@@ -33,21 +33,21 @@ function start() {
 	 
 		connect();
 		var offTimeTimer = setInterval(checkOffTimes,offTimeInterval);
-		 socket.on('deviceSwitch',function(NodeId,NodePort,State){
+		 socket.on('deviceSwitch',function(NodeId,NodePort,State,rulereq){
 		 	
 		 	
 		 //	myconsole.log("is array " + Array.isArray(NodeId));
 		 	if(Array.isArray(NodeId))
 			 	for(var i in NodeId)
 			 	{
-			 		myconsole.log(NodeId[i] + " " + NodePort[i] + " " + State[i] );
+			 	//	myconsole.log(NodeId[i] + " " + NodePort[i] + " " + State[i] + " " + rulereq[i] );
 			 		setTimeout(function() {
-					    sendData(NodeId[i],NodePort[i],State[i])	;
+					    sendData(NodeId[i],NodePort[i],State[i],rulereq[i])	;
 					}, 250);
 			 	}
 		 	else
-		 	{myconsole.log(NodeId + " " + NodePort + " " + State );
-		 		sendData(NodeId,NodePort,State)	;
+		 	{   //myconsole.log(NodeId + " " + NodePort + " " + State + " " + rulereq );
+		 		sendData(NodeId,NodePort,State,rulereq)	;
 		 			
 		 	}
 		 });
@@ -268,13 +268,21 @@ function start() {
 		
 	    	
 	    	
-	    function sendData(NodeId,NodePort,State){		
+	    function sendData(NodeId,NodePort,State,rulereq){		
 	    //	myconsole.log("data: " + NodeId + " " +NodePort  );
 	    		
 	    		db.getdata('Items',{Select: 'Item_Type,Item_Is_Toggle,Item_Toggle_Delay,Item_Current_Value',whereClause:'Node_Id = ' + NodeId.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
 	    			 if(data_receive[0]){
 	    			 	if(data_receive[0].Item_Current_Value != State){
+	    			 			var time = 0;
+		    			 		//myconsole.log("Mysensor state" + State);
+		    			 		if(rulereq == 1){
+		    			 			time = State;
+		    			 		}else{
+		    			 			time = data_receive[0].Item_Toggle_Delay;
+		    			 		}
 		    			 	if(data_receive[0].Item_Type == Access_Type && data_receive[0].Item_Is_Toggle == 1 ){
+		    			 	
 					    	 	if(State == 0){
 						    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;0\n',function(){
 					       
@@ -282,7 +290,8 @@ function start() {
 					                   });
 						    	 	
 						    	 }else{
-					    	 		actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
+						    	 	
+					    	 		actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;' + time.toString() + '\n',function(){
 					       
 					                       //myconsole.log('data sent');
 					                   });
@@ -296,7 +305,7 @@ function start() {
 					                   });
 						    	 	
 						    	 }else{
-							    	 actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay + '\n',function(){
+							    	 actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + time.toString() + '\n',function(){
 							       
 							                      // myconsole.log(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay);
 							                   });

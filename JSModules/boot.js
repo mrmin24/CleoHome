@@ -19,7 +19,9 @@ timer = setTimeout(function() {
     var Suncalc = require('./SunCalc.js');
     var Time = require('./timeUpdate');
     var Weather = require('./weatherUpdate');
-   // var Rules = require('./Rule_Evaluate.js');
+    var Health = require('./health.js');
+    var ruleMon = require('./Rule_Monitor.js');
+ //  var Rules = require('./Rule_Evaluate.js');
     
     
     
@@ -30,6 +32,8 @@ timer = setTimeout(function() {
     Suncalc.start();
     Time.start();
     Weather.start();
+    Health.start();
+    ruleMon.start();
   //  Rules.start();
     
     

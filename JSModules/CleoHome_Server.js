@@ -8,8 +8,8 @@ var http = require('http').Server(app);
 //var routes = require('./routes');
 //var router = express.Router();
 
-
-
+var rules = require('./Rule_UpdateStates.js');
+ 
 
 
 var bodyParser = require('body-parser');
@@ -17,7 +17,9 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var morgan = require('morgan');
 var logger = morgan('combined');
+
 require('./public/scripts/passport.js')(passport); // pass passport for configuration
+
 var email = require('./public/scripts/email.js');
 var pushOver = require('./public/scripts/pushOver.js');
 var path = require('path'); 
@@ -42,6 +44,10 @@ var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0]
 
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+
+
+var rulesio = require('socket.io-client');
+var rulessocket = rulesio.connect('http://localhost:'+ 44603);
 
 const Virtual_Item_Type = 15
 const Virtual_Alarm_Item_Type = 18;
@@ -339,6 +345,9 @@ io.on('connection', function(socket){
     }); 
     
     
+    
+    
+    
  socket.on('panic',function(){
     
     panic();
@@ -422,6 +431,8 @@ io.on('connection', function(socket){
       	  }
         });
   });
+  
+ 
   
   
   socket.on('saveRule',function(ruleData){
@@ -667,7 +678,7 @@ io.on('connection', function(socket){
 
 function virtualDeviceStatusChange(Id,State){
     
-    var evaluate = require('../JSModules/Rule_Items_Evaluate');
+  //  var evaluate = require('../JSModules/Rule_Items_Evaluate');
    if(State > 0){State = 1;}
    
      db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Id = ' + Id},function(err,data_receive){
@@ -684,18 +695,27 @@ function virtualDeviceStatusChange(Id,State){
                          if(data_receive){
                             // myconsole.log(ID + " " + State);
                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
-                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
-                             eval(func);
-                             if(node && port && state){
-                              mySensorsocket.emit('deviceSwitch',node,port,state);
-                             }
                              
-                             if(cancelTime){
+                              rules.updateRuleStates(ID, State);
+                          /*  evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
                                  
-                                 mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                             }
+                                    eval(func);             
+                                 if(node && port && state){
+                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                 }
+                                 
+                                 if(cancelTime){
+                                             
+                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                 }
+                                 
+                                 if(virtual == 1){
+                                     virtualDeviceStatusChange(node,state);
+                                   
+                                     
+                                 }
                              //myconsole.log(data_receive[0]);
-                             });
+                             });*/
                              
                              
                          }else
@@ -716,9 +736,9 @@ function virtualDeviceStatusChange(Id,State){
 }
 
 mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
-    //myconsole.log("Device Status Change");
+  //  myconsole.log("Device Status Change");
    // myconsole.log(NodePort);
-   var evaluate = require('../JSModules/Rule_Items_Evaluate');
+  // var evaluate = require('../JSModules/Rule_Items_Evaluate');
    if(State > 0){State = 1;}
    
      db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
@@ -733,21 +753,30 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
                           
                         
                          if(data_receive){
-                            // myconsole.log(ID + " " + State);
+                           // myconsole.log(ID + " " + State);
                              io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
-                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
-                                
-                             eval(func);
-                             if(node && port && state){
-                              mySensorsocket.emit('deviceSwitch',node,port,state);
-                             }
-                             
-                             if(cancelTime){
+                         
+                             rules.updateRuleStates(ID, State);
+                            
+                            /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
                                  
-                                 mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                             }
+                                    eval(func);             
+                                 if(node && port && state){
+                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                 }
+                                 
+                                 if(cancelTime){
+                                             
+                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                 }
+                                 
+                                  if(virtual == 1){
+                                     virtualDeviceStatusChange(node,state);
+                                   
+                                     
+                                 }
                              //myconsole.log(data_receive[0]);
-                             });
+                             });*/
                              
                              
                          }else
@@ -775,7 +804,7 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
 mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
     //myconsole.log("Device Status Change");
    // myconsole.log(NodePort);
-   var evaluate = require('../JSModules/Rule_Items_Evaluate');
+   //var evaluate = require('../JSModules/Rule_Items_Evaluate');
    
    
      db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
@@ -792,18 +821,28 @@ mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
                          if(data_receive){
                             // myconsole.log(ID + " " + State);
                              io.emit('SensorEvent', {Id:ID,Current_State:State});
-                             evaluate.evaluateChange(ID,State,function(node,port,state,cancelTime,func){
-                            eval(func);
-                             if(node && port && state){
-                              mySensorsocket.emit('deviceSwitch',node,port,state);
-                             }
                              
-                             if(cancelTime){
+                             rules.updateRuleStates(ID, State);
+                             
+                            /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
                                  
-                                 mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                             }
+                                    eval(func);             
+                                 if(node && port && state){
+                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                 }
+                                 
+                                 if(cancelTime){
+                                             
+                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                 }
+                                 
+                                  if(virtual == 1){
+                                     virtualDeviceStatusChange(node,state);
+                                  
+                                     
+                                 }
                              //myconsole.log(data_receive[0]);
-                             });
+                             });*/
                              
                              
                          }else
@@ -1269,6 +1308,15 @@ alarmsocket.on('connect', function() {
         });
         
         
+        
+        rulessocket.on('speak',function(msg){
+            myconsole.log("rules: speak requested");
+            speak(msg);
+            
+           
+         });
+    
+        
         alarmsocket.on('keypadLedState',function(data){
           getModeStatus(function(night,connect,err){
             
@@ -1282,7 +1330,7 @@ alarmsocket.on('connect', function() {
                 }
                 
                if(data.Ready && !data.Bypass){
-                   clearBypass();
+                 //  clearBypass();
                 } 
                 // myconsole.log(data.Bypass + " " + data.Memory + " " + data.Armed + " " + data.Ready);
              io.emit("keypadLedState",{Bypass:data.Bypass, Memory:data.Memory,Armed:data.Armed,Ready:data.Ready,Night:night,Connected:connect});
@@ -1331,6 +1379,12 @@ alarmsocket.on('connect', function() {
             });
             
         });
+        
+         alarmsocket.on('clearBypassZone',function(){
+             clearBypass();
+         });
+        
+       
         
         alarmsocket.on('power',function(code){
              myconsole.log("Server: Power:Sending Email");
@@ -1655,6 +1709,11 @@ function clearBypass(){
      
        
 }
+
+
+
+
+
 
 function getEvents(numEvents){
     var done = false;
@@ -2171,6 +2230,20 @@ function panic(){
      });
     
 }
+
+
+
+
+
+function speak(msg){
+    
+    
+    io.emit("speak",msg);
+    
+}
+
+
+
 
 function sendConfig(){
     

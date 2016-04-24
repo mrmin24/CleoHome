@@ -373,7 +373,7 @@ function sendcommand(addressee,command,callback) {
     	{
     	    //myconsole.log("Debug: NAck received for " + command.substring(0,3) );
     	    clearInterval(acktimer1);
-    	    callback(false,true,false);
+    	    callback(false,true,true);
     	   
     	}
     }else if(nackReceived == '010'){

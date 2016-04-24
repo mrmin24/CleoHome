@@ -1,10 +1,10 @@
 
 var db = require('./dbhandler');
-var evaluate = require('../JSModules/Rule_Items_Evaluate');
+//var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var pushOver = require('./public/scripts/pushOver.js');
 var myconsole = require('./myconsole.js');
-var intervaltime = 10 * 60 * 1000;
-
+var intervaltime = 15 * 60 * 1000;
+var rules = require('./Rule_UpdateStates.js');
 
 
 var mySensorio = require('socket.io-client');
@@ -130,18 +130,29 @@ function logData(item,weatherData){
                     myconsole.log(err);
                 }
             });   
-            evaluate.evaluateChange(result[0].Id,weatherData,function(node,port,state,cancelTime,func){
-                   eval(func);                                  
-                 if(node && port && state){
-                  mySensorsocket.emit('deviceSwitch',node,port,state);
-                 }
-                 
-                 if(cancelTime){
+           
+           
+           rules.updateRuleStates(result[0].Id, weatherData);
+             
+            /* evaluate.evaluateChange(result[0].Id,weatherData,function(node,port,state,virtual,cancelTime,func){
+                        eval(func);             
+                     if(node && port && state){
+                      mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                     }
+                     
+                     if(cancelTime){
                                  
-                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                 }
-             //myconsole.log(data_receive[0]);
-             });
+                         mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                     }
+                     
+                     if(virtual == 1){
+                         data = {Set:'Item_Current_Value',Where:'Id',Current_State:state,Name:node};
+                        
+                        db.update('Items',data,function(){});   
+                         
+                     }
+                 //myconsole.log(data_receive[0]);
+                 });*/
             }     
             
         });

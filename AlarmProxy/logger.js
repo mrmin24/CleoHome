@@ -2,7 +2,8 @@ var db = require('./dbhandler');
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var evaluate = require('../JSModules/Rule_Items_Evaluate');
+var rules = require('../JSModules/Rule_UpdateStates.js');
+//var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 var myconsole = require('../JSModules/myconsole.js');
@@ -29,25 +30,28 @@ exports.ownDb = function(type,data) {
    
  	db.update(type,data);
 	
-	/*
+	
 	 getID(data.Name,function(ID){
-        evaluate.evaluateChange(ID,data.Current_State,function(node,port,state,cancelTime,func){
+	     
+	     
+	      rules.updateRuleStates(ID, Current_State);
+     /*   evaluate.evaluateChange(ID,data.Current_State,function(node,port,state,cancelTime,func){
            
                 if(func){eval(func);}
              if(node && port && state){
               mySensorsocket.emit('deviceSwitch',node,port,state);
              }
          //myconsole.log(data_receive[0]);
-        });
+        });*/
     
     });
-	*/
+	
     return null;
 	
 
 }
 
-/*
+
 function getID(name,callback){
     
     db.getdata('Alarm_Items', {
@@ -68,5 +72,5 @@ function getID(name,callback){
                                 
                                 
 
-}*/
+}
 

@@ -1,0 +1,79 @@
+Controller active, delay for router is 1 seconds, please wait...
+starting....
+Initialising config
+Config Initialised
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+MySensor Module Listening on 44606
+SunCalc started
+TimeUpdate started
+Waiting to zero time. Can take up to 1 min
+Health check started
+Rule Monitor started
+Alarm Module: Alarm connected
+Alarm Status 18
+Event Handler: Client connected
+Client connected to mysensor Parser
+Mysensors: Trying to connect to Gateway @ 10.0.0.22:5003
+Mysensors: Gateway connected
+Setting day to: 0
+Weather Update: 6
+Server: Client Connected
+Connected to Event Handler
+Connected to Alarm Module
+Server registered for Alarm events
+Server registered for Alarm updates
+Server registered for Motion events
+Login token accepted
+Time zeroed
+Server: Client Connected
+[ '29', '255', '3', '0', '18', '1' ]
+Node state updated
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+[ '20', '3', '1', '0', '7', '0' ]
+Mysensor: Sensor updated
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Checking rule: 6
+Checking rule: 34
+Checking rule: 38
+Node state updated
+DNS Update: ok
+DNS Proxy Update: OK
+[ '28', '0', '1', '0', '39', '4.36' ]
+Mysensor: Sensor updated
+Node state updated
+[ '20', '3', '1', '0', '7', '0' ]
+Mysensor: Sensor updated
+Node state updated
+Server: Client Disconnected

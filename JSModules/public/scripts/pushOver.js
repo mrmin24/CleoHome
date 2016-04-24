@@ -28,7 +28,7 @@ exports.push = function(message){
                 myconsole.log(err);
                 myconsole.log(err.stack);
             }else{
-                myconsole.log("Message send successfully");
+                myconsole.log("Message sent successfully");
                // myconsole.log(res);
             }
         });

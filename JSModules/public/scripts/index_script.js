@@ -430,6 +430,15 @@
     });
     
     
+    socket.on('speak',function(msg){
+       
+     speak(msg);
+    
+     
+        
+    });
+    
+    
     
      function showAllEvents(numEvents,btnpress){
         
@@ -941,6 +950,7 @@
           clearBypassStatus();
           
           socket.emit('clearBypassZone');
+           //socket.emit('clearNightMode');
       }else if(data['Current_State'] == "Armed in Stay Mode"){
           $('#partition1').removeClass().addClass("label label-warning");
           
@@ -964,6 +974,7 @@
           
           clearBypassStatus();
            socket.emit('clearBypassZone');
+          //  socket.emit('clearNightMode');
       }else if(data['Current_State'] == "Armed in Stay Mode"){
           $('#partition1').removeClass().addClass("label label-warning");
           
@@ -2122,6 +2133,14 @@ function customFormat(formatString,date){
         
         
     }; 
+    
+    
+    function speak(message){
+        
+      var msg = new SpeechSynthesisUtterance(message);
+        window.speechSynthesis.speak(msg);
+
+    }
 
     
     
