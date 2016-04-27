@@ -191,7 +191,7 @@ function weekDayUpdate(){
             
          db.update('Items',data,function(){});   
          
-         rules.updateRuleStates(result[0].Id, isDark);
+         rules.updateRuleStates(result[0].Id, day);
                 
          
          

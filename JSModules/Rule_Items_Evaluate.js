@@ -33,17 +33,18 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    data = {'Set':'Status','Where':'Second_Id','Current_State':1,'Name':result[i].Second_Id};
                 
                    db.update('Rule_Items',data,function(){});
-                    if(result[i].Secondary_Item == 0){     //only execute check if Secondary item == 0
+                   
+                  //  if(result[i].Secondary_Item == 0){     //only execute check if Secondary item == 0
                         var rules = result[i].Rule_Id.split(';');     //determine which rules fit with this ID
                         
-                    } else {
+                   /* } else {
                         var rules = null;
                         
-                    } 
+                    } */
                   // var ruleValid2 = !result[i].Secondary_Item;
                    var ids = "";
                   // myconsole.log(rules);
-                   for(var j = 0; j < rules.length ; j++){
+                   for(var j = 0; j < (rules.length * !result[i].Secondary_Item) ; j++){
                        if(!isNaN(rules[j])){
                            var rulenr = rules[j];
                           // myconsole.log(rules[i]);
@@ -105,18 +106,19 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    }
                    
                    status = 0;
+                   // }
                }else
                {
-                   data = {'Set':'Status','Where':'Second_Id','Current_State':0,'Name':result[i].Second_Id};
+                   data2 = {'Set':'Status','Where':'Second_Id','Current_State':0,'Name':result[i].Second_Id};
                 
-                   db.update('Rule_Items',data,function(){});
+                   db.update('Rule_Items',data2,function(){});
                    status = 0;
-                   callback(null,null,null);
+                    callback(null,null,null,null,null,null);
                }
            }
           
        }else{
-           callback(null,null,null);
+            callback(null,null,null,null,null,null);
        }
        
        
