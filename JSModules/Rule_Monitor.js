@@ -90,8 +90,12 @@ function ruleMonitor(){
                
               // myconsole.log(data_receive);
                
-               
+              
                for(var i = 0;i < data_receive.length;i++){
+                    
+                 
+                deviceSendUpdate(data_receive[i].Item_Id);   
+                    
                 evaluate.evaluateChange(data_receive[i].Item_Id,data_receive[i].State,function(node,port,state,virtual,cancelTime,func){
                      eval(func);             
                      if(node && port && state){
@@ -108,6 +112,7 @@ function ruleMonitor(){
                         
                         db.update('Items',data,function(){});  
                         rules.updateRuleStates(node, state);
+                       
                          
                      }
                  //myconsole.log(data_receive[0]);
@@ -171,7 +176,17 @@ function speak(msg){
       
        socket2.emit("speak",msg);
         
-    }
+    
+}
+    
+    
+function deviceSendUpdate(Id){
+          
+      
+       socket2.emit("deviceUpdate",Id);
+        
+}    
+    
 
     
 exports.start = start;                   

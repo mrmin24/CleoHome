@@ -1912,7 +1912,7 @@ function customFormat(formatString,date){
            }
            else
            {
-                var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
+            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
            }
         }
         else

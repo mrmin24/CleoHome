@@ -21,6 +21,7 @@ timer = setTimeout(function() {
     var Weather = require('./weatherUpdate');
     var Health = require('./health.js');
     var ruleMon = require('./Rule_Monitor.js');
+    var ping = require('./ping.js');
  //  var Rules = require('./Rule_Evaluate.js');
     
     
@@ -34,6 +35,7 @@ timer = setTimeout(function() {
     Weather.start();
     Health.start();
     ruleMon.start();
+    ping.start();
   //  Rules.start();
     
     

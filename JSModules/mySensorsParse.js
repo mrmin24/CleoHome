@@ -115,7 +115,7 @@ function start() {
 	    	
 	    		
 	    	}else if(data[2] == 1 && sensorTypes.indexOf(data[4]) != -1 ){
-	    		myconsole.log("Mysensor: Sensor updated");
+	    		myconsole.log("Mysensor: Sensor updated2");
 	    		
 	    		
 	    		

@@ -12,5 +12,4 @@ exports.updateRuleStates = function(Id, state){
 	db.insert('Rules_toCheck',data);
     
     
-    
 }

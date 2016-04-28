@@ -3,7 +3,7 @@
 
 du -shc /var/lib/mysql/*   //get size of files
 
-
+find ~ -size +20M   //find big files
 
 service mysql stop
 

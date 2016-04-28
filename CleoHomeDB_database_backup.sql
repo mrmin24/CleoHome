@@ -248,7 +248,7 @@ CREATE TABLE `Items` (
   `Item_Toggle_Delay` int(11) DEFAULT '1',
   `Item_Enabled_Value` int(11) DEFAULT NULL,
   `Item_Current_State` int(11) DEFAULT NULL,
-  `Network_Address` float DEFAULT NULL,
+  `Network_Address` varchar(20) DEFAULT NULL,
   `Time_Updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`Id`),
   UNIQUE KEY `Id_UNIQUE` (`Id`)

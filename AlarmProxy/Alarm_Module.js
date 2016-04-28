@@ -862,7 +862,7 @@ function sendPanic(){
 
 
         });
-    // myconsole.log('send panic 2');
+   //  myconsole.log('send panic 2');
 }
 
 function speak(msg){
