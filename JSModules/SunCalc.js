@@ -19,7 +19,7 @@ function start() {
     myconsole.log("SunCalc started");
    
     checkSunCalc();
-    timer = setInterval(function(){
+    suntimer = setInterval(function(){
 
 
         checkSunCalc();

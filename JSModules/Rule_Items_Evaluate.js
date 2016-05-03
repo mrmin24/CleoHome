@@ -17,6 +17,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
            
           // myconsole.log(result);
            var status = 0;
+           var rulechanged = 0;
            for(var i in result){
                if(result[i].Equals == itemValue  && result[i].Equals != null){
                    status = 1;
@@ -32,7 +33,21 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    
                    data = {'Set':'Status','Where':'Second_Id','Current_State':1,'Name':result[i].Second_Id};
                 
-                   db.update('Rule_Items',data,function(){});
+                   db.update('Rule_Items',data,function(err,result2){
+                       
+                       if(result2){
+                        if(result2.changedRows == 1){
+                            rulechanged = 1;
+                            //myconsole.log(rulechanged);
+                        }
+                        else{
+                            rulechanged = 0;
+                            //myconsole.log(rulechanged);
+                        }
+                        
+                       }
+                       
+                 
                    
                   //  if(result[i].Secondary_Item == 0){     //only execute check if Secondary item == 0
                         var rules = result[i].Rule_Id.split(';');     //determine which rules fit with this ID
@@ -44,7 +59,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                   // var ruleValid2 = !result[i].Secondary_Item;
                    var ids = "";
                   // myconsole.log(rules);
-                   for(var j = 0; j < (rules.length * !result[i].Secondary_Item) ; j++){
+                   for(var j = 0; j < (rules.length * !result[i].Secondary_Item * rulechanged) ; j++){
                        if(!isNaN(rules[j])){
                            var rulenr = rules[j];
                           // myconsole.log(rules[i]);
@@ -104,6 +119,8 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                         }
                       
                    }
+                   
+                   });
                    
                    status = 0;
                    // }

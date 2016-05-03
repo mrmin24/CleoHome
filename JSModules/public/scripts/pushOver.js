@@ -3,6 +3,15 @@ var configure = getconfig.data;
 var configure2 = configure.xml;
 var myconsole = require('../../myconsole.js');
 
+var debug = 0;
+
+process.argv.forEach(function (val, index, array) {
+  if(index == 2){
+     
+     debug = val;
+  }
+});
+
 exports.push = function(message){
         
         myconsole.log('pushing message');
@@ -22,17 +31,20 @@ exports.push = function(message){
        
         
         // A callback function is defined:
-        push.send(user, "Cleopatra", message, function (err, res){
-            if(err){
-                myconsole.log("We have an error:");
-                myconsole.log(err);
-                myconsole.log(err.stack);
-            }else{
-                myconsole.log("Message sent successfully");
-               // myconsole.log(res);
-            }
-        });
         
+        if(debug == 0)
+        {
+            push.send(user, "Cleopatra", message, function (err, res){
+                if(err){
+                    myconsole.log("We have an error:");
+                    myconsole.log(err);
+                    myconsole.log(err.stack);
+                }else{
+                    myconsole.log("Message sent successfully");
+                   // myconsole.log(res);
+                }
+            });
+        }
         
         
         

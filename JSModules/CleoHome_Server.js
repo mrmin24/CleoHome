@@ -3,13 +3,16 @@ var express = require('express');
 var passport = require('passport');
 var app = express();
 var http = require('http').Server(app);
-
+//var app2 = express();
 //var ip = require('external-ip');
 //var routes = require('./routes');
 //var router = express.Router();
 
 var rules = require('./Rule_UpdateStates.js');
+
  
+//var nodeadmin = require('nodeadmin');
+//app2.use(nodeadmin(app2));
 
 
 var bodyParser = require('body-parser');
@@ -149,18 +152,19 @@ function start() {
     } ,1000*60*configure2.server[0].dnsinterval[0]);
     
 
-      
+  
 
 io.on('connection', function(socket){
    // myconsole.log(socket);
   myconsole.log('Server: Client Connected');
+   //sendPageTabs();
   //myconsole.log(lastArmTime);
   getAlarmTriggers(lastArmTime);
   getAlarmStatus();
   getDeviceStatus();
   getNodeStatus();
   sendConfig(); 
-  sendGatewayStatus();
+  sendGatewayStatus();   
   
   socket.on('disconnect',function(){
      
@@ -1238,8 +1242,14 @@ function getPower(){
            if(data_receive[0]){
             //myconsole.log(data_receive);
           //  io.emit("sendWeather",data_receive[0].Item_Current_Value,data_receive[1].Item_Current_Value);
-            io.emit('SensorEvent', {Id:data_receive[0].Id,Current_State:data_receive[0].Item_Current_Value});
-             io.emit('SensorEvent', {Id:data_receive[1].Id,Current_State:data_receive[1].Item_Current_Value});
+          io.emit('SensorEvent', {Id:data_receive[0].Id,Current_State:data_receive[0].Item_Current_Value});
+          io.emit('SensorEvent', {Id:data_receive[1].Id,Current_State:data_receive[1].Item_Current_Value});
+        //   io.emit('sendPower', data_receive[0].Item_Current_Value,data_receive[1].Item_Current_Value);
+           
+           
+          //  rules.updateRuleStates(data_receive[0].Id, data_receive[0].Item_Current_Value);
+           // rules.updateRuleStates(data_receive[1].Id, data_receive[1].Item_Current_Value);
+          
           //  io.emit('SensorEvent', {Id:ID,Current_State:State2});
             
         }else{
@@ -1686,9 +1696,44 @@ function getAlarmStatus(){
                return;
     
 }
+
+function sendPageTabs(){
+ 
+             db.getdatajoin2('Page_Tabs','Page_Containers',{Select: 't1.Description D1,t2.Description D2',whereClause:"t1.Id LIKE '%' ORDER BY t1.Id ASC, t2.Id",field1:"Containers_ToShow",field2:"Id"},function(err,data_receive){
+                        if (err) {
+                        // error handling code goes here
+                            myconsole.log("ERROR2 : ",err);            
+                        } else {       
+                            
+                        
+                        
+                           for(var i in data_receive){
+                               myconsole.log(data_receive[i]);  
+                               
+                                
+                                
+                               
+                           }
+                             
+                            
+                             
+                        }
+                       
+                   });
+                   
+             
+               
+               return;
+ 
+ 
+ 
+}
+
+
+
 function getDeviceStatus(){
    
-    db.getdata('Items',{Select: 'Id,Item_Name,Item_Current_Value,Item_Type,Node_Id,Node_Port,Item_Enabled_Value',whereClause:"'Id' LIKE '%' ORDER BY Item_Sort_Position ASC"},function(err,data_receive){
+    db.getdatajoin('Items','Page_Containers',{Select: 'Items.Id,Items.Item_Name,Items.Item_Current_Value,Items.Item_Type,Items.Node_Id,Items.Node_Port,Items.Item_Enabled_Value,Page_Containers.Description',whereClause:"Items.Id LIKE '%' ORDER BY Items.Item_Sort_Position ASC",join1:'Items.Item_Type',join2:'Page_Containers.ItemTypes_ToShow'},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
                             myconsole.log("ERROR2 : ",err);            
@@ -1698,10 +1743,10 @@ function getDeviceStatus(){
                         var device = [1 , 2 , 3 , 4 , 5,6,7,11,15,18,20];
                         
                            for(var i in data_receive){
-                              // myconsole.log(data_receive[i]['Item_Name']);  
+                            //   myconsole.log(data_receive[i]);  
                                 if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
                                 {
-                                    var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value']};
+                                    var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value'],Item_Container:data_receive[i]['Description']};
                                    
                                     io.emit('DeviceStatusEvent',data);
                                     
@@ -1724,6 +1769,8 @@ function getDeviceStatus(){
                return;
     
 }
+
+
 
 function getNodeStatus(){
    

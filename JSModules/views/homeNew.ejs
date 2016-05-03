@@ -1,0 +1,1116 @@
+<!doctype html>
+<html>
+    
+    <head>
+        <title>CleoHome Server</title>
+       <!-- <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css"> -->
+       <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+        <!--<link rel="stylesheet" , href="/bootstrap/css/bootstrap.min.css"> -->
+        <link rel="stylesheet" href="/font-awesome-4.2.0/css/font-awesome.min.css"> <!-- load fontawesome-->
+        <link rel='stylesheet',  href="/stylesheets/CleoHome_Main.css">
+         <link rel='stylesheet',  href="/EventGraph/css/style.css">
+       <link rel='stylesheet',  href="/stylesheets/datepicker.css">
+       <link rel='stylesheet',  href="/stylesheets/jquery-ui.min.css">
+         <link rel='stylesheet',  href="/stylesheets/jquery.dataTables.css"> 
+    </head>
+    
+    <body>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="/jquery/jquery-2.1.1.min.js">\x3C/script>')</script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+   <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+    
+    <script>(typeof $().modal == 'function') || document.write('<script src="/bootstrap/js/bootstrap.min.js">\x3C/script>')</script>-->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/jquery/jquery-ui.min.js"></script>
+    <script src="/jquery/jquery.dataTables.min.js"></script>
+    <script src="./scripts/Chart.min.js"></script>
+    
+    
+     
+    <!--<script type="text/javascript" src="/jquery/jquery-2.1.1.min.js"></script>
+    <script src="/bootstrap/js/bootstrap.min.js"></script>-->
+  
+       
+    
+        
+        
+        <div id="blackout" >
+            
+           <!-- <a id="refresh" href="#" data-toggle="tab" class="btn btn-default">Refresh</a>-->
+            
+        </div>
+        
+        
+        
+        <div class="container-fluid " >
+            <nav class="nav nav-tabs " role="navigation">
+                <!--<div class="container-fluid">-->
+                    <div class="navbar-header" >
+                        <a class="navbar-brand" href="/">CleoHome</a>
+                    </div>
+                   
+                    <div class="navbar-collapse collapse  " id="navbar-collapse-1">
+                         <ul class="nav nav-tabs" id="tabs" >
+                            <li class="active" onclick="switchHomeTab()" >
+                                <a href="#Home" data-toggle="tab">Home</a>
+                            </li>
+                            <li onclick="switchAlarmTab()">
+                                <a href="#Alarm" data-toggle="tab" >Alarm</a>
+                            </li>
+                            <li onclick="switchDevicesTab()">
+                                <a href="#Devices" data-toggle="tab" >Devices</a>
+                            </li>
+                            <li onclick="switchAccessTab()">
+                                <a href="#Devices" data-toggle="tab" >Access</a>
+                            </li>
+                            <li onclick="switchIrrigationTab()">
+                                <a href="#Devices" data-toggle="tab" >Irrigation</a>
+                            </li>
+                            <li onclick="switchNodesTab()">
+                                <a href="#Devices" data-toggle="tab" >Nodes</a>
+                            </li>
+                            <li onclick="switchEventsTab()">
+                                <a href="#Events" data-toggle="tab">Events</a>
+                            </li>
+                            <li onclick="switchGraphsTab()">
+                                <a href="#Graphs" data-toggle="tab">Graphs</a>
+                            </li>
+                            <li onclick="settings()">
+                                <a href="#" data-toggle="tab">Settings</a>
+                            </li>
+                             <li onclick="refreshIP()">
+                                <a href="#" data-toggle="tab">Refresh IP</a>
+                            </li>
+                            <li onclick="test()">
+                                <a href="#" data-toggle="tab">Test</a>
+                            </li>
+                            <li onclick="switchRulesTab()">
+                                <!--<a href="./rules" >Rules</a>-->
+                                <a href="#" data-toggle="tab">Rules</a>
+                            </li>
+                        </ul>
+                        
+                      
+                    </div> <!-- navbar-collapse-->
+                    
+                    <a href="/logout" class="btn btn-default pull-right"><span class="fa fa-sign-out"></span> Logout</a>  
+                    
+                    
+                    <button class="btn btn-default" type="button">
+                      Temp <span class="badge" id = 'temp'></span>
+                    </button>
+                    
+                    <button class="btn btn-default" type="button">
+                      Wind <span class="badge" id = 'wind'></span>
+                    </button>
+                     <button class="btn btn-default" type="button">
+                      Rain <span class="badge" id = 'rain'></span>
+                    </button>
+                    
+                    <button class="btn btn-default" type="button">
+                      Mains Power <span class="badge" id = 'device128'>0</span>
+                    </button>
+                    
+                    <button class="btn btn-default" type="button">
+                      Geyser Power <span class="badge" id = 'device129'>0</span>
+                    </button>
+                    
+                    <button class="btn btn-default" type="button" onclick = "speak('Kitchen door open')">
+                      Speak 
+                    </button>
+                    
+                    
+                    
+                   
+                 <!-- container-fluid-->
+                  
+            </nav>
+            
+            <br>
+            <div class = "row">
+            
+            
+                <div class = "col-xs-12 " id="Alarm_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong class="col-xs-2">Alarm</strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            <span >
+                                <span><label id="alarm_connected" class = "label label-default">Connected</label></span>
+                                <span><label id="ac" class = "label label-success">AC</label></span>
+                                <span><label id="battery" class = "label label-success">Battery</label></span>
+                                <span><label id="bypass" class = "label label-default">Bypass</label></span>
+                                <span><label id="memory" class = "label label-default">Memory</label></span>
+                               <!--  <span> <label  id="night" class = "label label-default">Night Mode</label></span>-->
+                                <span> <label id="armed" class = "label label-default">Armed</label></span>
+                                <span> <label  id="partition1" class = "label label-default">Unknown</label></span>
+                                
+                            </span>
+                        </div>
+                        
+                        <div class="panel-body" id="zone_container">
+                        <div id="alarm_blackout" >
+            
+                            <!-- <a id="refresh" href="#" data-toggle="tab" class="btn btn-default">Refresh</a>-->
+            
+                        </div>
+                        <div id="alarm_alert" class = "Alarm_Alert">
+                            <div id = "Alarm_Alert_Btn_Container" class = "Alarm_Alert">
+                                <button id = "Alarm_Alert_Btn" class = "btn btn-default btn-lg" onclick = "restoreAlarmTrigger()">OK</button>
+                            </div>
+                            
+                        </div>
+                        
+                        
+                            <div id = "alarm_controls" class="well hidden">
+                                    
+                                         
+                                    <!--<label id = "event_dropdown_btn" class="hidden">-->
+                                    <div class="btn-toolbar" role="toolbar">
+                                       
+                                             
+                                            
+                                            <span>
+                                                <button class="btn btn-danger" type="button" id="Away_Arm_Btn" onclick = "armDisarmAlarm('Away')" >Away Arm </button>
+                                            </span>
+                                            
+                                          
+                                            
+                                            <span>
+                                                <button class="btn btn-warning" type="button" id="Stay_Arm_Btn"  onclick = "armDisarmAlarm('Stay')"  >Stay Arm </button>
+                                            </span>
+                                           
+                                            
+                                            <span>
+                                                <button class="btn btn-success" type="button" id="Disarm_Btn" onclick = "armDisarmAlarm('Disarm')" >Disarm </button>
+                                            </span>
+                                            
+                                            <span>
+                                                <button class="btn btn-purple" type="button" id="Night_Arm_Btn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
+                                            </span>
+                                            
+                                           <!-- </label>-->
+                                            </span>
+                                     
+                                        
+                                       
+                                            <span>
+                                                <button class="btn btn-primary" type="button" id="Bypass_Btn" onclick = "bypassAlarm()" >Bypass </button>
+                                            </span>
+                                            
+                                           
+                                        
+                                            <span>
+                                                <button class="btn btn-primary" type="button" id="Panic_Btn" onclick = "panicAlarm()" >Panic </button>
+                                            </span>
+                                            
+                                           
+                                        
+                                        
+                                        </div>
+                                    
+                            </div> <!-- <well>-->
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!---------------------MOTION PANEL----------------->
+                
+                 <div class = "col-xs-12 " id="Motion_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Motion  </strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            <span>
+                                <span id="gatewayStatus" class="label label-default">Gateway</span>
+                            </span>
+                        </div>
+                        
+                        <div class="panel-body" id="motion_container">
+                        
+                        
+                        
+                        
+                            
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!---------------------DEVICE PANEL----------------->
+                
+                 <div class = "col-xs-12 " id="Devices_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Devices</strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="devices_container">
+                        
+                        
+                        
+                        
+                           
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+                
+                <!---------------------ACCESS PANEL----------------->
+                
+                 <div class = "col-xs-12 hidden" id="Access_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>Access</strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="access_container">
+                        
+                        
+                        
+                        
+                           
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                 <!---------------------IRRIGATION PANEL----------------->
+                
+                 <div class = "col-xs-12 hidden" id="Irrigation_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Irrigation</strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="irrigation_container">
+                        
+                        
+                        
+                        
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+                 <!---------------------Network PANEL----------------->
+                
+                 <div class = "col-xs-12 hidden" id="Network_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Network</strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="network_container">
+                        
+                        
+                        
+                        
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+                
+                 <!---------------------Virtual PANEL----------------->
+                
+                 <div class = "col-xs-12 hidden" id="Virtual_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Virtual</strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="virtual_container">
+                        
+                        
+                        
+                        
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <!---------------------Nodes PANEL----------------->
+                
+                 <div class = "col-xs-12 hidden" id="Nodes_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Nodes</strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="nodes_container">
+                        
+                        
+                        
+                        
+                            
+                           
+                            
+                           <!-- labels automatically get added here by script-->
+                           
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                
+                 <!---------------------Graphs PANEL----------------->
+                
+                
+                
+                 <div class = "col-xs-12 hidden " id="Graphs_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Graphs  </strong>
+                           <btn class="btn btn-default" id = "Rain" onClick= "getgraphs('RainRate')">Rain</btn>
+                            <btn class="btn btn-default" id = "Power" onClick= "getgraphs('Power')">Power</btn>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        
+                        <div class="panel-body" id="graphs_container">
+                        
+                        
+                           
+                               
+                              <!-- <canvas id="myChart" width="400" class="col-xs-12"></canvas>-->
+                           
+                        </div>
+                    </div>
+        </div>            
+                
+                <!---------------------Rules PANEL----------------->
+                
+                 <div class = "col-xs-12 hidden " id="Rules_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Rules  </strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="rules_container">
+                        
+                        
+                           <div class = "well">
+                               <div class="btn-group">
+                                            
+                                            <span>
+                                               <button type="button" class="btn btn-default" data-toggle="modal" data-target="#rulesAddModal">
+                                                      Add
+                                                    </button>
+                                            </span>
+                                            
+                                            <span>
+                                                <button class="btn btn-default" type="button" id="Rules_Edit_Btn"  onclick = ""  >Edit</button>
+                                            </span>
+                                            <span>
+                                                <button id="deleteBtn" class="btn btn-default " data-toggle="modal" data-target="#confirm-deleteRule">
+                                    		   		Delete
+                                    			</button>
+                                            </span>
+                                            
+                                          
+                                  </div>
+                            </div>
+                            <br><br>
+                             <div>    
+                               <span>
+                                   <table class = "table" id="rules_table">
+                                        <thead>
+                                            <tr>
+                                                <th>Id</th>
+                                                <th>Rule Comment</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        
+                                        <tbody id="rulesTableBody">
+                                           
+                                       
+                                         </tbody> 
+                                       
+                                       
+                                   </table>
+                                </span>
+                           </div>
+                   
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>
+               
+               
+               
+             <!--Rules Add Modal -->  
+               
+            
+                <div class="modal fade " id="rulesAddModal" tabindex="-1" role="dialog" aria-labelledby="rulesAddModalLabel">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">Add Rule</h4>
+                      </div>
+                      <div class="modal-body">
+                          <div><strong>Description</strong></strong></div>
+                          <div class="input-group" style="display:inline-block; ">
+                              <input type="text" class="form-control" id="ruleDescription" placeholder="description" aria-describedby="basic-addon2">
+                              
+                            </div>
+                        <div><strong>IF:</strong></div>
+                        
+                            <table id="if_Statements" class="table table-bordered">
+                                
+                                <thead>
+                                    <th>Item</th>
+                                    <th>Equals</th>
+                                    <th>Greater Than</th>
+                                    <th>Less Than</th>
+                                    <th>Not Equal</th>
+                                    <th>Secondary Item</th>
+                                    
+                                </thead>
+                                <tbody>
+                                <tr>
+                                        <td>
+                                            <div class="dropdown">
+                                              <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuReq1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                                Item
+                                                <span class="caret"></span>
+                                              </button>
+                                              <ul class="dropdown-menu scrollable-menu" role="menu" id='item_options' aria-labelledby="dropdownMenuReq1">
+                                                <!--<li><a href="#">Action</a></li>
+                                                <li><a href="#">Another action</a></li>
+                                                <li><a href="#">Something else here</a></li>
+                                                <li><a href="#">Separated link</a></li>-->
+                                              </ul>
+                                          </div>
+                                      </td>
+                                      <td>
+                                         <div class="input-group" style="display:inline-block; ">
+                                          <input type="text" id="equalsValueReq1" class="form-control" placeholder="value" aria-describedby="basic-addon2">
+                                          
+                                        </div>
+                                      </td>
+                                      <td>
+                                         <div class="input-group" style="display:inline-block; ">
+                                          <input type="text" id="greaterValueReq1" class="form-control" placeholder="value" aria-describedby="basic-addon2">
+                                          
+                                        </div>
+                                      </td>
+                                      <td>
+                                         <div class="input-group" style="display:inline-block; ">
+                                          <input type="text" id="lessValueReq1" class="form-control" placeholder="value" aria-describedby="basic-addon2">
+                                          
+                                        </div>
+                                      </td>
+                                      <td>
+                                         <div class="input-group" style="display:inline-block; ">
+                                          <input type="text" id="notEqualValueReq1" class="form-control" placeholder="value" aria-describedby="basic-addon2">
+                                          
+                                        </div>
+                                      </td>
+                                      <td align="center">
+                                         <div class="input-group" style="display:inline-block; ">
+                                           <input id="secondaryRuleCheck1" type="checkbox" class="big-checkbox">
+                                          
+                                        </div>
+                                      </td>
+                                      
+                                  </tr>
+                              
+                              </tbody>
+                          </table>
+                          <div>
+                            <button type="button" class="btn btn-info" id="addAND" >AND</button>
+                            <button type="button" class="btn btn-info" id="addOR">OR</button>
+                        </div>
+                          <div style="margin-top:10px;"><strong>THEN:</strong></div>
+                        
+                            <table class="table table-bordered">
+                                
+                                <thead>
+                                    <th>Item</th>
+
+                                    <th>Value</th>
+                                    
+                                    <th>Rule On Time</th>
+                                    
+                                   
+                                    
+                                </thead>
+                                <tbody>
+                                <tr>
+                                        <td>
+                                            <div class="dropdown" style="display:inline-block;">
+                                              <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuAction1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                                Item
+                                                <span class="caret"></span>
+                                              </button>
+                                              <ul class="dropdown-menu" id='item_options_action' aria-labelledby="dropdownMenuAction1">
+                                                <!--<li><a href="#">Action</a></li>
+                                                <li><a href="#">Another action</a></li>
+                                                <li><a href="#">Something else here</a></li>
+                                                <li><a href="#">Separated link</a></li>-->
+                                              </ul>
+                                          </div>
+                                      </td>
+                                     
+                                      <td>
+                                           <div class="input-group" style="display:inline-block; ">
+                                              <input type="text" id = "ActionValue1" class="form-control" placeholder="value" aria-describedby="basic-addon2">
+                                              
+                                            </div>    
+                                              
+                                      </td>
+                                       <td>
+                                           <div class="input-group" style="display:inline-block; ">
+                                              <input type="text" id = "ActionOnValue1" class="form-control" placeholder="0" aria-describedby="basic-addon2">
+                                              
+                                            </div>    
+                                              
+                                      </td>
+                                      
+                                  </tr>
+                              
+                              </tbody>
+                          </table>
+                          
+                          
+                          
+                          
+                        
+                      </div>
+                      <div class="modal-footer">
+                         
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirm-saveRule">Save changes</button>
+                        
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            	
+            	
+            	<!--Confirm Save Modal -->
+            	
+            	<div class="modal fade in" id="confirm-saveRule" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			    <div class="modal-dialog">
+			        <div class="modal-content">
+			            <div class="modal-header">
+			                <h4>Confirm rule save</h4>
+			            </div>
+			            <div class="modal-body">
+			               Are you sure you want to save this rule?
+			            </div>
+			            <div class="modal-footer">
+			                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+			                <a class="btn btn-success btn-ok" onclick="saveRule()" data-dismiss="modal">Save</a>
+			            </div>
+			        </div>
+			    </div>
+			</div><!--  end confirm modal -->
+			
+			
+            	
+            	<!--Confirm Delete Modal -->
+            	
+            	<div class="modal fade in" id="confirm-deleteRule" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			    <div class="modal-dialog">
+			        <div class="modal-content">
+			            <div class="modal-header">
+			                <h4>Confirm rule deletion</h4>
+			            </div>
+			            <div class="modal-body">
+			               Are you sure you want to delete this rule?
+			            </div>
+			            <div class="modal-footer">
+			                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+			                <a class="btn btn-success btn-ok" onclick="deleteRule()" data-dismiss="modal">Delete</a>
+			            </div>
+			        </div>
+			    </div>
+			</div><!--  end confirm modal -->
+			
+			
+			
+			
+                <!-- Settings panel -->
+                
+                <div class = "col-xs-12 hidden " id="Settings_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h2 class = "panel-title col-xs-1" id = "Settings_Panel_Title">Settings</h2>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                           <button class="btn btn-danger btn-sm" onclick = "saveConfig()">Save</button>
+                        </div>
+                         <div class="panel-body" id="settings_container">
+                         
+                          
+                          <div id="accordion" >
+                              <h3 >Config </h3>
+                              <div >
+                              <div id="accordion2" >
+                              <h4>Server</h4>
+                                <div class = "well">
+                                    <div class="col-xs-2 ">
+                                        <div class="checkbox " >
+                                          <label><input type="checkbox" value="" id="DNSUpdate_Check" >DNS Update</label>
+                                        </div>
+                                     </div><!-- /.col-lg-6 -->
+                                      
+                                      <div class="col-xs-2  ">
+                                        <div class="checkbox "  >
+                                          <label><input type="checkbox" value="" id="DNSEmail_Check" >DNS Email</label>
+                                        </div>
+                                     </div><!-- /.col-lg-6 -->
+                                      
+                                      <div class="form-group col-xs-8">
+                                          <label for="DNSInt" class="col-xs-3 control-label">DNS Update Interval (Mins)</label>
+                                          <div class="col-xs-2" id="DNSUpdateInt">
+                                             <input type="text" class="form-control" id="DNSInt" placeholder="">
+                                          </div>
+                                       </div>
+                                </div> <!-- WELL -->
+                            <h4>Email</h4>
+                                <div class = "well">
+                                    <div class="form-group ">
+                                          <label for="EmailFrom" class="col-xs-1 control-label">From:</label>
+                                          <div class="col-xs-11" >
+                                             <input type="text" class="form-control" id="EmailFrom" placeholder="From">
+                                          </div>
+                                       </div>
+                                      
+                                      <div class="form-group ">
+                                          <label for="EmailTo" class="col-xs-1 control-label">To:</label>
+                                          <div class="col-xs-11" >
+                                             <input type="text" class="form-control" id="EmailTo" placeholder="To">
+                                          </div>
+                                       </div>
+                                      
+                                      <div class="form-group ">
+                                          <label for="EmailCC" class="col-xs-1 control-label">CC:</label>
+                                          <div class="col-xs-11" >
+                                             <input type="text" class="form-control" id="EmailCC" placeholder="CC">
+                                          </div>
+                                       </div>
+                                    </div> <!-- WELL -->
+                                    
+                            <h4>Alarm</h4>
+                                <div class = "well">
+                                    <div class="form-group col-xs-4">
+                                          <label for="EnvisPass" class="col-xs-4 control-label">Envisalink Password</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="EnvisPass" placeholder="Password">
+                                          </div>
+                                       </div>
+                                      
+                                      <div class="form-group col-xs-4">
+                                          <label for="AlmPass" class="col-xs-4 control-label">Alarm Password</label>
+                                          <div class="col-xs-5">
+                                             <input type="text" class="form-control" id="AlmPass" placeholder="Password">
+                                          </div>
+                                       </div>
+                                      
+                                      <div class="form-group col-xs-4">
+                                          <label for="AlmPrt" class="col-xs-4 control-label">Alarm Port</label>
+                                          <div class="col-xs-5">
+                                             <input type="text" class="form-control" id="AlmPrt" placeholder="4025">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmIP" class="col-xs-4 control-label">Alarm IP</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmIP" placeholder="0.0.0.0">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmZones" class="col-xs-4 control-label">Number of Zones</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmZones" placeholder="32">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmPart" class="col-xs-4 control-label">Number of Partitions</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmPart" placeholder="1">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmAwayZone" class="col-xs-4 control-label">Away Arm Zone</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmAwayZone" placeholder="Away Zone">
+                                          </div>
+                                       </div>
+                                       <div class="form-group col-xs-4">
+                                          <label for="AlmStayZone" class="col-xs-4 control-label">Stay Arm Zone</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="AlmStayZone" placeholder="Stay Zone">
+                                          </div>
+                                       </div>
+                                    </div> <!-- WELL -->
+                                    
+                                <h4>DataBase</h4>
+                                    <div class = "well">
+                                        
+                                          
+                                          <div class="form-group col-xs-8">
+                                              <label for="DBName" class="col-xs-3 control-label">Database Name</label>
+                                              <div class="col-xs-5" >
+                                                 <input type="text" class="form-control" id="DBName" placeholder="">
+                                              </div>
+                                           </div>
+                                            <div class="form-group col-xs-8">
+                                              <label for="DBHost" class="col-xs-3 control-label">Database Host</label>
+                                              <div class="col-xs-5" >
+                                                 <input type="text" class="form-control" id="DBHost" placeholder="">
+                                              </div>
+                                           </div>
+                                            <div class="form-group col-xs-8">
+                                              <label for="DBUsername" class="col-xs-3 control-label">Database Username</label>
+                                              <div class="col-xs-5" >
+                                                 <input type="text" class="form-control" id="DBUsername" placeholder="">
+                                              </div>
+                                           </div>
+                                            <div class="form-group col-xs-8">
+                                              <label for="DBPass" class="col-xs-3 control-label">Database Password</label>
+                                              <div class="col-xs-5" >
+                                                 <input type="text" class="form-control" id="DBPass" placeholder="">
+                                              </div>
+                                           </div>
+                                    </div> <!-- WELL -->
+                                        
+                            <h4>Authentication</h4>
+                                        <div class = "well">
+                                            
+                                              
+                                              <div class="form-group col-xs-8">
+                                                  <label for="tokentimeout" class="col-xs-3 control-label">Authentication Token Timeout (Days)</label>
+                                                  <div class="col-xs-5" >
+                                                     <input type="text" class="form-control" id="tokentimeout" placeholder="">
+                                                  </div>
+                                               </div>
+                                            </div> <!-- WELL -->
+                              
+                             <h4>PushOver</h4>
+                                <div class = "well">
+                                    
+                                      <div class="form-group col-xs-8">
+                                          <label for="pushUser" class="col-xs-3 control-label">Push Over User Token</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="pushUser" placeholder="">
+                                          </div> 
+                                         </div>
+                                         <div class="form-group col-xs-8">
+                                          <label for="pushToken" class="col-xs-3 control-label">Push Over Token</label>
+                                          <div class="col-xs-5" >
+                                             <input type="text" class="form-control" id="pushToken" placeholder="">
+                                          </div>
+                                       </div>
+                                    </div> <!-- WELL -->
+                                    
+                                    
+                                  </div>
+                              </div>
+                              
+                              <h3 >Users</h3>
+                              <div>
+                             <!-- <div id="dialog1" title="User Deleted" >
+                                  <p>User deleted</p>
+                                </div>
+                                <div id="dialog2" title="Token Deleted">
+                                  <p>User token deleted</p>
+                                </div>-->
+                              <div class = "well">
+                               <div class="btn-group">
+                                            <span>
+                                                <button class="btn btn-default" type="button" id="Usr_Refresh_Btn" onclick = "getusers()" ><span class="fa fa-refresh"></span> Refresh </button>
+                                            </span>
+                                            <span>
+                                                <button class="btn btn-default" type="button" id="Usr_Delete_Btn" onclick = "" >Delete </button>
+                                            </span>
+                                            
+                                            <span>
+                                                <button class="btn btn-default" type="button" id="Usr_Token_Delete_Btn"  onclick = ""  >Remove Token </button>
+                                            </span>
+                                            
+                                            <a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Local Signup</a>
+                                            
+                                            <!--<span>
+                                                <button class="btn btn-default" type="button" id="Usr_Delete_Btnn"  onclick = "armDisarmAlarm('Night')"  >Night Mode </button>
+                                            </span>-->
+                                    </div>
+                                    </div>
+                                    <br><br>
+                                        <div>    
+                                           <span>
+                                               <table class = "table" id="users_table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Id</th>
+                                                            <th>Username</th>
+                                                            
+                                                        </tr>
+                                                    </thead>
+                                                    
+                                                    <tbody id="userTableBody">
+                                                       
+                                                   
+                                                     </tbody> 
+                                                   
+                                                   
+                                               </table>
+                                            </span>
+                                   </div>
+                                        </div>
+                              <h3 >Section 3</h3>
+                              <div >
+                                <p>
+                                Nam enim risus, molestie et, porta ac, aliquam ac, risus. Quisque lobortis.
+                                Phasellus pellentesque purus in massa. Aenean in pede. Phasellus ac libero
+                                ac tellus pellentesque semper. Sed ac felis. Sed commodo, magna quis
+                                lacinia ornare, quam ante aliquam nisi, eu iaculis leo purus venenatis dui.
+                                </p>
+                                <ul>
+                                  <li>List item one</li>
+                                  <li>List item two</li>
+                                  <li>List item three</li>
+                                </ul>
+                              </div>
+                              
+                         </div>
+                          
+                         </div>
+                    </div>
+                    
+                </div>
+                
+                 <!-- Events Panel -->      
+                   
+                
+                <div class = "col-xs-12 "  id="Event_Panel">
+                    <div class="panel panel-default " >
+                        <div class="panel-heading">
+                            <strong>Events </strong><!--<h2 class = "panel-title col-xs-3  col-lg-4" id = "Event_Panel_Title">Events</h2>-->
+                            <br>
+                            <span>
+                            <label id="Checkbox3" class="checkbox-inline">
+                                    <input type="checkbox" id="checkbox4" name="checkbox4" onclick = "checkbox4Click()" checked>Graph</label>
+                                <label id="Checkbox1" class="checkbox-inline" >
+                                    <input type="checkbox" id="checkbox1" name="checkbox1">Zones</label>
+                                <label id="Checkbox2" class="checkbox-inline">
+                                    <input type="checkbox" id="checkbox2" name="checkbox2">Partition</label>
+                                <label id="Checkbox3" class="checkbox-inline ">
+                                    <input type="checkbox" id="checkbox3" name="checkbox3"  checked>Important</label>
+                            </span>
+                                
+                            
+                        </div>
+                   
+                        <div class="panel-body " id="event_panel_body">
+                            
+                            <div id = "event_controls" class="well hidden">
+                                <span class="btn-group" id = "event_dropdown_label"  class="hidden" >
+                                   <span class="dropdown">
+                                          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuEvents" data-toggle="dropdown">
+                                            10
+                                            <span class="caret"></span>
+                                          </button>
+                                          <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuEvents" id="EventDropDownUL">
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">10</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">20</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">50</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">100</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">250</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">500</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">1000</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">1500</a></li>
+                                            
+                                          </ul>
+                                   </span>
+                                        
+                                        
+                                
+                                <!--<label id = "event_dropdown_btn" class="hidden">-->
+                                    <span>
+                                        <button class="btn btn-primary" type="button" id="Num_Event_Btn" onclick = "showAllEvents(null,true)" >All Events </button>
+                                    </span>
+                                    <span>
+                                        <button class="btn btn-warning" type="button" id="Num_Event_Btn" onclick = "showImportantEvents()" >Important Events </button>
+                                    </span>
+                                    <span>
+                                        <button class="btn btn-danger" type="button" id="Last_Alarm_Btn" onclick = "showLastAlarm()" > Last Alarm </button>
+                                    </span>
+                                
+                               
+                                    <span class="input-daterange input-group col-xs-6" id="datepicker">
+                                        <input type="text" class=" form-control" name="start" id="datepicker1" onclick = "showdatepicker1()"/>
+                                        <span class="input-group-addon">to</span>
+                                        <input type="text" class="form-control" name="end" id="datepicker2" onclick = "showdatepicker2()"/>
+                                       <span class="input-group-btn">
+                                        <button class="btn btn-default" type="button">Go!</button>
+                                      </span>
+                                    </span>
+                              </span> <!--button group -->
+                            </div>
+                               <!-- </label>-->
+                              
+                            
+                            
+                            <div class = "col-xs-12">    
+                                <div id="chart_placeholder" ></div>
+                                
+                                <div style="text-align: center" id="legend" ></div>
+                            </div>
+                            <div>
+                                <table class = "table table-striped table-condensed" id="event_container">  <!-- Events are added here by script-->  </table>
+                             </div>  <!--<ul id="messages"></ul>-->
+                             
+                             
+                        </div>  <!-- panel body -->
+                    </div> <!-- panel -->
+                </div> <!-- event panel  -->
+                
+                <section class="tab-content">
+           
+            
+                <article class = "tab-pane active" id="Home">
+            
+                
+                
+                </article>
+                
+                <article class = "tab-pane" id="Events">    <!-- Second Tab-->
+                
+                    
+                    
+                    
+                    
+                </article>  <!-- End second tab -->
+                <article class = "tab-pane" id="Alarm">    <!-- Third Tab-->
+                
+                    
+                    
+                    
+                    
+                </article>  <!-- End second tab -->
+                
+            </section>  <!-- End Tab content -->
+                    
+            </div> <!--row-->
+        
+        
+        </div> <!--container-fluid -->
+          <script src="/scripts/d3.min.js"></script>
+          <script src="/scripts/moment.min.js"></script>
+          <script src="/scripts/bootstrap-datepicker.js"></script>
+          <script src="/EventGraph/src/eventDrops.js"></script>
+          <script src="/scripts/index_scriptNew.js"></script>
+          
+     <script>
+      $(function() {
+        $( "#accordion2" ).accordion({
+            active: false,
+            collapsible: true,
+            event: "click ",
+            heightStyle: "content"
+        });
+        $( "#accordion" ).accordion({
+            active: false,
+            collapsible: true,
+            event: "click ",
+            heightStyle: "content"
+            });
+      });
+  </script>
+  
+  
+  
+			
+			
+    </body>
+
+</html>

@@ -50,7 +50,7 @@ function checkNodeHealth(){
                      // myconsole.log(lastseen);
                        //myconsole.log("Cleopatra Health: " + result[i].Name + " node offline");
                       if(exclude.indexOf(result[i].Name) == -1){
-                     //  pushOver.push("Cleopatra Health: " + result[i].Name + " node offline");
+                       pushOver.push("Cleopatra Health: " + result[i].Name + " node offline");
                        exclude.push(result[i].Name);
                       }
                      

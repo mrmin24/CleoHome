@@ -77,6 +77,61 @@ exports.getdata = function(table,data,callback) {
     });
 }
 
+
+exports.getdatajoin = function(table1,table2,data,callback) { //SELECT column_name(s) FROM table1INNER JOIN table2 ON table1.column_name=table2.column_name;
+
+   pool.getConnection(function(err, connection){
+    
+  //  myconsole.log(data);
+   
+    connection.query('SELECT ' + data.Select + ' FROM ' + table1 + ' INNER JOIN ' + table2 + ' ON ' + data.join1 + ' = ' + data.join2 + ' WHERE ' + data.whereClause,  function(err, result) {
+      
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+      // myconsole.log(result);
+       connection.release();
+        if(err) {
+             callback(err,null);
+           //  myconsole.log(err);
+            }
+            else {
+               // myconsole.log(result);
+             callback(null,result);
+            }
+            
+    });
+   
+    });
+}
+
+
+exports.getdatajoin2 = function(table1,table2,data,callback) { //SELECT column_name(s) FROM table1INNER JOIN table2 ON table1.column_name=table2.column_name;
+
+   pool.getConnection(function(err, connection){
+    
+  //  myconsole.log(data);
+   
+    connection.query('SELECT ' + data.Select + ' FROM ' + table1 + ' t1 INNER JOIN ' + table2 + ' t2 ON find_in_set(t2.'+ data.field2 +', t1.'+ data.field1 + ')  WHERE ' + data.whereClause,  function(err, result) {
+      
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+      // myconsole.log(result);
+       connection.release();
+        if(err) {
+             callback(err,null);
+           //  myconsole.log(err);
+            }
+            else {
+               // myconsole.log(result);
+             callback(null,result);
+            }
+            
+    });
+   
+    });
+}
+
+
+
+
 exports.getdataUnion = function(table,table2,data,data2,callback) {
 
    pool.getConnection(function(err, connection){
