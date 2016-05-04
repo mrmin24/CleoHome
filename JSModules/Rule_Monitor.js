@@ -6,7 +6,7 @@ var rules = require('../JSModules/Rule_UpdateStates');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 var myconsole = require('../JSModules/myconsole.js');
 
-var intervaltime = 250;
+var intervaltime = 300;
 
 //var timezone = 2;
 

@@ -157,7 +157,8 @@ function start() {
 io.on('connection', function(socket){
    // myconsole.log(socket);
   myconsole.log('Server: Client Connected');
-   //sendPageTabs();
+   sendPageTabs();
+  // sendPageContainers();
   //myconsole.log(lastArmTime);
   getAlarmTriggers(lastArmTime);
   getAlarmStatus();
@@ -1705,15 +1706,15 @@ function sendPageTabs(){
                             myconsole.log("ERROR2 : ",err);            
                         } else {       
                             
-                        
-                        
-                           for(var i in data_receive){
+                         io.emit('PageTabs',data_receive);
+                       //  myconsole.log(data_receive);  
+                           /*for(var i in data_receive){
                                myconsole.log(data_receive[i]);  
                                
-                                
+                                 
                                 
                                
-                           }
+                           }*/
                              
                             
                              
@@ -1729,7 +1730,37 @@ function sendPageTabs(){
  
 }
 
-
+function sendPageContainers(){
+ 
+             db.getdatajoin2('Page_Tabs','Page_Containers',{Select: 't1.Description D1,t2.Description D2',whereClause:"t1.Id LIKE '%' ORDER BY t1.Id ASC, t2.Id",field1:"Containers_ToShow",field2:"Id"},function(err,data_receive){
+                        if (err) {
+                        // error handling code goes here
+                            myconsole.log("ERROR2 : ",err);            
+                        } else {       
+                            
+                         io.emit('PageContainers',data_receive);
+                         myconsole.log(data_receive);  
+                           /*for(var i in data_receive){
+                               myconsole.log(data_receive[i]);  
+                               
+                                 
+                                
+                               
+                           }*/
+                             
+                            
+                             
+                        }
+                       
+                   });
+                   
+             
+               
+               return;
+ 
+ 
+ 
+}
 
 function getDeviceStatus(){
    
@@ -1743,7 +1774,7 @@ function getDeviceStatus(){
                         var device = [1 , 2 , 3 , 4 , 5,6,7,11,15,18,20];
                         
                            for(var i in data_receive){
-                            //   myconsole.log(data_receive[i]);  
+                            //  myconsole.log(data_receive[i]);  
                                 if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
                                 {
                                     var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value'],Item_Container:data_receive[i]['Description']};
@@ -1789,7 +1820,7 @@ function getNodeStatus(){
             //{
                 var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node'};
                
-                io.emit('DeviceStatusEvent',data);
+                io.emit('NodeStatusEvent',data);
                 
                
             

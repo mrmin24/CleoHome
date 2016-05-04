@@ -52,7 +52,7 @@
                    
                     <div class="navbar-collapse collapse  " id="navbar-collapse-1">
                          <ul class="nav nav-tabs" id="tabs" >
-                            <li class="active" onclick="switchHomeTab()" >
+                           <!-- <li class="active" onclick="switchHomeTab()" >
                                 <a href="#Home" data-toggle="tab">Home</a>
                             </li>
                             <li onclick="switchAlarmTab()">
@@ -66,7 +66,7 @@
                             </li>
                             <li onclick="switchIrrigationTab()">
                                 <a href="#Devices" data-toggle="tab" >Irrigation</a>
-                            </li>
+                            </li>  -->
                             <li onclick="switchNodesTab()">
                                 <a href="#Devices" data-toggle="tab" >Nodes</a>
                             </li>
@@ -128,7 +128,7 @@
             </nav>
             
             <br>
-            <div class = "row">
+            <div id="body" class = "row">
             
             
                 <div class = "col-xs-12 " id="Alarm_Panel"> 
@@ -224,123 +224,6 @@
                     
                 </div>
                 
-                <!---------------------MOTION PANEL----------------->
-                
-                 <div class = "col-xs-12 " id="Motion_Panel"> 
-                
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                           <strong>Motion  </strong>
-                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
-                            <span>
-                                <span id="gatewayStatus" class="label label-default">Gateway</span>
-                            </span>
-                        </div>
-                        
-                        <div class="panel-body" id="motion_container">
-                        
-                        
-                        
-                        
-                            
-                            
-                           
-                            
-                           <!-- labels automatically get added here by script-->
-                           
-                           
-                           
-                        </div>
-                    </div>
-                    
-                </div>
-                
-                <!---------------------DEVICE PANEL----------------->
-                
-                 <div class = "col-xs-12 " id="Devices_Panel"> 
-                
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                           <strong>Devices</strong>
-                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
-                            
-                        </div>
-                        
-                        <div class="panel-body" id="devices_container">
-                        
-                        
-                        
-                        
-                           
-                            
-                           
-                            
-                           <!-- labels automatically get added here by script-->
-                           
-                           
-                           
-                        </div>
-                    </div>
-                    
-                </div>
-                
-                
-                
-                <!---------------------ACCESS PANEL----------------->
-                
-                 <div class = "col-xs-12 hidden" id="Access_Panel"> 
-                
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <strong>Access</strong>
-                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
-                            
-                        </div>
-                        
-                        <div class="panel-body" id="access_container">
-                        
-                        
-                        
-                        
-                           
-                           
-                            
-                           <!-- labels automatically get added here by script-->
-                           
-                           
-                           
-                        </div>
-                    </div>
-                    
-                </div>
-                
-                 <!---------------------IRRIGATION PANEL----------------->
-                
-                 <div class = "col-xs-12 hidden" id="Irrigation_Panel"> 
-                
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                           <strong>Irrigation</strong>
-                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
-                            
-                        </div>
-                        
-                        <div class="panel-body" id="irrigation_container">
-                        
-                        
-                        
-                        
-                            
-                           
-                            
-                           <!-- labels automatically get added here by script-->
-                           
-                           
-                           
-                        </div>
-                    </div>
-                    
-                </div>
                 
                 <!---------------------Nodes PANEL----------------->
                 
