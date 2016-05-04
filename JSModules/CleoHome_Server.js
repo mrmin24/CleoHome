@@ -1733,7 +1733,9 @@ function sendPageTabs(){
 
 function getDeviceStatus(){
    
-    db.getdatajoin('Items','Page_Containers',{Select: 'Items.Id,Items.Item_Name,Items.Item_Current_Value,Items.Item_Type,Items.Node_Id,Items.Node_Port,Items.Item_Enabled_Value,Page_Containers.Description',whereClause:"Items.Id LIKE '%' ORDER BY Items.Item_Sort_Position ASC",join1:'Items.Item_Type',join2:'Page_Containers.ItemTypes_ToShow'},function(err,data_receive){
+ //   db.getdatajoin('Items','Page_Containers',{Select: 'Items.Id,Items.Item_Name,Items.Item_Current_Value,Items.Item_Type,Items.Node_Id,Items.Node_Port,Items.Item_Enabled_Value,Page_Containers.Description',whereClause:"Items.Id LIKE '%' ORDER BY Items.Item_Sort_Position ASC",join1:'Items.Item_Type',join2:'Page_Containers.ItemTypes_ToShow'},function(err,data_receive){
+                       db.getdata('Items',{Select: 'Id,Item_Name,Item_Current_Value,Item_Type,Node_Id,Node_Port,Item_Enabled_Value',whereClause:"'Id' LIKE '%' ORDER BY Item_Sort_Position ASC"},function(err,data_receive){
+                      
                         if (err) {
                         // error handling code goes here
                             myconsole.log("ERROR2 : ",err);            
@@ -1746,8 +1748,10 @@ function getDeviceStatus(){
                             //   myconsole.log(data_receive[i]);  
                                 if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
                                 {
-                                    var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value'],Item_Container:data_receive[i]['Description']};
-                                   
+                                   // var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value'],Item_Container:data_receive[i]['Description']};
+                            var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value']};
+
+
                                     io.emit('DeviceStatusEvent',data);
                                     
                                    
@@ -1767,6 +1771,8 @@ function getDeviceStatus(){
              
                
                return;
+               
+               
     
 }
 
