@@ -1771,19 +1771,19 @@ function getDeviceStatus(){
                         } else {       
                             
                         // code to execute on data retrieval
-                        var device = [1 , 2 , 3 , 4 , 5,6,7,11,15,18,20];
+                       //var device = [1 , 2 , 3 , 4 , 5,6,7,11,15,18,20];
                         
                            for(var i in data_receive){
-                            //  myconsole.log(data_receive[i]);  
-                                if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
-                                {
+                              myconsole.log(data_receive[i]);  
+                              //  if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
+                                //{
                                     var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Item_Name'],Current_State: data_receive[i]['Item_Current_Value'],Node_Id:data_receive[i]['Node_Id'],Node_Port:data_receive[i]['Node_Port'],Item_Type:data_receive[i]['Item_Type'],Item_Enabled_Value:data_receive[i]['Item_Enabled_Value'],Item_Container:data_receive[i]['Description']};
                                    
                                     io.emit('DeviceStatusEvent',data);
                                     
                                    
                                 
-                                }
+                                //}
                                 
                                 
                                

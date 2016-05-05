@@ -20,6 +20,8 @@
     var config;
     var selectedRow;
     var selectedRuleRow;
+     var tabData;
+     var distinct2 = [];
    
    const Last_Seen_Error = 601000;
    
@@ -41,19 +43,49 @@
 
         });
         
-        
+     
+ 
 
     });
     
     $( document ).ready(function() {
+       
         setUpDropdowns();
         getWeather();
         getPower();
+         
     });
     
-
+    
            
+    function checkVisible(tab){   //check which containers must show on tab
+        //console.log(tabData);
+         var unique = {};
+         var container = [];
+         
+         
+         for( var i in tabData ){
+             
+            // if( typeof(unique[tabData[i].D2]) == "undefined"){
+              //container.push(tabData[i].D2);
+            //  console.log(tabData[i].D1);
+             //  console.log(tab);
+              
+                 if(tabData[i].D1 == tab){
+                   $("#"+ tabData[i].D2+"_Panel").removeClass().addClass('col-xs-12 col-lg-12');
+                  container.push(tabData[i].D2);
+                 }
+                 else{
+                    if(container.indexOf(tabData[i].D2) == -1)
+                    $("#"+ tabData[i].D2+"_Panel").removeClass().addClass('hidden');
+                }
+                 unique[tabData[i].D2] = 0;
+            // }
+          
+         }
         
+        
+    }
     
         
         
@@ -856,9 +888,10 @@
     
     });
     
+   
     socket.on('PageTabs',function(data){
         
-        
+        tabData = data;
        // console.log(data);
         
             var unique = {};
@@ -866,7 +899,7 @@
              var newHtml = '';
              
              var unique2 = {};
-            var distinct2 = [];
+           
              var newHtml2 = '';
             for( var i in data ){
              if( typeof(unique[data[i].D1]) == "undefined"){
@@ -881,9 +914,9 @@
             
             for( var i in distinct ){ 
                 
-               newHtml += '<li onclick="switch' + distinct[i]+ 'Tab()"><a href="#Devices" data-toggle="tab" >' +  distinct[i] + '</a></li>';
+               newHtml += '<li onclick=checkVisible("'+distinct[i]+'")><a href="#" data-toggle="tab" >' + distinct[i] + '</a></li>';
              }
-               
+               //switch' + distinct[i]+ 'Tab()
                 var radioFragment = document.getElementById('tabs');
                 radioFragment.innerHTML =  newHtml + radioFragment.innerHTML ;
                  
@@ -908,16 +941,21 @@
                 
                     + '<div class="panel panel-default"><div class="panel-heading"><strong>'+ distinct2[i] +'</strong>'
                             + '</div><div class="panel-body" id="'+ distinct2[i] +'_container"></div></div></div>';
+                            
+                             
              }
                
                 var radioFragment = document.getElementById('body');
-                radioFragment.innerHTML =  newHtml2 + radioFragment.innerHTML ;
+                radioFragment.innerHTML =   radioFragment.innerHTML + newHtml2 ;
            
+        // $("#Alarm_Panel").removeClass().addClass('col-xs-12 col-lg-12');
         
         
         
-        
+            checkVisible("Home");  
     });
+    
+    
     
     
      socket.on('PageContainers',function(data){
@@ -965,7 +1003,7 @@
                    // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
                 }
                 
-                console.log(data.Item_Container + " " + data.Id);
+               // console.log(data.Item_Container + " " + data.Id);
                 var radioFragment = document.getElementById(data.Item_Container + '_container');
                 radioFragment.innerHTML += newHtml;
        
@@ -2472,5 +2510,3 @@ function showdatepicker2(){
 
        
 }
-
-
