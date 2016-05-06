@@ -1735,7 +1735,7 @@ function sendPageContainers(){
              db.getdatajoin2('Page_Tabs','Page_Containers',{Select: 't1.Description D1,t2.Description D2',whereClause:"t1.Id LIKE '%' ORDER BY t1.Id ASC, t2.Id",field1:"Containers_ToShow",field2:"Id"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            myconsole.log("ERROR2 : ",err);            
+                            myconsole.log("ERROR2 : "+err);            
                         } else {       
                             
                          io.emit('PageContainers',data_receive);
@@ -1764,10 +1764,10 @@ function sendPageContainers(){
 
 function getDeviceStatus(){
    
-    db.getdatajoin('Items','Page_Containers',{Select: 'Items.Id,Items.Item_Name,Items.Item_Current_Value,Items.Item_Type,Items.Node_Id,Items.Node_Port,Items.Item_Enabled_Value,Page_Containers.Description',whereClause:"Items.Id LIKE '%' ORDER BY Items.Item_Sort_Position ASC",join1:'Items.Item_Type',join2:'Page_Containers.ItemTypes_ToShow'},function(err,data_receive){
+    db.getdatajoin2('Page_Containers','Items',{Select: 't2.Id,t2.Item_Name,t2.Item_Current_Value,t2.Item_Type,t2.Node_Id,t2.Node_Port,t2.Item_Enabled_Value,t1.Description',whereClause:"t2.Id LIKE '%' ORDER BY t2.Item_Sort_Position ASC",field1:'ItemTypes_ToShow',field2:'Item_Type'},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
-                            myconsole.log("ERROR2 : ",err);            
+                            myconsole.log("ERROR2 : "+err);            
                         } else {       
                             
                         // code to execute on data retrieval

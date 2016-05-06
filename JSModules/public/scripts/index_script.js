@@ -59,7 +59,8 @@
     
            
     function checkVisible(tab){   //check which containers must show on tab
-        //console.log(tabData);
+      //  console.log(tabData);
+        
          var unique = {};
          var container = [];
          
@@ -72,24 +73,31 @@
              //  console.log(tab);
               
                  if(tabData[i].D1 == tab){
-                   $("#"+ tabData[i].D2+"_Panel").removeClass().addClass('col-xs-12 col-lg-12');
+                   $("#"+ tabData[i].D2+"_Panel_Auto").removeClass().addClass('col-xs-12 col-lg-12');
                   container.push(tabData[i].D2);
                  }
                  else{
                     if(container.indexOf(tabData[i].D2) == -1)
-                    $("#"+ tabData[i].D2+"_Panel").removeClass().addClass('hidden');
+                    $("#"+ tabData[i].D2+"_Panel_Auto").removeClass().addClass('hidden');
                 }
                  unique[tabData[i].D2] = 0;
             // }
           
          }
+         
+         switchDefault();
         
+        
+        if(tab == 'Alarm'){
+            
+            switchAlarmTab();  //remove later
+        }
         
     }
     
         
         
-     function switchHomeTab(){
+     function switchDefault(){   //used to switch back from static tabs
          $("#Alarm_Panel").removeClass().addClass('col-xs-12 col-lg-12');
         $("#Event_Panel").removeClass().addClass('col-xs-12 ');
         $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
@@ -98,14 +106,10 @@
         $("#event_controls").removeClass().addClass('well hidden');
         $("#alarm_controls").removeClass().addClass('well hidden');
         $("#Settings_Panel").removeClass().addClass('hidden');
-         $("#Devices_Panel").removeClass().addClass('col-xs-12');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('col-xs-12');
+       
          
          $("#Nodes_Panel").removeClass().addClass('hidden');
-          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
+         
           $("#Rules_Panel").removeClass().addClass('hidden');
           $("#Graphs_Panel").removeClass().addClass('hidden');
         document.getElementById('checkbox4').checked = true;
@@ -113,6 +117,8 @@
             $( "#accordion2" ).accordion({ active: false});
         $( "#accordion" ).accordion({active: false });
      }
+     
+     
      
      function settings(){
          getusers();
@@ -123,13 +129,9 @@
        //$("#event_dropdown_btn").removeClass().addClass('hidden');
         $("#event_controls").removeClass().addClass('well hidden');
         $("#alarm_controls").removeClass().addClass('well hidden');
-         $("#Devices_Panel").removeClass().addClass('col-xs-12');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('hidden');
+        
          $("#Nodes_Panel").removeClass().addClass('hidden');
-          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
+         
           $("#Rules_Panel").removeClass().addClass('hidden');
           $("#Graphs_Panel").removeClass().addClass('hidden');
         $("#Settings_Panel").removeClass().addClass('col-xs-12 show');
@@ -137,7 +139,7 @@
          btnPress = false;
          
          
-            
+          $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
      }
     
   function checkbox4Click(){
@@ -145,9 +147,26 @@
       
   }
      
-   
+  
+     function switchAlarmTab(){
+         $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
+         $("#Event_Panel").removeClass().addClass('col-xs-12 ');
+         $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-2');
+       // $("#event_dropdown_label").removeClass().addClass('show');
+       // $("#event_dropdown_btn").removeClass().addClass('show');
+        $("#event_controls").removeClass().addClass('well hidden');
+        $("#alarm_controls").removeClass().addClass('well show');
+        $("#Settings_Panel").removeClass().addClass('hidden');
+         
+         $("#Nodes_Panel").removeClass().addClass('hidden');
+         $("#Rules_Panel").removeClass().addClass('hidden');
+         $("#Graphs_Panel").removeClass().addClass('hidden');
+         
+         $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
+         
+      }
      
-     function switchEventsTab(){
+      function switchEventsTab(){
          $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
          $("#Event_Panel").removeClass().addClass('col-xs-12 ');
          $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-2');
@@ -156,99 +175,14 @@
         $("#event_controls").removeClass().addClass('well show');
         $("#alarm_controls").removeClass().addClass('well hidden');
         $("#Settings_Panel").removeClass().addClass('hidden');
-         $("#Devices_Panel").removeClass().addClass('hidden');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('hidden');
-          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
-         $("#Nodes_Panel").removeClass().addClass('hidden');
-         $("#Rules_Panel").removeClass().addClass('hidden');
-         $("#Graphs_Panel").removeClass().addClass('hidden');
-     }
-     
-     function switchAlarmTab(){
-         $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
-         $("#Event_Panel").removeClass().addClass('col-xs-12');
-        $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
-         $("#event_controls").removeClass().addClass('well hidden');
-         $("#alarm_controls").removeClass().addClass('well show');
-         $("#Settings_Panel").removeClass().addClass('hidden');
-          $("#Devices_Panel").removeClass().addClass('hidden');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('hidden');
-          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
+         
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('hidden');
          $("#Graphs_Panel").removeClass().addClass('hidden');
          
+         $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
          
-        // $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-2');
-       // $("#event_dropdown_label").removeClass().addClass('show');
-       // $("#event_dropdown_btn").removeClass().addClass('show');
-       // $("#event_controls").removeClass().addClass('well show');
-        
-         
-     }
-     function switchDevicesTab(){
-         $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
-         $("#Event_Panel").removeClass().addClass('col-xs-12');
-        $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
-         $("#event_controls").removeClass().addClass('well hidden');
-         $("#alarm_controls").removeClass().addClass('well hidden');
-         $("#Settings_Panel").removeClass().addClass('hidden');
-         $("#Devices_Panel").removeClass().addClass('col-xs-12');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('col-xs-12');
-         $("#Virtual_Panel").removeClass().addClass('col-xs-12');
-          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
-         $("#Nodes_Panel").removeClass().addClass('hidden');
-         $("#Rules_Panel").removeClass().addClass('hidden');
-         $("#Graphs_Panel").removeClass().addClass('hidden');
-         
-     }
-     
-     function switchAccessTab(){
-         $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
-         $("#Event_Panel").removeClass().addClass('col-xs-12');
-        $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
-         $("#event_controls").removeClass().addClass('well hidden');
-         $("#alarm_controls").removeClass().addClass('well hidden');
-         $("#Settings_Panel").removeClass().addClass('hidden');
-         $("#Devices_Panel").removeClass().addClass('hidden');
-         $("#Access_Panel").removeClass().addClass('col-xs-12');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('hidden');
-         
-         
-          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
-         $("#Nodes_Panel").removeClass().addClass('hidden');
-         $("#Rules_Panel").removeClass().addClass('hidden');
-         $("#Graphs_Panel").removeClass().addClass('hidden');
-     }
-     
-     function switchIrrigationTab(){
-         $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
-         $("#Event_Panel").removeClass().addClass('col-xs-12');
-        $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
-         $("#event_controls").removeClass().addClass('well hidden');
-         $("#alarm_controls").removeClass().addClass('well hidden');
-         $("#Settings_Panel").removeClass().addClass('hidden');
-          $("#Devices_Panel").removeClass().addClass('hidden');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('col-xs-12');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('hidden');
-          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
-         $("#Nodes_Panel").removeClass().addClass('hidden');
-         $("#Rules_Panel").removeClass().addClass('hidden');
-         $("#Graphs_Panel").removeClass().addClass('hidden');
-         
-     }
+      }
      
       function switchNodesTab(){
          $("#Alarm_Panel").removeClass().addClass('col-xs-12 ');
@@ -257,15 +191,12 @@
          $("#event_controls").removeClass().addClass('well hidden');
          $("#alarm_controls").removeClass().addClass('well hidden');
          $("#Settings_Panel").removeClass().addClass('hidden');
-          $("#Devices_Panel").removeClass().addClass('hidden');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('hidden');
-          $("#Motion_Panel").removeClass().addClass("col-xs-12 ");
+          
          $("#Nodes_Panel").removeClass().addClass('col-xs-12');
           $("#Rules_Panel").removeClass().addClass('hidden');
           $("#Graphs_Panel").removeClass().addClass('hidden');
+          
+           $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
          socket.emit("getNodesStatus",function(){});
      }
      
@@ -277,15 +208,12 @@
          $("#event_controls").removeClass().addClass('well hidden');
          $("#alarm_controls").removeClass().addClass('well hidden');
          $("#Settings_Panel").removeClass().addClass('hidden');
-          $("#Devices_Panel").removeClass().addClass('hidden');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('hidden');
-         $("#Motion_Panel").removeClass().addClass('hidden');
+         
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('col-xs-12');
          $("#Graphs_Panel").removeClass().addClass('hidden');
+         
+          $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
          
      }
      
@@ -298,17 +226,17 @@
          $("#event_controls").removeClass().addClass('well hidden');
          $("#alarm_controls").removeClass().addClass('well hidden');
          $("#Settings_Panel").removeClass().addClass('hidden');
-          $("#Devices_Panel").removeClass().addClass('hidden');
-         $("#Access_Panel").removeClass().addClass('hidden');
-         $("#Irrigation_Panel").removeClass().addClass('hidden');
-         $("#Network_Panel").removeClass().addClass('hidden');
-         $("#Virtual_Panel").removeClass().addClass('hidden');
-         $("#Motion_Panel").removeClass().addClass('hidden');
+        
          $("#Nodes_Panel").removeClass().addClass('hidden');
          $("#Rules_Panel").removeClass().addClass('hidden');
          $("#Graphs_Panel").removeClass().addClass('col-xs-12');
          
+         
+          $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
+         
      }
+     
+     
      
      $('#rulesAddModal').on('shown.bs.modal', function (e) {
       // do something...
@@ -937,18 +865,25 @@
             
             for( var i in distinct2 ){ 
                 
-               newHtml2 += ' <div class = "col-xs-12 " id="'+ distinct2[i] +'_Panel">' 
+               newHtml2 += ' <div class = "col-xs-12 " id="'+ distinct2[i] +'_Panel_Auto">' 
                 
                     + '<div class="panel panel-default"><div class="panel-heading"><strong>'+ distinct2[i] +'</strong>'
-                            + '</div><div class="panel-body" id="'+ distinct2[i] +'_container"></div></div></div>';
+                            + '</div><div class="panel-body" id="'+ distinct2[i] +'_container"></div></div></div>'  ;
                             
                              
              }
                
-                var radioFragment = document.getElementById('body');
-                radioFragment.innerHTML =   radioFragment.innerHTML + newHtml2 ;
+            var eventHTML = ' <div class = "col-xs-12 "  id="Event_Panel">' + $("#Event_Panel").html(); + '</div';
+           // console.log(eventHTML);
+            
+            $("#Event_Panel").remove();
+          
+                
+             var radioFragment = document.getElementById('body');
+                
+             radioFragment.innerHTML =   radioFragment.innerHTML + newHtml2 + eventHTML ;
            
-        // $("#Alarm_Panel").removeClass().addClass('col-xs-12 col-lg-12');
+       
         
         
         
@@ -958,20 +893,6 @@
     
     
     
-     socket.on('PageContainers',function(data){
-        
-        
-       
-     
-        
-        
-      
-        
-        
-        
-        
-    });
-    
     
     
     
@@ -980,7 +901,7 @@
         
         
         
-       //console.log(data);
+     //  console.log(data);
          
               var newHtml = '';
               
