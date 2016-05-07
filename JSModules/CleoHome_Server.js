@@ -205,10 +205,10 @@ io.on('connection', function(socket){
       
   });
   
-  socket.on('getItems',function(){
+  socket.on('getItems',function(callback){
         myconsole.log('tems requested');
       senditems();
-      
+      callback();
   });
   
   socket.on('delete_user',function(userId,username){

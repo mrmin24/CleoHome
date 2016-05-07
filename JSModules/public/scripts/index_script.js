@@ -97,12 +97,11 @@
     
         
         
-     function switchDefault(){   //used to switch back from static tabs
+     function switchDefault(){                                                                //used to switch back from static tabs
          $("#Alarm_Panel").removeClass().addClass('col-xs-12 col-lg-12');
         $("#Event_Panel").removeClass().addClass('col-xs-12 ');
         $("#Event_Panel_Title").removeClass().addClass('panel-title col-xs-3  col-lg-4');
-       // $("#event_dropdown_label").removeClass().addClass('hidden');
-       //$("#event_dropdown_btn").removeClass().addClass('hidden');
+       
         $("#event_controls").removeClass().addClass('well hidden');
         $("#alarm_controls").removeClass().addClass('well hidden');
         $("#Settings_Panel").removeClass().addClass('hidden');
@@ -142,19 +141,19 @@
          btnPress = false;
          
          
-          $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
+         // $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
           
           
           return;
      }
     
-  function checkbox4Click(){
-      btnPress = false;
-      
-      
-      return;
-      
-  }
+      function checkbox4Click(){
+          btnPress = false;
+          
+          
+          return;
+          
+      }
      
   
      function switchAlarmTab(){
@@ -230,7 +229,7 @@
          $("#Rules_Panel").removeClass().addClass('col-xs-12');
          $("#Graphs_Panel").removeClass().addClass('hidden');
          
-          $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
+       //   $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
           
           return;
          
@@ -258,6 +257,41 @@
          
      }
      
+     
+     $('#rulesAddModal').on('shown.bs.modal', function (e) {
+      // do something...
+      console.log("WHY");
+        socket.emit('getItems',function(){ });
+        
+        
+        
+        
+     
+        socket.on('sendItems',function(items,alarm_items){ 
+         //$('#item_options').value = '';
+         
+         Items = items;
+         AlarmItems = alarm_items;
+         for(var i = 0;i<items.length;i++)
+         {
+             $('#item_options').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+             $('#item_options_action').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+        
+           // console.log(items[i]['Item_Name']);
+         }
+         
+         for(var i = 0;i<AlarmItems.length;i++)
+         {
+             $('#item_options').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+             $('#item_options_action').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+        
+           // console.log(items[i]['Item_Name']);
+         }
+         
+         setUpDropdowns();
+         
+     });
+    });
      
     
     
@@ -307,16 +341,7 @@
        
     });
     
-    $('#rulesAddModal').on('shown.bs.modal', function (e) {
-      // do something...
-        console.log(e);
-        socket.emit('getItems',function(err,data){});
-     
-     
-        return;
-       
-    });
-    
+   
     
     function setUpDropdowns(){
        
@@ -426,30 +451,6 @@
     });
     
     
-    socket.on('sendItems',function(items,alarm_items){ 
-         //$('#item_options').value = '';
-         
-         Items = items;
-         AlarmItems = alarm_items;
-         for(var i = 0;i<items.length;i++)
-         {
-             $('#item_options').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
-             $('#item_options_action').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
-        
-           // console.log(items[i]['Item_Name']);
-         }
-         
-         for(var i = 0;i<AlarmItems.length;i++)
-         {
-             $('#item_options').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
-             $('#item_options_action').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
-        
-           // console.log(items[i]['Item_Name']);
-         }
-         
-         setUpDropdowns();
-         
-     });
     
     
     socket.on('speak',function(msg){
@@ -1169,7 +1170,7 @@
      
      
      
-        socket.on('battery',function(state){
+      /*  socket.on('battery',function(state){
             
             if(state){
                 $('#battery').removeClass("label-danger").addClass("label-success");
@@ -1189,7 +1190,7 @@
                 $('#ac').removeClass("label-success").addClass("label-danger");
             }
         });   
-        
+        */
         
         socket.on('nightModeState',function(state){
             
@@ -1251,126 +1252,128 @@
         //var data = {"step_plot_4": {"x_axis": ["12-Jul-14", "14-Jul-14", "16-Jul-14", "18-Jul-14", "20-Jul-14", "22-Jul-14", "24-Jul-14", "26-Jul-14", "28-Jul-14", "30-Jul-14", "01-Aug-14"], "y_axis": [0, 3.7399996781255571, 4.1165090983021901, 5.2234708249494757, 3.3339103629814177, 3.7140085760060746, 4.3276262114041755, 6.8512925627236267, 3.6917800293224392, 4.3655969051243977, 4.0856638509855392]}}  
 
 
-/* Format data into a D3.js acceptable format. */
-    var parseDate = d3.time.format("%d-%b-%y %H:%M:%S %p").parse,
-        bisectDate = d3.bisector(function(d) { return d.x; }).left;
-
-    var graph_data = data["step_plot_4"];
-    var x_axis = graph_data["x_axis"];
-    //var x_axis2 = graph_data["x_axis2"];
-    var y_axis = graph_data["y_axis"];
-
-    var formatted_data = [];
-    for (var i = 0; i < x_axis.length; i++){
-        formatted_data[i] = {"x": parseDate(x_axis[i]), "y": +y_axis[i]};
-    };
-
-
-    /* Graph related details */
-    var margin = {top: 20, right: 40, bottom: 30, left: 50},
-            width = 960 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
-
-    var x = d3.time.scale()
-            .range([0, width]);
-
-    var y = d3.scale.linear()
-            .range([height, 0]);
-
-    var xAxis = d3.svg.axis()
-            .scale(x)
-            .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-            .scale(y)
-            .orient("left");
-
-    var line = d3.svg.line()
-            .x(function (d) {
-                   return x(d.x);
-               })
-            .y(function (d) {
-                   return y(+d.y);
-               })
-            .interpolate("step-after");   //https://github.com/mbostock/d3/wiki/SVG-Shapes#wiki-line
-
-    var svg = d3.select("#graphs_container").append("svg")
-            .attr("width", width + margin.left + margin.right)
-            .attr("height", height + margin.top + margin.bottom)
-            .append("g")
-            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    svg.append("clipPath").attr("id", "canvasClip")
-    .append("rect")
-    .attr("height", height)
-    .attr("width", width)
-
-    x.domain(d3.extent(x_axis, function (d) {
-        return parseDate(d);
-    }));
-
-    y.domain([d3.min(y_axis) - d3.min(y_axis)/10, d3.max(y_axis) + d3.max(y_axis)/10]);
-
-    svg.append("g")
-            .attr("class", "x axis")
-            .attr("transform", "translate(0," + height + ")")
-            .call(xAxis)
-            .append("text")
-            .attr("class", "label")
-            .attr("x", width)
-            .attr("y", -6)
-            .style("text-anchor", "end")
-            .text("Date");
-
-    svg.append("g")
-            .attr("class", "y axis")
-            .call(yAxis)
-            .append("text")
-            .attr("class", "label")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            .attr("dy", ".71em")
-            .style("text-anchor", "end")
-            .text(axis_text);
-
-    svg.append("path")
-            .datum(formatted_data)
-            .attr("class", "line")
-            .attr("d", line)
-    .attr("clip-path", "url(#canvasClip)")
-
-    var focus = svg.append("g")
-      .attr("class", "focus")
-      .style("display", "none");
-
-    focus.append("circle")
-      .attr("r", 4.5);
-
-    focus.append("text")
-      .attr("x", 9)
-      .attr("dy", ".35em");
-
-    svg.append("rect")
-      .attr("class", "overlay")
-      .attr("width", width)
-      .attr("height", height)
-      .on("mouseover", function() { focus.style("display", null); })
-      .on("mouseout", function() { focus.style("display", "none"); })
-      .on("mousemove", mousemove);
-
-    function mousemove() {
-      var x0 = x.invert(d3.mouse(this)[0]),
-          i = bisectDate(formatted_data, x0, 1),
-          d0 = formatted_data[i - 1],
-          d1 = formatted_data[i],
-          d = x0 - d0.x > d1.x - x0 ? d1 : d0;
-      focus.attr("transform", "translate(" + x(d.x) + "," + y(d.y) + ")");
-      focus.select("text").text(d.y);
-  }
+        /* Format data into a D3.js acceptable format. */
+            var parseDate = d3.time.format("%d-%b-%y %H:%M:%S %p").parse,
+                bisectDate = d3.bisector(function(d) { return d.x; }).left;
+        
+            var graph_data = data["step_plot_4"];
+            var x_axis = graph_data["x_axis"];
+            //var x_axis2 = graph_data["x_axis2"];
+            var y_axis = graph_data["y_axis"];
+        
+            var formatted_data = [];
+            for (var i = 0; i < x_axis.length; i++){
+                formatted_data[i] = {"x": parseDate(x_axis[i]), "y": +y_axis[i]};
+            };
+        
+        
+            /* Graph related details */
+            var margin = {top: 20, right: 40, bottom: 30, left: 50},
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
+        
+            var x = d3.time.scale()
+                    .range([0, width]);
+        
+            var y = d3.scale.linear()
+                    .range([height, 0]);
+        
+            var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom");
+        
+            var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left");
+        
+            var line = d3.svg.line()
+                    .x(function (d) {
+                           return x(d.x);
+                       })
+                    .y(function (d) {
+                           return y(+d.y);
+                       })
+                    .interpolate("step-after");   //https://github.com/mbostock/d3/wiki/SVG-Shapes#wiki-line
+        
+            var svg = d3.select("#graphs_container").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+            svg.append("clipPath").attr("id", "canvasClip")
+            .append("rect")
+            .attr("height", height)
+            .attr("width", width)
+        
+            x.domain(d3.extent(x_axis, function (d) {
+                return parseDate(d);
+            }));
+        
+            y.domain([d3.min(y_axis) - d3.min(y_axis)/10, d3.max(y_axis) + d3.max(y_axis)/10]);
+        
+            svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + height + ")")
+                    .call(xAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("x", width)
+                    .attr("y", -6)
+                    .style("text-anchor", "end")
+                    .text("Date");
+        
+            svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis)
+                    .append("text")
+                    .attr("class", "label")
+                    .attr("transform", "rotate(-90)")
+                    .attr("y", 6)
+                    .attr("dy", ".71em")
+                    .style("text-anchor", "end")
+                    .text(axis_text);
+        
+            svg.append("path")
+                    .datum(formatted_data)
+                    .attr("class", "line")
+                    .attr("d", line)
+            .attr("clip-path", "url(#canvasClip)")
+        
+            var focus = svg.append("g")
+              .attr("class", "focus")
+              .style("display", "none");
+        
+            focus.append("circle")
+              .attr("r", 4.5);
+        
+            focus.append("text")
+              .attr("x", 9)
+              .attr("dy", ".35em");
+        
+            svg.append("rect")
+              .attr("class", "overlay")
+              .attr("width", width)
+              .attr("height", height)
+              .on("mouseover", function() { focus.style("display", null); })
+              .on("mouseout", function() { focus.style("display", "none"); })
+              .on("mousemove", mousemove);
+        
+            function mousemove() {
+              var x0 = x.invert(d3.mouse(this)[0]),
+                  i = bisectDate(formatted_data, x0, 1),
+                  d0 = formatted_data[i - 1],
+                  d1 = formatted_data[i],
+                  d = x0 - d0.x > d1.x - x0 ? d1 : d0;
+              focus.attr("transform", "translate(" + x(d.x) + "," + y(d.y) + ")");
+              focus.select("text").text(d.y);
+          }
   
   
   
     }
+    
+    
     socket.on("sendGraphs",function(graphs){
         
      
@@ -1843,7 +1846,7 @@ function customFormat(formatString,date){
     
     }
     
-    function addElement(zone,description,state){
+    function addElement(zone,description,state){    //remove when alarm is auto generated
         
         
         if(state == 1)
@@ -1866,35 +1869,7 @@ function customFormat(formatString,date){
         return ;
     }
     
-    /*
-    function addDevices(id,device,state,NodeID,NodePort,enabledState){
-        
-        
-        if(state == 1)
-        {
-          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           if(enabledState == 1){
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
-           }
-           else
-           {
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
-           }
-        }
-        else
-        {
-            
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-default fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')" >'+device +'</button></span>';
-            
-           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
-        }
-        
-        var radioFragment = document.getElementById('Devices_container');
-        radioFragment.innerHTML += newHtml;
-        // console.log( radioFragment.innerHTML);
-
-        return ;
-    }*/
+   
     function checkUncheckDevice(item, state,enabledState){
     
        
@@ -1956,129 +1931,6 @@ function customFormat(formatString,date){
     }
     
     
-    /*
-    function addAccess(id,device,state,NodeID,NodePort){
-        
-        
-        if(state == 1)
-        {
-          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
-        }
-        else
-        {
-            
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-default fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')" >'+device +'</button></span>';
-            
-           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
-        }
-        
-        var radioFragment = document.getElementById('Access_container');
-        radioFragment.innerHTML += newHtml;
-        // console.log( radioFragment.innerHTML);
-
-        return ;
-    }
-    
-    function addIrrigation(id,device,state,NodeID,NodePort){
-        
-        
-        if(state == 1)
-        {
-          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
-        }
-        else
-        {
-            
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-default fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')" >'+device +'</button></span>';
-            
-           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
-        }
-        
-        var radioFragment = document.getElementById('Irrigation_container');
-        radioFragment.innerHTML += newHtml;
-        // console.log( radioFragment.innerHTML);
-
-        return ;
-    }
-    
-    
-    function addNetwork(id,device,state,NodeID,NodePort){
-        
-        
-        if(state == 1)
-        {
-          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
-        }
-        else
-        {
-            
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-default fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')" >'+device +'</button></span>';
-            
-           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
-        }
-        
-        var radioFragment = document.getElementById('Network_container');
-        radioFragment.innerHTML += newHtml;
-        // console.log( radioFragment.innerHTML);
-
-        return ;
-    }
-    
-    
-    function addVirtual(id,device,state,NodeID,NodePort){
-        
-        
-        if(state == 1)
-        {
-          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')">'+device +'</button></span>';
-        }
-        else
-        {
-            
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-default fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+id+')" >'+device +'</button></span>';
-            
-           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
-        }
-        
-        var radioFragment = document.getElementById('Virtual_container');
-        radioFragment.innerHTML += newHtml;
-        // console.log( radioFragment.innerHTML);
-
-        return ;
-    }
-    
-    
-    
-    
-    function addMotion(id,device,state,NodeID,NodePort){
-        
-        
-        if(state == 1)
-        {
-          // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" >'+device +'</button></span>';
-        }
-        else
-        {
-            
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="device'+id +'" name="device'+id +'" type="button" class="btn btn-default fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off"  >'+device +'</button></span>';
-            
-           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
-        }
-        
-        
-        
-        
-        var radioFragment = document.getElementById('motion_container');
-        radioFragment.innerHTML += newHtml;
-        // console.log( radioFragment.innerHTML);
-
-        return ;
-    }*/
     
     function addNodes(id,device,state/*,NodeID,NodePort*/){
        // console.log(new Date().getTime() - state);

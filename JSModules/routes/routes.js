@@ -235,11 +235,8 @@ module.exports = function(app, passport) {
 	}));
 
 
-	app.get('/rules', function(req, res) {
 
-		// render the page and pass in any flash data if it exists
-		res.render('rules.ejs');
-	});
+	
 	// =====================================
 	// PROFILE SECTION =========================
 	// =====================================

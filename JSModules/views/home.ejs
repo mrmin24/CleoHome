@@ -74,7 +74,7 @@
                             <li onclick="test()">
                                 <a href="#" data-toggle="tab">Test</a>
                             </li>
-                            <li onclick="switchRulesTab()">
+                             <li onclick="switchRulesTab()">
                                 <!--<a href="./rules" >Rules</a>-->
                                 <a href="#" data-toggle="tab">Rules</a>
                             </li>
@@ -128,8 +128,8 @@
                             <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
                             <span >
                                 <span><label id="alarm_connected" class = "label label-default">Connected</label></span>
-                                <span><label id="ac" class = "label label-success">AC</label></span>
-                                <span><label id="battery" class = "label label-success">Battery</label></span>
+                               <!-- <span><label id="ac" class = "label label-success">AC</label></span>
+                                <span><label id="battery" class = "label label-success">Battery</label></span>      -->
                                 <span><label id="bypass" class = "label label-default">Bypass</label></span>
                                 <span><label id="memory" class = "label label-default">Memory</label></span>
                                <!--  <span> <label  id="night" class = "label label-default">Night Mode</label></span>-->
@@ -271,7 +271,7 @@
                            
                         </div>
                     </div>
-        </div>            
+                </div>            
                 
           
                 <!---------------------Rules PANEL----------------->
@@ -877,36 +877,14 @@
                     </div> <!-- panel -->
                 </div> <!-- event panel  -->
                 
-                <section class="tab-content">
-           
-            
-                <article class = "tab-pane active" id="Home">
-            
-                
-                
-                </article>
-                
-                <article class = "tab-pane" id="Events">    <!-- Second Tab-->
-                
-                    
-                    
-                    
-                    
-                </article>  <!-- End second tab -->
-                <article class = "tab-pane" id="Alarm">    <!-- Third Tab-->
-                
-                    
-                    
-                    
-                    
-                </article>  <!-- End second tab -->
-                
-            </section>  <!-- End Tab content -->
+               
                     
             </div> <!--row-->
         
         
         </div> <!--container-fluid -->
+        
+        
           <script src="/scripts/d3.min.js"></script>
           <script src="/scripts/moment.min.js"></script>
           <script src="/scripts/bootstrap-datepicker.js"></script>
@@ -914,6 +892,8 @@
           <script src="/scripts/index_script.js"></script>
           
      <script>
+     
+     
       $(function() {
         $( "#accordion2" ).accordion({
             active: false,
@@ -928,7 +908,9 @@
             heightStyle: "content"
             });
       });
-  </script>
+      
+      
+        </script>
   
   
   
