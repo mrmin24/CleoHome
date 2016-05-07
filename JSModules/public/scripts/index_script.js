@@ -67,10 +67,7 @@
          
          for( var i in tabData ){
              
-            // if( typeof(unique[tabData[i].D2]) == "undefined"){
-              //container.push(tabData[i].D2);
-            //  console.log(tabData[i].D1);
-             //  console.log(tab);
+         
               
                  if(tabData[i].D1 == tab){
                    $("#"+ tabData[i].D2+"_Panel_Auto").removeClass().addClass('col-xs-12 col-lg-12');
@@ -92,6 +89,9 @@
             
             switchAlarmTab();  //remove later
         }
+        
+        
+        return;
         
     }
     
@@ -116,6 +116,9 @@
          btnPress = false;
             $( "#accordion2" ).accordion({ active: false});
         $( "#accordion" ).accordion({active: false });
+        
+        
+        return;
      }
      
      
@@ -140,10 +143,16 @@
          
          
           $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
+          
+          
+          return;
      }
     
   function checkbox4Click(){
       btnPress = false;
+      
+      
+      return;
       
   }
      
@@ -164,6 +173,9 @@
          
          $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
          
+         
+         return;
+         
       }
      
       function switchEventsTab(){
@@ -182,6 +194,8 @@
          
          $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
          
+         return;
+         
       }
      
       function switchNodesTab(){
@@ -198,6 +212,9 @@
           
            $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
          socket.emit("getNodesStatus",function(){});
+         
+         
+         return;
      }
      
      function switchRulesTab(){
@@ -214,6 +231,8 @@
          $("#Graphs_Panel").removeClass().addClass('hidden');
          
           $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
+          
+          return;
          
      }
      
@@ -233,41 +252,13 @@
          
          
           $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
+          
+          
+          return;
          
      }
      
      
-     
-     $('#rulesAddModal').on('shown.bs.modal', function (e) {
-      // do something...
-        socket.emit('getItems',function(err,data){});
-     
-        socket.on('sendItems',function(items,alarm_items){ 
-         //$('#item_options').value = '';
-         
-         Items = items;
-         AlarmItems = alarm_items;
-         for(var i = 0;i<items.length;i++)
-         {
-             $('#item_options').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
-             $('#item_options_action').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
-        
-           // console.log(items[i]['Item_Name']);
-         }
-         
-         for(var i = 0;i<AlarmItems.length;i++)
-         {
-             $('#item_options').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
-             $('#item_options_action').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
-        
-           // console.log(items[i]['Item_Name']);
-         }
-         
-         setUpDropdowns();
-         
-     });
-    })
-    
     
     
     $('#addAND').on( 'click', function() {
@@ -316,6 +307,17 @@
        
     });
     
+    $('#rulesAddModal').on('shown.bs.modal', function (e) {
+      // do something...
+        console.log(e);
+        socket.emit('getItems',function(err,data){});
+     
+     
+        return;
+       
+    });
+    
+    
     function setUpDropdowns(){
        
 
@@ -327,6 +329,8 @@
         
         $(".btnDelete").bind("click", DeleteRow);
         
+        
+        return;
     }
     
     
@@ -374,6 +378,8 @@
         
         socket.emit('saveRule',ruleData);
         console.log(ruleData);
+        
+        return;
     }
     
     function deleteRule(){
@@ -382,12 +388,13 @@
 		//	console.log(selectedRuleRow[0].children[1].innerHTML);
 			socket.emit("deleteRule",selectedRuleRow[0].children[0].innerHTML);
 			
-
+            return;
 		}
     
      function getWeather(){
         
         socket.emit('getWeather');
+        return;
         
     }  
     
@@ -395,7 +402,10 @@
          
         socket.emit('getPower');
         
+        return;
+        
     }  
+    
     
     
     socket.on('sendWeather',function(temp,wind,rain){
@@ -414,6 +424,32 @@
      
         
     });
+    
+    
+    socket.on('sendItems',function(items,alarm_items){ 
+         //$('#item_options').value = '';
+         
+         Items = items;
+         AlarmItems = alarm_items;
+         for(var i = 0;i<items.length;i++)
+         {
+             $('#item_options').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+             $('#item_options_action').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+        
+           // console.log(items[i]['Item_Name']);
+         }
+         
+         for(var i = 0;i<AlarmItems.length;i++)
+         {
+             $('#item_options').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+             $('#item_options_action').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+        
+           // console.log(items[i]['Item_Name']);
+         }
+         
+         setUpDropdowns();
+         
+     });
     
     
     socket.on('speak',function(msg){
@@ -928,88 +964,6 @@
                 var radioFragment = document.getElementById(data.Item_Container + '_container');
                 radioFragment.innerHTML += newHtml;
        
-        
-        
-     
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    
-    
-    
-       /* if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] != Access_Type && data['Item_Type'] != Irrigation_Type && data['Item_Type'] != Motion_Type && data['Item_Type'] != 'Node' && data['Item_Type'] != Virtual_Alarm_Type && data['Item_Type'] != Virtual_Type && data['Item_Type'] != Network_Type) 
-        {
-            
-            addDevices(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port'],data['Item_Enabled_Value']);
-          
-            
-        }
-        
-        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] == Access_Type) 
-        {
-            
-            addAccess(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
-          
-            
-        }
-        
-        if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] == Irrigation_Type ) 
-        {
-            
-            addIrrigation(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
-          
-            
-        }
-        
-         if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('device' + data['Id']) == null && data['Item_Type'] == Motion_Type) 
-        {
-            
-            addMotion(data['Id'],data['Device'],data['Current_State'],data['Node_Id'],data['Node_Port']);
-          
-            
-        }
-        
-         if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('node' + data['Id']) == null && data['Item_Type'] == 'Node') 
-        {
-            
-            addNodes(data['Id'],data['Device'],data['Current_State']/*,data['Node_Id'],data['Node_Port']*///);
-          
-      /* 
-        }
-        
-        
-          if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('node' + data['Id']) == null && data['Item_Type'] == Network_Type) 
-        {
-            
-            addNetwork(data['Id'],data['Device'],data['Current_State']/*,data['Node_Id'],data['Node_Port']*///);
-          
-            
-      /*  }
-        
-          if (data['Device'] && data['Device'].substring(0,5) != "Spare" && document.getElementById('node' + data['Id']) == null && (data['Item_Type'] == Virtual_Alarm_Type || data['Item_Type'] == Virtual_Type)) 
-        {
-            
-            addVirtual(data['Id'],data['Device'],data['Current_State']/*,data['Node_Id'],data['Node_Port']*///);
-          
-            
-       // }
-        
-    
     
     });
     
@@ -1618,128 +1572,24 @@ function customFormat(formatString,date){
         }
         
         
-      // console.log(data2[0].length);
-       // for(var count3 = 0;count3 < data2.length;count3++){
             for(var k = 0;k < data2[0].length;k++){
                
                 var d = new Date(graphs[k].TimeStamp);
                 labels[0][k] = customFormat("#DD#-#MMM#-#YY# #h#:#mm#:#ss# #AMPM#",d);
-              //  labels[1][k] = graphs[k].TimeStamp;//graphs[k].Time;
+              
             }
-       //} 
+   
        
    
         
    var data3 = {"step_plot_4": {"x_axis": labels[0], "y_axis": data2[0] }}
- // var data3 = {};
+ 
    
   
-   //console.log(data3);
+   
         graphd3(data3,axis);  
         
-      /*  datasetDataArray = [];
-        
-        
      
-      
-      for(var num = 0;num < data2.length;num++){
-          col = 220 - num*20;
-       datasetdata = {
-            label: "My First dataset",
-            fillColor: "rgba(220,"+ col + "," + col +",0.2)",
-            strokeColor: "rgba(220,220,220,1)",
-            pointColor: "rgba(220,220,220,1)",
-            pointStrokeColor: "#fff",
-            pointHighlightFill: "#fff",
-            pointHighlightStroke: "rgba(220,220,220,1)",
-            data: data2[num]
-        }
-        
-        datasetDataArray.push(datasetdata);
-      }
-       
-        
-        var data = {
-    labels: labels[0],
-    datasets: datasetDataArray
-    
-    
-};
-//console.log(data);
-
-
-  
-
-    // Boolean - If we want to override with a hard coded scale
-   // Chart.defaults.global.scaleOverride = true;
-
-    // ** Required if scaleOverride is true **
-    // Number - The number of steps in a hard coded scale
-  //  Chart.defaults.global.scaleSteps = data2[0].length;
-    // Number - The value jump in the hard coded scale
-   // Chart.defaults.global.scaleStepWidth = 2;
-    // Number - The scale starting value
-   // Chart.defaults.global.scaleStartValue = 1;
-
-    
-        
-       var ctx = document.getElementById("myChart").getContext("2d");
-      
-        var options = {
-
-    ///Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines : true,
-
-    scaleShowLabels : true,
-
-    //String - Colour of the grid lines
-    scaleGridLineColor : "rgba(0,0,0,.05)",
-
-    //Number - Width of the grid lines
-    scaleGridLineWidth : 1,
-
-    //Boolean - Whether to show horizontal lines (except X axis)
-    scaleShowHorizontalLines: true,
-
-    //Boolean - Whether to show vertical lines (except Y axis)
-    scaleShowVerticalLines: false,
-
-    //Boolean - Whether the line is curved between points
-    bezierCurve : false,
-
-    //Number - Tension of the bezier curve between points
-    bezierCurveTension : 0.4,
-
-    //Boolean - Whether to show a dot for each point
-    pointDot : false,
-
-    //Number - Radius of each point dot in pixels
-    pointDotRadius : 4,
-
-    //Number - Pixel width of point dot stroke
-    pointDotStrokeWidth : 1,
-
-    //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-    pointHitDetectionRadius : 20,
-
-    //Boolean - Whether to show a stroke for datasets
-    datasetStroke : false,
-
-    //Number - Pixel width of dataset stroke
-    datasetStrokeWidth : 2,
-
-    //Boolean - Whether to fill the dataset with a colour
-    datasetFill : true,
-
-    //String - A legend template
-    legendTemplate : "<ul class=\"<%=name.toLowerCase()%>-legend\"><% for (var i=0; i<datasets.length; i++){%><li><span style=\"background-color:<%=datasets[i].strokeColor%>\"></span><%if(datasets[i].label){%><%=datasets[i].label%><%}%></li><%}%></ul>"
-
-};
-        
-        
-       var myLineChart = new Chart(ctx).Line(data, options);
-        
-        */
     }) ;  
     
     
@@ -1892,15 +1742,13 @@ function customFormat(formatString,date){
      
         $('#Usr_Delete_Btn').click( function () {
            socket.emit("delete_user",selectedRow[0].children[0].innerHTML,selectedRow[0].children[1].innerHTML);
-            //console.log(selectedRow[0].children[0].innerHTML);
-            //table.row('.selected').remove().draw( false );
+            
             
         } );
         
         $('#Usr_Token_Delete_Btn').click( function () {
            socket.emit("delete_user_token",selectedRow[0].children[1].innerHTML);
-            //console.log(selectedRow[0].children[0].innerHTML);
-            //table.row('.selected').remove().draw( false );
+            
             
         } );
         
@@ -1935,7 +1783,7 @@ function customFormat(formatString,date){
         } );
         $('#Rules_Add_Btn').click( function () {
            // $('#rulesAddModal').appendTo("body").modal('show');
-           // $('#rulesAddModal').modal('show');
+           //$('#rulesAddModal').modal('show');
            //socket.emit("delete_user_token",selectedRow[0].children[1].innerHTML);
             //console.log(selectedRow[0].children[0].innerHTML);
             //table.row('.selected').remove().draw( false );
@@ -1989,25 +1837,9 @@ function customFormat(formatString,date){
             }
         }
         
-        /*
+        
        
-       if (state == 1) {
-            var elem = document.getElementById(item);
-            if(elem){
-                elem.style.color = "red";
-                elem.checked = true;
-            }            
-        }
-        else if (state == 2) {
-    
-            var elem = document.getElementById(item);
-            if(elem){
-                elem.style.color = "black";
-                elem.checked = false;
-            }
-        }*/
-    
-    
+       
     
     }
     
@@ -2034,7 +1866,7 @@ function customFormat(formatString,date){
         return ;
     }
     
-    
+    /*
     function addDevices(id,device,state,NodeID,NodePort,enabledState){
         
         
@@ -2062,7 +1894,7 @@ function customFormat(formatString,date){
         // console.log( radioFragment.innerHTML);
 
         return ;
-    }
+    }*/
     function checkUncheckDevice(item, state,enabledState){
     
        
@@ -2123,6 +1955,8 @@ function customFormat(formatString,date){
         
     }
     
+    
+    /*
     function addAccess(id,device,state,NodeID,NodePort){
         
         
@@ -2244,7 +2078,7 @@ function customFormat(formatString,date){
         // console.log( radioFragment.innerHTML);
 
         return ;
-    }
+    }*/
     
     function addNodes(id,device,state/*,NodeID,NodePort*/){
        // console.log(new Date().getTime() - state);

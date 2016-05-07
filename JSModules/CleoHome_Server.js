@@ -94,18 +94,6 @@ var externalip = "127.0.0.1";
 
 require('./routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
-/*var https = require('https');
-var fs = require('fs');
-
-var options = {
-  key: fs.readFileSync('../ssl/minny-key.pem'),
-  cert: fs.readFileSync('../ssl/minny-cert.pem')
-};
-
-https.createServer(options, function (req, res) {
-  res.writeHead(200);
-  res.end("hello world\n");
-}).listen(443);*/
 var io = require('socket.io')(http);
 
 http.listen(port);
@@ -147,7 +135,7 @@ function start() {
 });
         
      
-       // myconsole.log('test');
+    
     } ,1000*60*configure2.server[0].dnsinterval[0]);
     
 
@@ -155,24 +143,16 @@ function start() {
 
 io.on('connection', function(socket){
  
-  
-  
-   // myconsole.log(socket);
-  myconsole.log('Server: Client Connected');
-  
- // if(clients.indexOf(socket.id) == -1){
-  // clients.push(socket.id);
-    sendPageTabs(socket);
-   // sendPageContainers();
-  // myconsole.log(socket.id);
+   myconsole.log('Server: Client Connected');
+
+   sendPageTabs(socket);
    getAlarmTriggers(lastArmTime,socket);
    getAlarmStatus(socket);
    getDeviceStatus(socket);
    getNodeStatus(socket);
    sendConfig(socket); 
    sendGatewayStatus(socket);   
- // }
-   
+ 
   
   socket.on('disconnect',function(socket){
      
@@ -226,7 +206,7 @@ io.on('connection', function(socket){
   });
   
   socket.on('getItems',function(){
-      
+        myconsole.log('tems requested');
       senditems();
       
   });
@@ -269,16 +249,9 @@ io.on('connection', function(socket){
   });
   
   
- /* socket.on('AlarmDisconnect',function(){   
-      myconsole.log('disconnect requested');
-     alarmsocket.disconnect(); 
-      
-  });*/
-  
   socket.on('getEvents',function(data){
     
     
-   // myconsole.log(data);
     
     getEvents(data['numEvents']);
     
@@ -406,7 +379,7 @@ io.on('connection', function(socket){
 
 
     socket.on('test',function(){
-        test();
+       // test();
         
    
     });
@@ -684,7 +657,7 @@ io.on('connection', function(socket){
       }
   });
     
-});
+});     /////////////////////////////////////////////////////////////////////////////////////////////////////////end of webpage socket connection
 
 }
 
@@ -1188,7 +1161,7 @@ function senditems(){
                 db.getdata('Alarm_Items',{Select: 'Id,Description',whereClause:'Id LIKE "%"'},function(err,data_receive2){
                           // myconsole.log('test1'); 
                    if(data_receive2[0]){
-                   // myconsole.log(data_receive);
+                    myconsole.log(data_receive);
                     
                         io.emit("sendItems",data_receive,data_receive2);
                    
@@ -1736,7 +1709,7 @@ function sendPageTabs(sockets){
  
  
 }
-
+/*
 function sendPageContainers(sockets){
 //myconsole.log(sockets);
              db.getdatajoin2('Page_Tabs','Page_Containers',{Select: 't1.Description D1,t2.Description D2',whereClause:"t1.Id LIKE '%' ORDER BY t1.Id ASC, t2.Id",field1:"Containers_ToShow",field2:"Id"},function(err,data_receive){
@@ -1755,7 +1728,7 @@ function sendPageContainers(sockets){
                                
                            }*/
                              
-                            
+ /*                           
                              
                         }
                        
@@ -1767,7 +1740,7 @@ function sendPageContainers(sockets){
  
  
  
-}
+}*/
 
 function getDeviceStatus(sockets){
    
