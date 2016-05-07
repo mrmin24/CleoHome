@@ -8,6 +8,7 @@ var retrytimer;
 var db = require('./dbhandler');
 var myconsole = require('./myconsole.js');
 
+var rules = require('./Rule_UpdateStates.js');
 var Access_Type = 5;
 var Irrigation_Type = 6; 
 var Motion_Type = 7;
@@ -53,36 +54,45 @@ function start() {
 		 });
 		 
 		 
-		 socket.on('switchOff',function(NodeId,NodePort,State,offTime){
+		 socket.on('switchOff',function(NodeId,NodePort,State,virtual,offTime){
 		 	
-		 	var foudIndex = 0;
-		 //	myconsole.log(offTimes);
+		 	var foundIndex = 0;
+		 	//	myconsole.log("Switch off: " + NodeId + " " + NodePort + " " + virtual);
+		 	if(NodePort == null){NodePort = 1;}
+		 
 		 	for(var i = 0;i<offTimes.length;i++){
 		 		
-		 		if(offTimes[i]['data']['node'] == NodeId && offTimes[i]['data']['port'] == NodePort){
+		 		if(offTimes[i]['data']['node'] == NodeId && offTimes[i]['data']['port'] == NodePort  ){
 		 			
 		 			offTimes[i]['data']['offTime'] = offTime;
 		 			offTimes[i]['data']['state'] = State;
-		 			foudIndex = 1;
+		 		
+		 			foundIndex = 1;
 		 			
 		 		}
 		 		
 		 		
 		 	}
 		 	
-		 	if(foudIndex == 0)
+		 	if(foundIndex == 0)
 		 	{
-			 	offTimesObjects.node = NodeId;
+			 	offTimesObjects.node =parseInt(NodeId);
 			 	offTimesObjects.port = NodePort;
 			 	offTimesObjects.state = State;
 			 	offTimesObjects.offTime = offTime;
-			 	
+			 	offTimesObjects.virtual = virtual;
 			 	
 			 	
 			 	offTimes.push({data: offTimesObjects});
+			 	
+			 	
 		 	}
+		 	
+		 	//	myconsole.log(offTimes);
 		 	foundIndex = 0;
 		 	offTimesObjects = {};
+		 	
+		 	
 		 //	myconsole.log(offTimes);
 		 });
 		 
@@ -363,15 +373,23 @@ function start() {
 	
 		function checkOffTimes(){
 		 var time = new Date().getTime()	
-			//myconsole.log(time);
-			//myconsole.log(offTimes);
+		//	myconsole.log(time);
+		//	myconsole.log(offTimes);
         	//return t.setSeconds(t.getSeconds() + onTime);
 			for(var i = 0;i < offTimes.length;i++){
 				//myconsole.log(offTimes[i]['data']['offTime']);
 				if(time >= offTimes[i]['data']['offTime']){
 					
-					sendData(offTimes[i]['data']['node'],offTimes[i]['data']['port'],offTimes[i]['data']['state']);
 					
+					if(offTimes[i]['data']['virtual'] == 1){
+						data = {Set:'Item_Current_Value',Where:'Id',Current_State:0,Name:offTimes[i]['data']['node']};
+                        
+                        db.update('Items',data,function(){});
+						 rules.updateRuleStates(offTimes[i]['data']['node'], 0);
+						 
+					}else{
+						sendData(offTimes[i]['data']['node'],offTimes[i]['data']['port'],offTimes[i]['data']['state']);
+					}
 					offTimes.splice(i, 1);
 					myconsole.log("Switch Off");
 					i--;

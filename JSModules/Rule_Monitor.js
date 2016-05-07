@@ -101,10 +101,10 @@ function ruleMonitor(){
                      if(node && port && state){
                       mySensorsocket.emit('deviceSwitch',node,port,state,1);
                      }
-                     
-                     if(cancelTime){
+                    //myconsole.log(cancelTime);
+                     if(cancelTime != null){
                                  
-                         mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                         mySensorsocket.emit('switchOff',node,port,0,virtual,cancelTime);
                      }
                      
                      if(virtual == 1){
