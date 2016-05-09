@@ -3,7 +3,7 @@ var rule = require('./Rule_Evaluate');
 var myconsole = require('./myconsole.js');
 
 exports.evaluateChange = function(itemId,itemValue,callback){
-    //myconsole.log(itemId);
+    myconsole.log(itemId);
     //myconsole.log(itemValue);
     
     data = {'Select':'Second_Id,Rule_Id,Equals,Greater_Than,Less_Than,Not_Equal,Secondary_Item','whereClause':'Item_Id = ' + itemId };
@@ -17,7 +17,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
            
           // myconsole.log(result);
            var status = 0;
-           var rulechanged = 0;
+           
            for(var i in result){
                if(result[i].Equals == itemValue  && result[i].Equals != null){
                    status = 1;
@@ -30,13 +30,13 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                }
                
                if(status == 1 ){
-                   
+                   var rulechanged = 0;
                    data = {'Set':'Status','Where':'Second_Id','Current_State':1,'Name':result[i].Second_Id};
                 
                    db.update('Rule_Items',data,function(err,result2){
                        
                        if(result2){
-                        if(result2.changedRows == 1){
+                        if(result2.changedRows >= 1){
                             rulechanged = 1;
                             //myconsole.log(rulechanged);
                         }
@@ -49,14 +49,10 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                        
                  
                    
-                  //  if(result[i].Secondary_Item == 0){     //only execute check if Secondary item == 0
+                
                         var rules = result[i].Rule_Id.split(';');     //determine which rules fit with this ID
                         
-                   /* } else {
-                        var rules = null;
-                        
-                    } */
-                  // var ruleValid2 = !result[i].Secondary_Item;
+                  
                    var ids = "";
                   // myconsole.log(rules);
                    for(var j = 0; j < (rules.length * !result[i].Secondary_Item * rulechanged) ; j++){
