@@ -36,8 +36,8 @@ timer = setTimeout(function() {
     Health.start();
     ruleMon.start();
     ping.start();
-  //  Rules.start();
-    
+  
+  
     
     });
 

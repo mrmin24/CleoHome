@@ -1744,7 +1744,9 @@ function sendPageContainers(sockets){
 
 function getDeviceStatus(sockets){
    
+
     db.getdatajoin2('Page_Containers','Items',{Select: 't2.Id,t2.Item_Name,t2.Item_Current_Value,t2.Item_Type,t2.Node_Id,t2.Node_Port,t2.Item_Enabled_Value,t1.Description',whereClause:"t2.Id LIKE '%' ORDER BY t2.Item_Sort_Position ASC",field1:'ItemTypes_ToShow',field2:'Item_Type'},function(err,data_receive){
+
                         if (err) {
                         // error handling code goes here
                             myconsole.log("ERROR2 : "+err);            
@@ -1754,6 +1756,7 @@ function getDeviceStatus(sockets){
                        //var device = [1 , 2 , 3 , 4 , 5,6,7,11,15,18,20];
                         
                            for(var i in data_receive){
+
                             //  myconsole.log(data_receive[i]);  
                               //  if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
                                 //{
@@ -1761,6 +1764,7 @@ function getDeviceStatus(sockets){
                                   
                                     sockets.emit('DeviceStatusEvent',data);
                                   
+
                                    
                                 
                                 //}
@@ -1778,6 +1782,8 @@ function getDeviceStatus(sockets){
              
                
                return;
+               
+               
     
 }
 

@@ -938,7 +938,7 @@
         
         
         
-     //  console.log(data);
+      console.log(data);
          
               var newHtml = '';
               
@@ -946,22 +946,22 @@
                 {
                   // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
                    if(data.Item_Enabled_Value == 1){
-                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-success btn.lg btn-block " data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')">'+ data.Device +'</button></span>';
+                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-success btn.lg btn-block " data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
                    }
                    else
                    {
-                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-danger btn.lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')">'+ data.Device +'</button></span>';
+                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-danger btn.lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
                    }
                 }
                 else
                 {
                     
-                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id  +'" type="button" class="btn btn-default btn.lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')" >'+ data.Device +'</button></span>';
+                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id  +'" type="button" class="btn btn-default btn.lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')" ><strong>'+ data.Device +'</strong></button></span>';
                 
                    // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
                 }
                 
-               // console.log(data.Item_Container + " " + data.Id);
+              //  console.log(data.Item_Container + " " + data.Id);
                 var radioFragment = document.getElementById(data.Item_Container + '_container');
                 radioFragment.innerHTML += newHtml;
        
