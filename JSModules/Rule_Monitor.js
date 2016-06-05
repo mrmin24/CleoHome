@@ -6,7 +6,7 @@ var rules = require('../JSModules/Rule_UpdateStates');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 var myconsole = require('../JSModules/myconsole.js');
 
-var intervaltime = 300;
+var intervaltime = 500;
 
 //var timezone = 2;
 
@@ -88,7 +88,7 @@ function ruleMonitor(){
                    
          if(data_receive){
                
-              // myconsole.log(data_receive);
+             //  myconsole.log("ruleMON: " + data_receive);
                
               
                for(var i = 0;i < data_receive.length;i++){
@@ -99,7 +99,9 @@ function ruleMonitor(){
                 evaluate.evaluateChange(data_receive[i].Item_Id,data_receive[i].State,function(node,port,state,virtual,cancelTime,func){
                      eval(func);             
                      if(node && port && state){
-                      mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                     
+                     	    mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                     
                      }
                      
                      if(cancelTime){
@@ -117,6 +119,8 @@ function ruleMonitor(){
                      }
                  //myconsole.log(data_receive[0]);
                  });
+                 
+                 
                
                }
                
