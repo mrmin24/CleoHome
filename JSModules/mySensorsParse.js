@@ -28,12 +28,15 @@ function start() {
 	if(io)
 	{ myconsole.log('MySensor Module Listening on ' + '44606');}
 	
+
 	
 	io.sockets.on('connection', function(socket){
 	  myconsole.log('Client connected to mysensor Parser');
 	 
 		connect();
+		checkOffTimes();
 		var offTimeTimer = setInterval(checkOffTimes,offTimeInterval);
+		
 		 socket.on('deviceSwitch',function(NodeId,NodePort,State,rulereq){
 		 	
 		 	
@@ -41,14 +44,17 @@ function start() {
 		 	if(Array.isArray(NodeId))
 			 	for(var i in NodeId)
 			 	{
-			 	//	myconsole.log(NodeId[i] + " " + NodePort[i] + " " + State[i] + " " + rulereq[i] );
+			 		myconsole.log("mysens1 " + NodeId[i] + " " + NodePort[i] + " " + State[i] + " " + rulereq[i] );
 			 		setTimeout(function() {
 					    sendData(NodeId[i],NodePort[i],State[i],rulereq[i])	;
 					}, 250);
 			 	}
 		 	else
-		 	{   //myconsole.log(NodeId + " " + NodePort + " " + State + " " + rulereq );
+		 	{   myconsole.log("mysens2 " + NodeId + " " + NodePort + " " + State + " " + rulereq );
+		 	
+		 	
 		 		sendData(NodeId,NodePort,State,rulereq)	;
+		 	
 		 			
 		 	}
 		 });
@@ -57,16 +63,21 @@ function start() {
 		 socket.on('switchOff',function(NodeId,NodePort,State,virtual,offTime){
 		 	
 		 	var foundIndex = 0;
+
 		 	//	myconsole.log("Switch off: " + NodeId + " " + NodePort + " " + virtual);
 		 	if(NodePort == null){NodePort = 1;}
 		 
+
+		 //	myconsole.log(offTimes);
+
 		 	for(var i = 0;i<offTimes.length;i++){
 		 		
 		 		if(offTimes[i]['data']['node'] == NodeId && offTimes[i]['data']['port'] == NodePort  ){
 		 			
 		 			offTimes[i]['data']['offTime'] = offTime;
 		 			offTimes[i]['data']['state'] = State;
-		 		
+
+		 	
 		 			foundIndex = 1;
 		 			
 		 		}
@@ -279,13 +290,13 @@ function start() {
 	    	
 	    	
 	    function sendData(NodeId,NodePort,State,rulereq){		
-	    //	myconsole.log("data: " + NodeId + " " +NodePort  );
+	    	//myconsole.log("mysens data: " + NodeId + " " + NodePort  );
 	    		
 	    		db.getdata('Items',{Select: 'Item_Type,Item_Is_Toggle,Item_Toggle_Delay,Item_Current_Value',whereClause:'Node_Id = ' + NodeId.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
 	    			 if(data_receive[0]){
 	    			 	if(data_receive[0].Item_Current_Value != State){
 	    			 			var time = 0;
-		    			 		//myconsole.log("Mysensor state" + State);
+		    			 	//	myconsole.log("Mysensor state: " + State);
 		    			 		if(rulereq == 1){
 		    			 			time = State;
 		    			 		}else{
@@ -369,15 +380,13 @@ function start() {
 	                   
 		}
 		
-		
-	
 		function checkOffTimes(){
 		 var time = new Date().getTime()	
 		//	myconsole.log(time);
 		//	myconsole.log(offTimes);
         	//return t.setSeconds(t.getSeconds() + onTime);
 			for(var i = 0;i < offTimes.length;i++){
-				//myconsole.log(offTimes[i]['data']['offTime']);
+				myconsole.log(offTimes[i]['data']['node'] + " " + offTimes[i]['data']['port'] + " " + offTimes[i]['data']['offTime']);
 				if(time >= offTimes[i]['data']['offTime']){
 					
 					
@@ -402,9 +411,11 @@ function start() {
 		
 		}
 	
+		
+	
 	});
 	
-	
+
 }
 
 	
