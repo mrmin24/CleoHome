@@ -938,7 +938,7 @@
         
         
         
-      console.log(data);
+     // console.log(data);
          
               var newHtml = '';
               
@@ -975,6 +975,13 @@
          var time = new Date().getTime() - data['Current_State'];
           lastseen = (time/1000/60).toString();
           lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
+         //console.log("nodestatus");
+         
+         if ( !$('#node'+data['Id'] ).length ){
+           //  console.log(data['Id']);
+            addNodes(data['Id'],data['Device'],data['Current_State']); 
+             
+         }
          
          if(time > Last_Seen_Error)
         {
