@@ -3,7 +3,7 @@ var db = require('./dbhandler');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 var myconsole = require('./myconsole.js');
 var intervaltime = 1 * 60 * 1000;
-var healthCheckInterval = 30 ;
+var healthCheckInterval = 60 ;
 var now = Date.now();  
 var exclude = [];
 

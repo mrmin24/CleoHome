@@ -5,7 +5,7 @@
   "dependencies": {
       
       "express": "4.3.1",
-    "socket.io": "1.0.2",
+    "socket.io": "latest",
     "ejs":"1.0.0",
     "passport":"0.2.1",
     "connect-flash" : "~0.1.1", 	

@@ -22,8 +22,9 @@
     var selectedRuleRow;
      var tabData;
      var distinct2 = [];
-   
+   var noSleep = new NoSleep();
    const Last_Seen_Error = 601000;
+   const heartBeatinterval = 30;
    
     showAllEvents(numEvents2,false);
   var Items = null;
@@ -48,13 +49,21 @@
 
     });
     
+    
+   
+    
+    
+    
+    
     $( document ).ready(function() {
-       
+       socket.emit('firstConnect');
         setUpDropdowns();
         getWeather();
         getPower();
-         
+        startheartbeat(heartBeatinterval);
     });
+    
+    
     
     
            
@@ -1027,7 +1036,7 @@
     socket.on('SensorEvent', function(data) {
     
     
-       // console.log(data);
+        console.log(data);
         document.getElementById('device' + data['Id']).innerHTML = data['Current_State'] + "A / " + (((data['Current_State'])*230)/1000).toFixed(2)  + 'KW';
     
     
@@ -1094,8 +1103,8 @@
     socket.on('reconnect',function(){
         
        document.getElementById('blackout').style.display = 'none'; 
-       location.reload(true);
-       
+       //location.reload(true);
+       socket.emit('ReConnect');
        //res.redirect('/')
         
     });
@@ -1252,6 +1261,15 @@
     
     
     
+    function startheartbeat(heartbeat){
+    
+    function enableNoSleep() {
+      noSleep.enable();
+      document.removeEventListener('touchstart', enableNoSleep, false);
+    }
+       document.addEventListener('touchstart', enableNoSleep, false);
+    
+    }
     
     
     function graphd3(data,axis_text){

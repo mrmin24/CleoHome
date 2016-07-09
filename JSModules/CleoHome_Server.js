@@ -145,14 +145,31 @@ io.on('connection', function(socket){
  
    myconsole.log('Server: Client Connected');
 
+   getAlarmTriggers(lastArmTime,socket); 
+   
+   sendGatewayStatus(socket);
+     
+   
+ socket.on('firstConnect',function(){
+  
+  
    sendPageTabs(socket);
-   getAlarmTriggers(lastArmTime,socket);
-   getAlarmStatus(socket);
-   getDeviceStatus(socket);
-   getNodeStatus(socket);
+   
+   getAlarmStatus(socket,1);   //send on update
+   getDeviceStatus(socket);   //send on update
+   getNodeStatus(socket);    //send on update
+   
+   
    sendConfig(socket); 
-   sendGatewayStatus(socket);   
+  
+  
+ });
  
+ socket.on('ReConnect',function(){
+  getAlarmStatus(socket,0);   //send on update
+  getLatestAlarmStatus();
+  getLatestVirtualStatus();
+ });
   
   socket.on('disconnect',function(socket){
      
@@ -660,6 +677,52 @@ io.on('connection', function(socket){
 });     /////////////////////////////////////////////////////////////////////////////////////////////////////////end of webpage socket connection
 
 }
+
+
+function getLatestVirtualStatus(){
+ myconsole.log('Get latest zone');
+  db.getdata('Items',{Select: 'Id,Item_Enabled_Value,Item_Current_Value',whereClause:'Id > 0 '},function(err,data_receive){
+ 
+    if(data_receive[0]){
+     for(var i = 0;i<data_receive.length;i++){
+      ID = data_receive[i].Id;
+      enabledValue = data_receive[i].Item_Enabled_Value;
+      State = data_receive[i].Item_Current_Value;
+     
+      io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
+     }
+    }
+    else{
+      myconsole.log(err); 
+    }
+  });
+}
+
+
+
+function getLatestAlarmStatus(){
+ myconsole.log('Get latest alarm');
+  db.getdata('Alarm_Items',{Select: 'Name,Current_State',whereClause:'Id < 28 '},function(err,data_receive){
+ 
+    if(data_receive[0]){
+     for(var i = 0;i<data_receive.length;i++){
+      
+      ID = data_receive[i].Name.substring(5, 8);
+   //  myconsole.log(data_receive[i].Name.substring(5, 8)  +  "   "  + data_receive[i].Name);
+     
+     
+      State = data_receive[i].Current_State;
+     
+      io.emit('AlarmZoneEvent', {Zone:ID,Current_State:State});
+     }
+    }
+    else{
+      myconsole.log(err); 
+    }
+  });
+}
+
+
 
 
 function virtualDeviceStatusChange(Id,State){
@@ -1342,7 +1405,8 @@ alarmsocket.on('connect', function() {
         alarmsocket.on('AlarmEvent',function(data){
            //myconsole.log("Alarm event")
            if(data['Partition'])
-           {    //myconsole.log("this " + data['Current_State']);
+           {   // myconsole.log("this1 " + data['Current_State']);
+           
                getState(data['Current_State'],function(realState){
                    
                    
@@ -1556,14 +1620,15 @@ function getState(requiredState,callback){
                           callback(data_receive[0]['State']);
                         }
                         else
-                          callback(false);
+                       
+                          callback(requiredState);   // change back to false
                         }
                        
                    });
 
 }
 
-function getAlarmStatus(sockets){
+function getAlarmStatus(sockets,newpage){  //newpage 1 if first load of page
     
     db.getdata('Alarm_Items',{Select: 'Name,Current_State,Description,Alarm_Event,Type',whereClause:"'Id' LIKE '%'"},function(err,data_receive){
                         if (err) {
@@ -1577,16 +1642,16 @@ function getAlarmStatus(sockets){
                            for(var i in data_receive){
                                //myconsole.log(data_receive[i]['Type'] + " " + data_receive[i]['Name']);  
                                 if(zone.indexOf(data_receive[i]['Type']) != -1 )
-                                {
+                                {  if(newpage == 1){
                                     var data = {Zone: data_receive[i]['Name'].substring(5),Current_State: data_receive[i]['Current_State'],Description:data_receive[i]['Description'],Alarm_Event:data_receive[i]['Alarm_Event']};
                                
                                     sockets.emit('AlarmZoneStatusEvent',data);
-                                    
+                                  }
                                    
                                 
                                 }
                                 else if(data_receive[i]['Type'] == 9)
-                                {
+                                { //  myconsole.log("this2 " + data['Current_State']);
                                     getState(data_receive[i]['Current_State'],function(realState){
                                         var data = {Partition: data_receive[i]['Name'].substring(0,8)+'1',Current_State:realState };
                                         sockets.emit('AlarmPartitionStatusEvent',data);
@@ -1640,7 +1705,7 @@ function getAlarmStatus(sockets){
                                     if(err){
                                         myconsole.log("Error occured during night mode status retrieval");
                                     }else{
-                                      //  myconsole.log(bypass + " " + memory + " " + armed + " " + ready);
+                                       // myconsole.log(bypass + " " + memory + " " + armed + " " + ready);
                                      sockets.emit("keypadLedState",{Bypass:bypass, Memory:memory,Armed:armed,Ready:ready,Night:night,Connected:connect});
                                     }
                                   });
@@ -2090,6 +2155,7 @@ function constructEvent(eventData,time,type,callback){
     
         var state = null;
         var Alarm = null;
+         // myconsole.log("this3 " + data['Current_State']);
         getState(eventData['Current_State'],function(data){
                             
             state = data;

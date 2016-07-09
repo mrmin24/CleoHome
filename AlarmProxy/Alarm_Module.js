@@ -320,6 +320,7 @@ function logdata(data) {
 
                 //myconsole.log(data.zone + " test 1");
                 if (client) {
+                  //   myconsole.log(data.send + " test 1");
                     sockets.emit('AlarmEvent', {
                         Zone: data.zone,
                         Current_State: data.send,
@@ -404,8 +405,8 @@ function logdata(data) {
                 
                 // myconsole.log(data.zone + " test 3");
                 if (client) {
-                    // myconsole.log(data.zone + " test 2");
-
+                    // myconsole.log(data.send + " test 2");
+                    
                     sockets.emit('AlarmEvent', {
                         Zone: data.zone,
                         Current_State: data.send
@@ -455,6 +456,7 @@ function logdata(data) {
                             });
 
                             if (client) {
+                                // myconsole.log(result + " test 3");
                                 sockets.emit('AlarmEvent', {
                                     Partition: data.partition,
                                     Current_State: result
@@ -558,9 +560,29 @@ function logdata(data) {
                  updateStatus('Partition_1',data.send);
                 myconsole.log('Alarm Module: Exit delay');
                 //sockets.emit('alarmTrigger', lastzone,Date.now());
+            }else if (data.code == '701') {/*
+                log.ownDb('Alarm_Items', {
+                    Set: 'Current_State',
+                    Where: 'Name',
+                    Name: 'Partition_' + data.partition,
+                    Current_State: data.send
+                });
+                 updateStatus('Partition_1',data.send);
+                myconsole.log('Alarm Module: Exit delay');*/
+                //sockets.emit('alarmTrigger', lastzone,Date.now());
+            }else if (data.code == '702') {/*
+                log.ownDb('Alarm_Items', {
+                    Set: 'Current_State',
+                    Where: 'Name',
+                    Name: 'Partition_' + data.partition,
+                    Current_State: data.send
+                });
+                 updateStatus('Partition_1',data.send);
+                myconsole.log('Alarm Module: Exit delay');*/
+                //sockets.emit('alarmTrigger', lastzone,Date.now());
             }
             else {
-
+                myconsole.log("alarm data code = " + data.code);
 
                 log.ownDb('Alarm_Items', {
                     Set: 'Current_State',
@@ -570,6 +592,7 @@ function logdata(data) {
                 });
                  updateStatus('Partition_1',data.send);
                 if (client) {
+                  //  myconsole.log(data.send + " test 4");
                     sockets.emit('AlarmEvent', {
                         Partition: data.partition,
                         Current_State: data.send

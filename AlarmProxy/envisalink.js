@@ -551,7 +551,7 @@ exports.tpicommands = {
     'pre':'Partition has been armed by user:',
     'bytes':5,
     'post':'',
-    'send':'armed',
+    'send':20,
     'action':'updatepartitionuser'
   },
   '701' : {
@@ -559,7 +559,7 @@ exports.tpicommands = {
     'pre':'Partition',
     'bytes':1,
     'post':'has been armed by Quick Arm, Auto Arm, Keyswitch, DLS or Wireless Key',
-    'send':'armed',
+    'send':'',
     'action':'updatepartition'
   },
   '702' : {
@@ -567,7 +567,7 @@ exports.tpicommands = {
     'pre':'Partition',
     'bytes':1,
     'post':'is armed with one or more zones bypassed',
-    'send':'armedbypass',
+    'send':'',
     'action':'updatepartition'
   },
   '750' : {
