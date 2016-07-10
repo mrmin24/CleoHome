@@ -1424,7 +1424,15 @@ alarmsocket.on('connect', function() {
         });
         
         
-        
+        alarmsocket.on('speak',function(msg){
+            myconsole.log("rules: speak requested");
+            speak(msg);
+            
+           
+         });
+         
+         
+         
         rulessocket.on('speak',function(msg){
             myconsole.log("rules: speak requested");
             speak(msg);

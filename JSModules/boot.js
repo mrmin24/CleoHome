@@ -1,6 +1,10 @@
 var myconsole = require('./myconsole.js');
+
+
+
 const startup_delay = 1000; 
-var debug = 0;
+
+
 myconsole.log('Controller active, delay for router is ' + startup_delay/1000  + ' seconds, please wait...');
 
 

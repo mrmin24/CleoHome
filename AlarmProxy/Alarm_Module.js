@@ -19,8 +19,9 @@ var alarm = null;
 var oldconnectionstatus = null;
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
-var retrycount = 0;
-var retryrequest = false;
+//var retrycount = 0;
+//var retryrequest = false;
+var disarmRetry = 0;
 
 function start() {
    // myconsole.log(debug);
@@ -416,7 +417,7 @@ function logdata(data) {
 
         }
         else if (data.pre == 'Partition') {
-          //   myconsole.log(data);
+            // myconsole.log(data.code);
             if (data.code == '652') {
                 var state;
                 switch (data.mode) {
@@ -529,6 +530,10 @@ function logdata(data) {
                 sockets.emit('alarmTrigger', lastzone,Date.now());
                 
             }else if (data.code == '655') {    //disarmed code
+             
+            clearInterval(disarmTimer);
+             disarmRetry = 0;
+             
               log.ownDb('Alarm_Items', {
                     Set: 'Current_State',
                     Where: 'Type',
@@ -548,6 +553,8 @@ function logdata(data) {
                  
                    sockets.emit('clearBypassZone');
                 myconsole.log('Alarm Module: The alarm was disarmed');
+                
+                
                
                 
             }else if (data.code == '656') {
@@ -580,6 +587,11 @@ function logdata(data) {
                  updateStatus('Partition_1',data.send);
                 myconsole.log('Alarm Module: Exit delay');*/
                 //sockets.emit('alarmTrigger', lastzone,Date.now());
+            }else if (data.code == '672') {
+                myconsole.log("alarm data code = Arm Failed" );
+               sockets.emit('speak','Arm Failed');  
+                
+              
             }
             else {
                 myconsole.log("alarm data code = " + data.code);
@@ -1057,8 +1069,8 @@ function armDisarm(type){
                                             
                                           
                                             
-                                            
-                                             if(retrycount == 0){
+                                              disarmcommand(1);
+                                           /*  if(retrycount == 0){
                                                  disarmcommand();
                                                  sleep(1000,function() {});
                                                  while(retrycount <= 3 && retryrequest == true ){
@@ -1066,7 +1078,7 @@ function armDisarm(type){
                                                     sleep(1000,function() {});
                                                 
                                                  }
-                                               }
+                                               }*/
                                             
                                             
                                             
@@ -1092,16 +1104,16 @@ function armDisarm(type){
                             }
                             else {
                                 
-                               
-                               if(retrycount == 0){
-                                 disarmcommand();
+                               disarmcommand(1);
+                              /* if(retrycount == 0){
+                                   disarmcommand(1);
                                  sleep(1000,function() {});
                                  while(retrycount <= 3 && retryrequest == true ){
-                                    disarmcommand();
+                                    disarmcommand(1);
                                     sleep(1000,function() {});
                                 
                                  }
-                               }
+                               }*/
                                 
 
                                /* nap.manualCommand('0401', true, function(ack, nack, retry) {
@@ -1302,7 +1314,9 @@ function armDisarm(type){
                 }
 }
 
-function disarmcommand(){
+function disarmcommand(retryOn){
+    
+    startDisarmCheck(retryOn);
     nap.manualCommand('0401', true, function(ack, nack, retry) {
     
         if (ack) {
@@ -1316,22 +1330,23 @@ function disarmcommand(){
             });
               updateStatus('Night_Mode_Active',0);
     
-                retrycount = 0;  
-                retryrequest = false;
+              //  retrycount = 0;  
+               // retryrequest = false;
           
     
         }
         else if (nack) {
     
             myconsole.log('Disarm Failed');
-    
+            // retrycount++;
+           // retryrequest = true;
     
         }
          if (retry) {
            
             myconsole.log("Debug: Retry required");
-            retrycount++;
-            retryrequest = true;
+           // retrycount++;
+            //retryrequest = true;
           
         }
        // else {
@@ -1341,6 +1356,22 @@ function disarmcommand(){
     
     
     });  
+}
+
+function startDisarmCheck(retryOn){
+    
+    if(disarmRetry < 3 && retryOn == 1){
+         disarmTimer = setInterval(function(){
+    
+            myconsole.log("Retry Disarm");
+            disarmRetry++;
+            disarmcommand(0);
+            
+            
+         
+        }, 1000);
+    }
+    
 }
 
 function getID(name,callback){
