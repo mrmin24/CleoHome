@@ -37,7 +37,7 @@ var configure = getconfig.data;
 var configure2 = configure.xml;
 
 var gatewayStatus = 0;
-
+var ROWS = 0;
 
 var eventio = require('socket.io-client');
 var eventsocket = eventio.connect('http://localhost:' + configure2.eventmodule[0].port[0]);
@@ -223,7 +223,7 @@ io.on('connection', function(socket){
   });
   
   socket.on('getItems',function(callback){
-        myconsole.log('tems requested');
+        myconsole.log('items requested');
       senditems();
       callback();
   });
@@ -1220,7 +1220,7 @@ function senditems(){
       db.getdata('Items',{Select: 'Id,Item_Name',whereClause:'Id LIKE "%"'},function(err,data_receive){
                       // myconsole.log('test1'); 
            if(data_receive[0]){
-           // myconsole.log(data_receive);
+            myconsole.log(data_receive);
                 db.getdata('Alarm_Items',{Select: 'Id,Description',whereClause:'Id LIKE "%"'},function(err,data_receive2){
                           // myconsole.log('test1'); 
                    if(data_receive2[0]){
@@ -1638,7 +1638,7 @@ function getState(requiredState,callback){
 
 function getAlarmStatus(sockets,newpage){  //newpage 1 if first load of page
     
-    db.getdata('Alarm_Items',{Select: 'Name,Current_State,Description,Alarm_Event,Type',whereClause:"'Id' LIKE '%'"},function(err,data_receive){
+    db.getdatajoin('Alarm_Items','Alarm_Item_Types',{Select: 'Name,Current_State,Description,Alarm_Event,T1.Type',join1: 'Type' ,join2: 'Id',whereClause:"T1.Id LIKE '%' AND T2.ShowOnPage = 1 ORDER BY T1.Description ASC"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
                             myconsole.log("ERROR2 : ",err);            
@@ -1956,7 +1956,8 @@ function clearBypass(){
 
 
 function getEvents(numEvents){
-    var done = false;
+   ROWS = 0;
+   // console.log(numEvents);
     db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Id LIKE '%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
@@ -1969,7 +1970,7 @@ function getEvents(numEvents){
                                 
                                   //  myconsole.log(eventData);
                                     
-                                   
+                                  
                                      
                                     constructEvent(eventData,data_receive[i]['Time'],data_receive[i]['Type'],function(eventstring,alarm,time,type){
                                      
@@ -1981,9 +1982,14 @@ function getEvents(numEvents){
                                             { 
                                                 
                                                 
-                                                io.emit('sendEvents',data);
+                                                io.emit('sendEvents',data,false);
                                                 
                                             }
+                                        }
+                                       // myconsole.log(ROWS + " " + numEvents);
+                                        ROWS++;
+                                        if(ROWS == numEvents-1){
+                                          io.emit('sendEvents',false,true);
                                         }
                                     
                                     });
@@ -2002,7 +2008,7 @@ function getEvents(numEvents){
 }
 
 function getImportantEvents(numEvents){
-    
+    ROWS = 0;
     db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Event LIKE '%Important%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
@@ -2031,6 +2037,10 @@ function getImportantEvents(numEvents){
                                             {
                                                 io.emit('sendImportantEvents',data);
                                             }
+                                        }
+                                        ROWS++;
+                                        if(ROWS == numEvents-1){
+                                          io.emit('sendEvents',false,true);
                                         }
                                     
                                     });
@@ -2066,7 +2076,7 @@ function getImportantEvents(numEvents){
 
 
 function getLastAlarm(){
-    
+    ROWS = 0;
     db.getdata('Event_Log',{Select: 'Id',whereClause:"Event LIKE '%12%' ORDER BY Id DESC LIMIT 1"},function(err,data_receive){
                         if (err) {
                         // error handling code goes here
@@ -2102,6 +2112,10 @@ function getLastAlarm(){
                                             {
                                                 io.emit('lastAlarmEvents',data);
                                             }
+                                        }
+                                        ROWS++;
+                                        if(ROWS == 1-1){
+                                          io.emit('sendEvents',false,true);
                                         }
                                     
                                     });
@@ -2157,7 +2171,7 @@ function getAlarmTriggers(lastArmTime,sockets){
 }
 
 function constructEvent(eventData,time,type,callback){
-    
+   
     if(eventData['Zone'] && eventData['Current_State'])
     {
     
@@ -2198,7 +2212,7 @@ function constructEvent(eventData,time,type,callback){
     } 
     else
     {
-        
+       // console.log("this is a null event: " +  eventData);
         callback(null,null,null,null);
     }
 }

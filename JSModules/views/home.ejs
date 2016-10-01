@@ -16,8 +16,8 @@
     </head>
     
     <body>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="/jquery/jquery-2.1.1.min.js">\x3C/script>')</script>
+   <script   src="https://code.jquery.com/jquery-3.1.1.min.js"   integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="   crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="/jquery/jquery-3.1.1.min.js">\x3C/script>')</script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     
@@ -26,7 +26,8 @@
     <script src="/jquery/jquery-ui.min.js"></script>
     <script src="/jquery/jquery.dataTables.min.js"></script>
     <script src="./scripts/Chart.min.js"></script>
-    <script src="./scripts/NoSleep.min.js"></script>
+     <script src="/scripts/index_script.js"></script>
+    <!--<script src="./scripts/NoSleep.min.js"></script>-->
      <!-- <script src="/scripts/screenSaver.js"></script>-->
      
     <!--<script type="text/javascript" src="/jquery/jquery-2.1.1.min.js"></script>
@@ -57,26 +58,26 @@
                            
                            
                             <li onclick="switchNodesTab()">
-                                <a href="#Devices" data-toggle="tab" >Nodes</a>
+                                <a  data-toggle="tab" >Nodes</a>
                             </li>
                             <li onclick="switchEventsTab()">
-                                <a href="#Events" data-toggle="tab">Events</a>
+                                <a  data-toggle="tab">Events</a>
                             </li>
                             <li onclick="switchGraphsTab()">
-                                <a href="#Graphs" data-toggle="tab">Graphs</a>
+                                <a  data-toggle="tab">Graphs</a>
                             </li>
                             <li onclick="settings()">
-                                <a href="#" data-toggle="tab">Settings</a>
+                                <a  data-toggle="tab">Settings</a>
                             </li>
                              <li onclick="refreshIP()">
-                                <a href="#" data-toggle="tab">Refresh IP</a>
+                                <a  data-toggle="tab">Refresh IP</a>
                             </li>
                             <li onclick="test()">
-                                <a href="#" data-toggle="tab">Test</a>
+                                <a  data-toggle="tab">Test</a>
                             </li>
                              <li onclick="switchRulesTab()">
                                 <!--<a href="./rules" >Rules</a>-->
-                                <a href="#" data-toggle="tab">Rules</a>
+                                <a  data-toggle="tab">Rules</a>
                             </li>
                         </ul>
                         
@@ -483,7 +484,7 @@
                       <div class="modal-footer">
                          
                         <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirm-saveRule">Save changes</button>
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#confirm-saveRule">Save</button>
                         
                       </div>
                     </div>
@@ -800,7 +801,7 @@
                             <strong>Events </strong><!--<h2 class = "panel-title col-xs-3  col-lg-4" id = "Event_Panel_Title">Events</h2>-->
                             <br>
                             <span>
-                            <label id="Checkbox3" class="checkbox-inline">
+                                <label id="Checkbox4" class="checkbox-inline">
                                     <input type="checkbox" id="checkbox4" name="checkbox4" onclick = "checkbox4Click()" checked>Graph</label>
                                 <label id="Checkbox1" class="checkbox-inline" >
                                     <input type="checkbox" id="checkbox1" name="checkbox1">Zones</label>
@@ -823,14 +824,14 @@
                                             <span class="caret"></span>
                                           </button>
                                           <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenuEvents" id="EventDropDownUL">
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">10</a></li>
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">20</a></li>
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">50</a></li>
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">100</a></li>
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">250</a></li>
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">500</a></li>
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">1000</a></li>
-                                            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">1500</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" >10</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" >20</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" >50</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" >100</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" >250</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" >500</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" >1000</a></li>
+                                            <li role="presentation"><a role="menuitem" tabindex="-1" >1500</a></li>
                                             
                                           </ul>
                                    </span>
@@ -889,7 +890,7 @@
           <script src="/scripts/moment.min.js"></script>
           <script src="/scripts/bootstrap-datepicker.js"></script>
           <script src="/EventGraph/src/eventDrops.js"></script>
-          <script src="/scripts/index_script.js"></script>
+         
         
           
      <script>

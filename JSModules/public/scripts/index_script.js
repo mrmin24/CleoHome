@@ -22,45 +22,90 @@
     var selectedRuleRow;
      var tabData;
      var distinct2 = [];
-   var noSleep = new NoSleep();
+  // var noSleep = new NoSleep();
    const Last_Seen_Error = 601000;
    const heartBeatinterval = 30;
    
-    showAllEvents(numEvents2,false);
+    
   var Items = null;
   
     j = 1;
     
     setUpDropdowns();
    
-   $(function(){
-
-    $(".dropdown-menu li a").click(function(){
-
-      eventdroptext = $(this).text();
-      console.log($(this));
-          $("#dropdownMenuEvents").text(eventdroptext );
-         document.getElementById('dropdownMenuEvents').innerHTML +=  '<span class="caret"></span>';
-
-        });
-        
-     
- 
-
-    });
-    
-    
+   
+   
+   
    
     
     
     
     
     $( document ).ready(function() {
+      
+    
+   
+        showAllEvents(numEvents2,false);
        socket.emit('firstConnect');
         setUpDropdowns();
         getWeather();
         getPower();
-        startheartbeat(heartBeatinterval);
+        
+        $(function(){  
+    
+    
+             $(document).on('click','#EventDropDownUL li a',function(){
+               
+                  eventdroptext = $(this).text();
+                  
+                      $("#dropdownMenuEvents").text(eventdroptext);
+                     document.getElementById('dropdownMenuEvents').innerHTML +=  '<span class="caret"></span>';
+            
+                });
+                    
+          });
+       
+            
+         
+     
+         $(function(){  
+            $('.modal').on('show.bs.modal', function (event) {
+              // do something...
+                console.log("WHY");
+                
+                socket.emit('getItems',function(){ });
+                
+                
+             
+                socket.on('sendItems',function(items,alarm_items){ 
+                 //$('#item_options').value = '';
+                 
+                     Items = items;
+                     AlarmItems = alarm_items;
+                     for(var i = 0;i<items.length;i++)
+                     {
+                         $('#item_options').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+                         $('#item_options_action').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+                    
+                       // console.log(items[i]['Item_Name']);
+                     }
+                     
+                     for(var i = 0;i<AlarmItems.length;i++)
+                     {
+                         $('#item_options').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+                         $('#item_options_action').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+                    
+                       // console.log(items[i]['Item_Name']);
+                     }
+                     
+                     setUpDropdowns();
+                 
+                });
+            });
+        
+        });
+       
+        //startheartbeat(heartBeatinterval);
     });
     
     
@@ -267,41 +312,10 @@
      }
      
      
-     $('#rulesAddModal').on('shown.bs.modal', function (e) {
-      // do something...
-      console.log("WHY");
-        socket.emit('getItems',function(){ });
-        
-        
-        
-        
+    
      
-        socket.on('sendItems',function(items,alarm_items){ 
-         //$('#item_options').value = '';
-         
-         Items = items;
-         AlarmItems = alarm_items;
-         for(var i = 0;i<items.length;i++)
-         {
-             $('#item_options').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
-             $('#item_options_action').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
-        
-           // console.log(items[i]['Item_Name']);
-         }
-         
-         for(var i = 0;i<AlarmItems.length;i++)
-         {
-             $('#item_options').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
-             $('#item_options_action').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
-        
-           // console.log(items[i]['Item_Name']);
-         }
-         
-         setUpDropdowns();
-         
-     });
-    });
-     
+    
+    
     
     
     $('#addAND').on( 'click', function() {
@@ -324,6 +338,8 @@
         setUpDropdowns();
         
     });
+    
+    
     
     $('#addOR').on( 'click', function() {
        
@@ -353,9 +369,8 @@
    
     
     function setUpDropdowns(){
-       
-
-            $(".dropdown-menu li a").click(function(){
+      
+       $(document).on('click','.dropdown-menu li a',function(){
                 $(this).parents(".dropdown").find('.btn').html($(this).text() + ' <span class="caret"></span>');
                  $(this).parents(".dropdown").find('.btn').val($(this).data('value'));
         
@@ -473,10 +488,10 @@
     
     
      function showAllEvents(numEvents,btnpress){
-        
-         if(btnPress){
-            document.getElementById("checkbox4").checked = true;
-        }
+    
+       //  if(btnPress){
+            document.getElementById("checkbox4").checked = btnPress;
+        //}
          //console.log("getting events" + eventdroptext);
           btnPress = btnpress;
             
@@ -486,11 +501,12 @@
             radioFragment.innerHTML = "" ;
             eventdata.length = 0;
 
-              dates.length = 0;
+            dates.length = 0;
               
          if(!numEvents){
              socket.emit('getEvents',{numEvents:eventdroptext},function(err,data){});
          }else{
+           //  console.log("getting events: " + numEvents);
              socket.emit('getEvents',{numEvents:numEvents},function(err,data){});
          }
             
@@ -498,40 +514,38 @@
      
      
      
-     socket.on('sendEvents',function(data){
-         var done = false;
-          var rows = $('#event_container tr').length+1;
-      
+     socket.on('sendEvents',function(data,Done){
+         // console.log("received events: " + Done);
+         var done = Done;
+         var rows = $('#event_container tr').length+1;
+       
         
        
-         Rows++;
+       
         // console.log(Rows);
        
         if (document.getElementById("checkbox1").checked == true) 
         {
+            if(data){
+                if(data['Alarm'] == "Alarm")
+                { 
+                    var newHtml = '<tr class = "danger"><td>'+ rows +'</td><td>'+data['Event_Type'] +'</td><td>'+ data['Event']+'</td><td>'+ data['Time'] +'</td></tr>';
+                    
+                }else
+                {
+                    var newHtml = '<tr><td>'+ rows +'</td><td>'+data['Event_Type'] +'</td><td>'+ data['Event']+'</td><td>'+ data['Time'] +'</td></tr>';
+                    
+                   
+                }
+                var radioFragment = document.getElementById('event_container');
+                radioFragment.innerHTML =  newHtml + radioFragment.innerHTML ;
         
-            if(data['Alarm'] == "Alarm")
-            { 
-                var newHtml = '<tr class = "danger"><td>'+ rows +'</td><td>'+data['Event_Type'] +'</td><td>'+ data['Event']+'</td><td>'+ data['Time'] +'</td></tr>';
-                
-            }else
-            {
-                var newHtml = '<tr><td>'+ rows +'</td><td>'+data['Event_Type'] +'</td><td>'+ data['Event']+'</td><td>'+ data['Time'] +'</td></tr>';
-                
-               
             }
-            var radioFragment = document.getElementById('event_container');
-            radioFragment.innerHTML =  newHtml + radioFragment.innerHTML ;
-        
-           
         
         }
      
-         if((btnPress && Rows == eventdroptext) || (!btnPress && Rows == (numEvents2 - 1)) ){
-             done = true;
-             Rows = 0;
-             
-         }
+    
+        
         addEventGraph(data,done,true,"default",function(){ });
         
         
@@ -540,21 +554,22 @@
      
      function addEventGraph(data,done,widetime,type,callback){
          //console.log(data['Event']);
-         
+        
          var oneMin = 60 * 1000;
          var startDate, endDate;
-        
+     if(data){ 
          var event = {};
          var stringarr = data['Event'].split(" - ");
          var stringarr2 = stringarr[0].split(" ");
          
-       //console.log(stringarr2);
+      // console.log(stringarr);
        // console.log(eventdata);
-         var watchwords = ['Opened','Armed','Disarmed','Alarm!','Door','Gate'];  //graph only graphs these event items if words are in description
+      
+         var watchwords = ['Opened','Disarmed','Armed','Alarm!','Door','Gate'];  //graph only graphs these event items if words are in description
          var notwatchwords = ['Main Partition LED State','Alarm Connection Status'];
         
          if(notwatchwords.indexOf(stringarr[0]) == -1){
-             console.log(stringarr[0]);
+            
              if(watchwords.indexOf(stringarr[1]) > -1 || watchwords.indexOf(stringarr2[1]) > -1 || watchwords.indexOf(stringarr2[2]) > -1 || type == 'alarm' ){
                 var index = null;
                
@@ -588,23 +603,25 @@
                 
             }
          }
-         
-       
-            if((done && btnPress == false) || (done && document.getElementById('checkbox4').checked && btnPress == true)){
-                
+       }
+        
+           if((done && btnPress == false) || (done && document.getElementById('checkbox4').checked && btnPress == true)){
+               
                 if(btnPress){
                     document.getElementById('checkbox4').checked = false;
                 }
                 if(widetime){
-                startDate=new Date(Math.min.apply(null,dates)-oneMin);
-                endDate=new Date(Math.max.apply(null,dates)+oneMin);    
-                
-                
-                setupEventGraph(startDate,endDate,type);
+                    startDate=new Date(Math.min.apply(null,dates)-oneMin);
+                    endDate=new Date(Math.max.apply(null,dates)+oneMin);    
+                    
+                    
+                    setupEventGraph(startDate,endDate,type);
+                   
                 
                 }else
                 {
-                 setupEventGraph(null,null,type);   
+                    setupEventGraph(null,null,type);   
+                   
                 }
             }
         
@@ -1036,7 +1053,7 @@
     socket.on('SensorEvent', function(data) {
     
     
-        console.log(data);
+        //console.log(data);
         document.getElementById('device' + data['Id']).innerHTML = data['Current_State'] + "A / " + (((data['Current_State'])*230)/1000).toFixed(2)  + 'KW';
     
     
@@ -1811,8 +1828,8 @@ function customFormat(formatString,date){
         } );
         $('#Rules_Add_Btn').click( function () {
            // $('#rulesAddModal').appendTo("body").modal('show');
-           //$('#rulesAddModal').modal('show');
-           //socket.emit("delete_user_token",selectedRow[0].children[1].innerHTML);
+          // $('#rulesAddModal').modal('show');
+          // //socket.emit("delete_user_token",selectedRow[0].children[1].innerHTML);
             //console.log(selectedRow[0].children[0].innerHTML);
             //table.row('.selected').remove().draw( false );
             
@@ -2056,25 +2073,26 @@ function customFormat(formatString,date){
     
      
     function setupEventGraph(startTime,endTime,type){
-     var chartPlaceholder = document.getElementById('chart_placeholder');
-     var legend = $('legend').width();
-   var widthnow = $(window).width()-legend;
-   //console.log($('legend').width());
-    
-    var now = Date.now();   
-    var oneHour = 60 * 60 * 1000;
-    var oneMin = 60 * 1000;
-    var fiveMin = 60 * 1000*5;
-   // var endTime = Date.now() ;
-    //var startTime = endTime - fiveMin;
-    
-    if(!startTime){startTime = new Date(now-fiveMin)};
-    if(!endTime){endTime = new Date(now+fiveMin)};
-    
-    var color = d3.scale.category20();
-    
-  
-    var graph = d3.chart.eventDrops()
+      //  console.log(startTime + ' ' + endTime + '  ' +type);
+        var chartPlaceholder = document.getElementById('chart_placeholder');
+        var legend = $('legend').width();
+        var widthnow = $(window).width()-legend;
+       //console.log($('legend').width());
+        
+        var now = Date.now();   
+        var oneHour = 60 * 60 * 1000;
+        var oneMin = 60 * 1000;
+        var fiveMin = 60 * 1000*5;
+       // var endTime = Date.now() ;
+        //var startTime = endTime - fiveMin;
+        
+        if(!startTime){startTime = new Date(now-fiveMin)};
+        if(!endTime){endTime = new Date(now+fiveMin)};
+        
+        var color = d3.scale.category20();
+        
+      
+        var graph = d3.chart.eventDrops()
         .start(startTime)
         .end(endTime)
         
@@ -2103,7 +2121,7 @@ function customFormat(formatString,date){
             document.getElementById('legend').innerHTML = 'Hovering [' + timestamp + '] in series "' + series + '"'; 
         });
         var element = d3.select(chartPlaceholder).datum(eventdata);
-    graph(element);
+        graph(element);
      //console.log($('legend').width());
     return;
     

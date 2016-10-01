@@ -77,6 +77,30 @@ exports.getdata = function(table,data,callback) {
     });
 }
 
+exports.getJoinData = function(table,table2,data,callback) {
+
+   pool.getConnection(function(err, connection){
+    
+   // myconsole.log(data.whereClause);
+   
+        connection.query('SELECT ' + data.Select + ' FROM ?? T1 INNER JOIN ?? T2 ON ' + data.Join  + 'WHERE ' + data.whereClause, [table],[table2], function(err, result) {
+          
+      // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+           
+           connection.release();
+            if(err) {
+                 callback(err,null);
+                }
+                else {
+                    // myconsole.log(data.whereClause);
+                 callback(null,result);
+                }
+                
+        });
+   
+    });
+}
+
 
 exports.getLast = function(table,data,callback) {
 
