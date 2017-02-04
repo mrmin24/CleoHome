@@ -22,6 +22,7 @@ var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 //var retrycount = 0;
 //var retryrequest = false;
 var disarmRetry = 10;
+disarmTimer = null;
 
 function start() {
    // myconsole.log(debug);
@@ -164,12 +165,6 @@ function start() {
            
            
          //  myconsole.log(status + "  " + oldconnectionstatus);
-            
-            
-            
-            
-            
-            
             
             if (oldconnectionstatus != status){
                 
@@ -417,9 +412,9 @@ function logdata(data) {
 
         }
         else if (data.pre == 'Partition') {
-            // myconsole.log(data.code);
+             //myconsole.log("test arming: " + data.code);
             if (data.code == '652') {
-                 clearInterval(disarmTimer);
+                 if(disarmTimer != null) clearInterval(disarmTimer);
                 disarmRetry = 10;
                 var state;
                 switch (data.mode) {
@@ -521,7 +516,7 @@ function logdata(data) {
 
             }
             else if (data.code == '654') {
-                 clearInterval(disarmTimer);
+                 if(disarmTimer != null) clearInterval(disarmTimer);
                 disarmRetry = 10;
                 log.ownDb('Alarm_Items', {
                     Set: 'Current_State',
@@ -535,7 +530,7 @@ function logdata(data) {
                 
             }else if (data.code == '655') {    //disarmed code
              
-            clearInterval(disarmTimer);
+            if(disarmTimer != null) clearInterval(disarmTimer);
              disarmRetry = 10;
              
               log.ownDb('Alarm_Items', {
@@ -974,6 +969,9 @@ function armDisarm(type){
 
 
                 if (type == 'Away') {
+                    disarmRetry = 10;
+                   if(disarmTimer != null) clearInterval(disarmTimer);
+                    
 
                     nap.manualCommand('0301', false, function(ack, nack, retry) {
 
@@ -1002,7 +1000,9 @@ function armDisarm(type){
                 }
                 else if (type == 'Stay') {
 
-
+                     disarmRetry = 10;
+                    if(disarmTimer != null) clearInterval(disarmTimer);
+                    
                     nap.manualCommand('0311', false, function(ack, nack, retry) {
 
                         if (ack) {
@@ -1035,7 +1035,11 @@ function armDisarm(type){
 
                 }
                 else if (type == 'Disarm') {
-
+                     disarmRetry = 10;
+                   if(disarmTimer != null) clearInterval(disarmTimer);
+                    
+    
+    
                     db.getdata('Alarm_Items', {
                         Select: 'Current_State',
                         whereClause: "Type LIKE '%11%' ORDER BY Id DESC LIMIT 1"
@@ -1319,7 +1323,8 @@ function armDisarm(type){
 }
 
 function disarmcommand(retryOn){
-    
+   
+             
     if(retryOn == 1){
          disarmRetry = 0;
         startDisarmCheck();
@@ -1337,7 +1342,7 @@ function disarmcommand(retryOn){
             });
               updateStatus('Night_Mode_Active',0);
              disarmRetry = 10;
-             clearInterval(disarmTimer);
+             if(disarmTimer != null) clearInterval(disarmTimer);
               //  retrycount = 0;  
                // retryrequest = false;
           

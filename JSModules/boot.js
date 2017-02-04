@@ -19,7 +19,9 @@ timer = setTimeout(function() {
     
     var Events = require('./Event_Handler.js');
     var Alarm = require('../AlarmProxy/Alarm_Module.js');
+    var mqtt = require('./MQTTParse.js');
     var mySensor = require('./mySensorsParse.js');
+    var ESP8266 = require('./ESP8266Parse.js');
     var Suncalc = require('./SunCalc.js');
     var Time = require('./timeUpdate');
     var Weather = require('./weatherUpdate');
@@ -32,13 +34,16 @@ timer = setTimeout(function() {
     
     Alarm.start();
     Events.start();
+   // mqtt.start();
     mySensor.start();
+   // ESP8266.start();
     Server.start();
     Suncalc.start();
     Time.start();
     Weather.start();
     Health.start();
     ruleMon.start();
+    
    // ping.start();
   
   

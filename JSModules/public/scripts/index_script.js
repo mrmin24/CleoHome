@@ -41,7 +41,7 @@
     
     
     
-    $( document ).ready(function() {
+    $( document ).ready(function(){
       
     
    
@@ -54,21 +54,21 @@
         $(function(){  
     
     
-             $(document).on('click','#EventDropDownUL li a',function(){
-               
-                  eventdroptext = $(this).text();
-                  
-                      $("#dropdownMenuEvents").text(eventdroptext);
-                     document.getElementById('dropdownMenuEvents').innerHTML +=  '<span class="caret"></span>';
-            
-                });
+         $(document).on('click','#EventDropDownUL li a',function(){
+           
+              eventdroptext = $(this).text();
+              
+                  $("#dropdownMenuEvents").text(eventdroptext);
+                 document.getElementById('dropdownMenuEvents').innerHTML +=  '<span class="caret"></span>';
+        
+            });
                     
           });
        
             
          
      
-         $(function(){  
+        /* $(function(){  
             $('.modal').on('show.bs.modal', function (event) {
               // do something...
                 console.log("WHY");
@@ -103,7 +103,13 @@
                 });
             });
         
+        });*/
+        
+        
+         $('#rulesAddModal').on('shown.bs.modal', function () {
+         console.log("trying");
         });
+        
        
         //startheartbeat(heartBeatinterval);
     });
@@ -313,8 +319,36 @@
      
      
     
+   /*  $('#rulesAddModal').on('shown.bs.modal', function (e) {
+      // do something...
+      console.log("trying");
+        socket.emit('getItems',function(err,data){});
      
-    
+        socket.on('sendItems',function(items,alarm_items){ 
+         //$('#item_options').value = '';
+         
+         Items = items;
+         AlarmItems = alarm_items;
+         for(var i = 0;i<items.length;i++)
+         {
+             $('#item_options').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+             $('#item_options_action').append('<li><a href="#">'+items[i]['Item_Name']+'</a></li>');
+        
+           // console.log(items[i]['Item_Name']);
+         }
+         
+         for(var i = 0;i<AlarmItems.length;i++)
+         {
+             $('#item_options').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+             $('#item_options_action').append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+        
+           // console.log(items[i]['Item_Name']);
+         }
+         
+         setUpDropdowns();
+         
+     });
+    })*/
     
     
     
@@ -325,14 +359,14 @@
         $("#if_Statements").append('<tr><td><div class="dropdown"><button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenuReq'+j+'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">Item <span class="caret"></span></button><ul class="dropdown-menu scrollable-menu" role="menu" id="item_options'+j+'" aria-labelledby="dropdownMenuReq'+j+'"></ul></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="equalsValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="greaterValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="lessValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td><div class="input-group" style="display:inline-block; "><input type="text" id="notEqualValueReq'+j+'" class="form-control" placeholder="value" aria-describedby="basic-addon2"></div></td><td align="center"><div class="input-group" style="display:inline-block; "><input id="secondaryRuleCheck'+j+'" type="checkbox" class="big-checkbox"></div></td><td><img src = "/resources/deleteicon.png" class="btnDelete" /></td></tr>');
         for(var i = 0;i<Items.length;i++)
          {
-             $('#item_options'+j).append('<li><a href="#">'+Items[i]['Item_Name']+'</a></li>');
+             $('#item_options'+j).append('<li><a>'+Items[i]['Item_Name']+'</a></li>');
              
         
             console.log(Items[i]['Item_Name']);
          }
           for(var i = 0;i<AlarmItems.length;i++)
          {
-          $('#item_options'+j).append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+          $('#item_options'+j).append('<li><a>'+AlarmItems[i]['Description']+'</a></li>');
          
          }
         setUpDropdowns();
@@ -350,7 +384,7 @@
         for(var i = 0;i<Items.length;i++)
          {
              
-             $('#item_options'+j).append('<li><a href="#">'+Items[i]['Item_Name']+'</a></li>');
+             $('#item_options'+j).append('<li><a>'+Items[i]['Item_Name']+'</a></li>');
              
         
             console.log(Items[i]['Item_Name']);
@@ -358,7 +392,7 @@
          
           for(var i = 0;i<AlarmItems.length;i++)
          {
-          $('#item_options'+j).append('<li><a href="#">'+AlarmItems[i]['Description']+'</a></li>');
+          $('#item_options'+j).append('<li><a>'+AlarmItems[i]['Description']+'</a></li>');
          
          }
           setUpDropdowns();
@@ -905,7 +939,7 @@
             
             for( var i in distinct ){ 
                 
-               newHtml += '<li onclick=checkVisible("'+distinct[i]+'")><a href="#" data-toggle="tab" >' + distinct[i] + '</a></li>';
+               newHtml += '<li onclick=checkVisible("'+distinct[i]+'")><a  data-toggle="tab" >' + distinct[i] + '</a></li>';
              }
                //switch' + distinct[i]+ 'Tab()
                 var radioFragment = document.getElementById('tabs');
