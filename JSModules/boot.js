@@ -34,7 +34,7 @@ timer = setTimeout(function() {
     
     Alarm.start();
     Events.start();
-   // mqtt.start();
+    mqtt.start();
     mySensor.start();
    // ESP8266.start();
     Server.start();

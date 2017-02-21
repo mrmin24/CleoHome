@@ -4,8 +4,8 @@
     const Motion_Type = 7;
     const Power_Type = 10;
     const Network_Type = 20;
-     const Virtual_Type = 15;
-     const Virtual_Alarm_Type = 18;
+    const Virtual_Type = 15;
+    const Virtual_Alarm_Type = 18;
     
     var socket = io();
     var eventdroptext = 10;
@@ -1077,7 +1077,7 @@
     
     socket.on('DeviceEvent', function(data) {
     
-    
+        console.log("DeviceEvent " +  data['Id'] + " " + data['Current_State']);
          checkUncheckDevice('device' + data['Id'], data['Current_State'],data['Item_Enabled_Value']);
         
     

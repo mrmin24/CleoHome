@@ -25,16 +25,22 @@ function start() {
     zeroTime(function(){   //waits for 00 seconds before starting interval to ensure time is checked on each minute
         timeUpdate();
         dayMinutesUpdate();
+        myconsole.log("timer started");
+        timer();
         
-        timer = setInterval(function(){
-    
-    
-            timeUpdate();
-            dayMinutesUpdate();
-           // weekDayUpdate();
-         
-        }, intervaltime);
     });
+}
+
+function timer(){
+    timer = setInterval(function(){
+    
+    
+        timeUpdate();
+        dayMinutesUpdate();
+       // weekDayUpdate();
+     
+    }, intervaltime);
+    
 }
 
 function timeUpdate(){

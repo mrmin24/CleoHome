@@ -52,6 +52,11 @@ var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 var rulesio = require('socket.io-client');
 var rulessocket = rulesio.connect('http://localhost:'+ 44603);
 
+var MQTTio = require('socket.io-client');
+var MQTTsocket = MQTTio.connect('http://localhost:'+ 44607);
+
+
+
 const Virtual_Item_Type = 15
 const Virtual_Alarm_Item_Type = 18;
 const Phone_Item_Type = 20;
@@ -407,10 +412,10 @@ io.on('connection', function(socket){
     });
     
     socket.on('deviceSwitch',function(Id){
-      //myconsole.log(userId);
+    //  myconsole.log("deviceSwitch1");
       
         db.getdata('Items',{Select: 'Item_Type,Item_Current_Value,Node_Id,Node_Port',whereClause:'Id = ' + Id.toString()},function(err,data_receive){
-      	
+      //	 myconsole.log("deviceSwitch: " + data_receive);
       	  if(data_receive){
       	      
       	   if(data_receive[0].Item_Current_Value == 1 )
@@ -421,6 +426,8 @@ io.on('connection', function(socket){
           	    }else
           	    {
                  mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
+                 MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
+                 //myconsole.log('deviceSwitch2');
           	    }
             }else
             {    if(data_receive[0].Item_Type == Virtual_Item_Type || data_receive[0].Item_Type == Virtual_Alarm_Item_Type)
@@ -429,6 +436,8 @@ io.on('connection', function(socket){
       	        }else
       	        {
                     mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
+                    MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
+                   // myconsole.log('deviceSwitch3');
       	        }
             } 
       	  }
@@ -974,6 +983,139 @@ mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
     
 });
 
+
+MQTTsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
+    myconsole.log("Device Status Change4");
+    myconsole.log(State);
+  // var evaluate = require('../JSModules/Rule_Items_Evaluate');
+   if(State > 0){State = 1;}
+   
+     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+        myconsole.log(data_receive);
+         if(data_receive[0]){
+                   // myconsole.log(data_receive);
+                    ID = data_receive[0].Id;
+                    enabledValue = data_receive[0].Item_Enabled_Value;
+                    
+                    data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                    db.update("Items",data,function(err,data_receive){
+                          
+                          
+                        
+                         if(data_receive){
+                            // myconsole.log("data: " + ID + " " + State);
+                             io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
+                         
+                             rules.updateRuleStates(ID, State);
+                            
+                            /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
+                                 
+                                 eval(func);
+                                 
+                                 if(node && port && state){
+                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                 }
+                                 
+                                 if(cancelTime){
+                                             
+                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                 }
+                                 
+                                  if(virtual == 1){
+                                     virtualDeviceStatusChange(node,state);
+                                   
+                                     
+                                 }
+                             //myconsole.log(data_receive[0]);
+                             });*/
+                             
+                             
+                         }else
+                         {
+                            myconsole.log(err); 
+                             
+                         }
+                        
+                    }); 
+        }else 
+        if(err)
+        {
+            myconsole.log(err);
+        }
+         
+     });
+    
+   
+    
+    
+});
+
+MQTTsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
+    //myconsole.log("Device Status Change");
+   // myconsole.log(NodePort);
+   //var evaluate = require('../JSModules/Rule_Items_Evaluate');
+   
+   
+     db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+        // myconsole.log(data_receive);
+         if(data_receive[0]){
+                    //myconsole.log(data_receive);
+                    ID = data_receive[0].Id;
+                    
+                     data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                    db.update("Items",data,function(err,data_receive){
+                          
+                          //	myconsole.log("Server: Sensor updated");
+                        
+                         if(data_receive){
+                            // myconsole.log(ID + " " + State);
+                             io.emit('SensorEvent', {Id:ID,Current_State:State});
+                             
+                             rules.updateRuleStates(ID, State);
+                             
+                            /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
+                                 
+                                    eval(func);             
+                                 if(node && port && state){
+                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                 }
+                                 
+                                 if(cancelTime){
+                                             
+                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                 }
+                                 
+                                  if(virtual == 1){
+                                     virtualDeviceStatusChange(node,state);
+                                  
+                                     
+                                 }
+                             //myconsole.log(data_receive[0]);
+                             });*/
+                             
+                             
+                         }else
+                         {
+                            myconsole.log(err); 
+                             
+                         }
+                        
+                    }); 
+        }else 
+        if(err)
+        {
+            myconsole.log(err);
+        }
+         
+     });
+    
+   
+    
+    
+});
+
+
+
 mySensorsocket.on('gatewayConnected',function(gatewayState){
     gatewayStatus = gatewayState;
     sendGatewayStatus();
@@ -992,6 +1134,46 @@ mySensorsocket.on('nodeAlive',function(NodeID){
              if(data_receive){
                 // myconsole.log(ID + " " + State);
                  myconsole.log("Node state updated");
+                 
+                 
+             }else
+             {
+                myconsole.log(err); 
+                 
+             }
+            
+    }); 
+    updateNodeStatus();
+    
+});
+
+
+MQTTsocket.on('nodeAlive',function(NodeID,Status){
+    var timenow = new Date().getTime();
+     data = {Set:'Status',Current_State:Status,Where:"Node_Port",Name:NodeID};
+     db.update("Nodes",data,function(err,data_receive){
+              
+              
+            
+             if(data_receive){
+                // myconsole.log(ID + " " + State);
+                 data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
+                 db.update("Nodes",data2,function(err2,data_receive2){
+                           
+                           
+                         
+                          if(data_receive2){
+                             // myconsole.log(ID + " " + State);
+                              myconsole.log("Node state updated");
+                              
+                              
+                          }else
+                          {
+                             myconsole.log(err); 
+                              
+                          }
+                         
+                 });
                  
                  
              }else
@@ -1902,7 +2084,7 @@ return;
 
 function updateNodeStatus(){
    
-    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
+    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
     if (err) {
     // error handling code goes here
         myconsole.log("ERROR2 : ",err);            
@@ -2377,7 +2559,7 @@ function updatedns(ip,callback2){
   //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		myconsole.log('DNS Update: ' + chunk);
+    		myconsole.log('DNS Update1: ' + chunk);
   	});
   });
 
@@ -2416,7 +2598,7 @@ function updatednshome(ip,callback2){
   //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		myconsole.log('DNS Update: ' + chunk);
+    		myconsole.log('DNS Update2: ' + chunk);
   	});
   });
 

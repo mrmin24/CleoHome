@@ -1,14 +1,10 @@
-var net = require('net');
-var log = require('./logger.js');
-
-var gatewayip = '127.0.0.1';
-var gatewayport = '1883';
-var actual = new net.Socket();
-var retrytimer;
+var mqtt = require('mqtt');
 var db = require('./dbhandler');
 var myconsole = require('./myconsole.js');
 
 var rules = require('./Rule_UpdateStates.js');
+
+var retrytimer;
 var Access_Type = 5;
 var Irrigation_Type = 6; 
 var Motion_Type = 7;
@@ -17,40 +13,109 @@ var offTimes = [];
 var offTimesObjects = {};
 var offTimeInterval = 1000;
 
-//var alarmio = require('socket.io-client');
-//var actual = alarmio.connect(gatewayip + gatewayport);
+
+
+
+ 
+
 
 
 function start() {
-   // myconsole.log(debug);
-	var io = require('socket.io').listen(44606);
+	
+	
+	// myconsole.log(debug);
+	var io = require('socket.io').listen(44607);
 	
 	if(io)
-	{ myconsole.log('MQTT Module Listening on ' + '44606');}
-	
-
+	{ myconsole.log('MQTT Module Listening on ' + '44607');}
 	
 	io.sockets.on('connection', function(socket){
-	  myconsole.log('Client connected to MQTT Parser');
-	 
-		connect();
-		checkOffTimes();
-		var offTimeTimer = setInterval(checkOffTimes,offTimeInterval);
+	 myconsole.log('Client connected to MQTT Parser');
+	 var client  = mqtt.connect('mqtt://127.0.0.1',{ clientId: 'CleoHome',keepalive:120,will:{topic:'ctrlOut/status/0',payload:'offline',qos:2,retain:true}});
+
+			
+			
+		client.on('connect', function () {
+			myconsole.log('MQTT client connected to server');
+
+			  MQTT_Subscribe('ctrlIn/#');
+			  MQTT_Publish('ctrlOut/0/status', 'online');
+			  
+			 
 		
-		 socket.on('deviceSwitch',function(NodeId,NodePort,State,rulereq){
+		 
+		
+		client.on('message', function (topic, message) {
+			myconsole.log('New MQTT message: ' + topic + " " + message);
+		  // message is Buffer 
+		 	var dataslice = topic.toString().replace(/[\n\r]/g, '').split('/');
+	        myconsole.log(dataslice);
+	        
+	        processData(dataslice,message);
+	        
+		});	
+	
+		
+		
+		
+	});  	
+	
+	
+	function MQTT_Subscribe(topic){
+		myconsole.log("Subscribing to: " + topic);
+		client.subscribe(topic);
+		
+	}
+	
+	function MQTT_Publish(topic,message){
+		myconsole.log("Publishing to: " + topic);
+		 client.publish(topic, message);
+		
+	}
+	
+	function sendNewId(){
+	    	
+	    	
+	    	
+    	db.getdata('Items',{Select: 'Node_Id',whereClause:'Node_Id > 0 ORDER BY Node_Id DESC LIMIT 1'},function(err,data_receive){
+        // myconsole.log(data_receive);
+         	if(data_receive[0]){
+                    //myconsole.log(data_receive);
+                    ID = data_receive[0].Node_Id + 1;
+                    // data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                    
+                    
+                    actual.write('255;255;3;1;4;'+ ID.toString()+'\n',function(){
+       
+                       myconsole.log('Sent new ID ' +  ID.toString());
+                   });
+	        }else 
+	        if(err)
+	        {
+	            myconsole.log(err);
+	        }
+    	
+    	 
+    	});
+    
+                   
+                   
+	}
+	socket.on('deviceSwitch',function(NodeId,NodePort,State,rulereq){
 		 	
 		 	
-		 //	myconsole.log("is array " + Array.isArray(NodeId));
+		 	myconsole.log("MQTT switch: " + Array.isArray(NodeId));
+		 	
 		 	if(Array.isArray(NodeId))
 			 	for(var i in NodeId)
 			 	{
-			 		myconsole.log("mysens1 " + NodeId[i] + " " + NodePort[i] + " " + State[i] + " " + rulereq[i] );
+			 		myconsole.log("mysensMQTT " + NodeId[i] + " " + NodePort[i] + " " + State[i] + " " + rulereq[i] );
 			 		setTimeout(function() {
 					    sendData(NodeId[i],NodePort[i],State[i],rulereq[i])	;
 					}, 250);
 			 	}
 		 	else
-		 	{   myconsole.log("mysens2 " + NodeId + " " + NodePort + " " + State + " " + rulereq );
+		 	{   myconsole.log("mysensMQTT2 " + NodeId + " " + NodePort + " " + State + " " + rulereq );
 		 	
 		 	
 		 		sendData(NodeId,NodePort,State,rulereq)	;
@@ -60,236 +125,7 @@ function start() {
 		 });
 		 
 		 
-		 socket.on('switchOff',function(NodeId,NodePort,State,virtual,offTime){
-		 	
-		 	var foundIndex = 0;
-
-		 	//	myconsole.log("Switch off: " + NodeId + " " + NodePort + " " + virtual);
-		 	if(NodePort == null){NodePort = 1;}
-		 
-
-		 //	myconsole.log(offTimes);
-
-		 	for(var i = 0;i<offTimes.length;i++){
-		 		
-		 		if(offTimes[i]['data']['node'] == NodeId && offTimes[i]['data']['port'] == NodePort  ){
-		 			
-		 			offTimes[i]['data']['offTime'] = offTime;
-		 			offTimes[i]['data']['state'] = State;
-
-		 	
-		 			foundIndex = 1;
-		 			
-		 		}
-		 		
-		 		
-		 	}
-		 	
-		 	if(foundIndex == 0)
-		 	{
-			 	offTimesObjects.node =parseInt(NodeId);
-			 	offTimesObjects.port = NodePort;
-			 	offTimesObjects.state = State;
-			 	offTimesObjects.offTime = offTime;
-			 	offTimesObjects.virtual = virtual;
-			 	
-			 	
-			 	offTimes.push({data: offTimesObjects});
-			 	
-			 	
-		 	}
-		 	
-		 	//	myconsole.log(offTimes);
-		 	foundIndex = 0;
-		 	offTimesObjects = {};
-		 	
-		 	
-		 //	myconsole.log(offTimes);
-		 });
-		 
-		 
-		 
-		function processData(data){
-	    	socket.emit("nodeAlive",data[0]);
-	    	var sensorTypes = ['17','0','8','38','39','7'];// ['0','1','17','18','35','38','39'];
-	    	if(data[2] == 1 && sensorTypes.indexOf(data[4]) == -1 ){
-	    	   myconsole.log("Mysensor: Device updated");
-	    		
-	    		
-    			db.getdata('Items',{Select:'Item_Current_Value',whereClause:'Node_Id = "' + data[0] + '"AND Node_Port = "' + data[1] +'"'},function(err,data_receive){
-    			
-	    			if(data_receive){
-	    				
-	    				if(data_receive[0].Item_Current_Value - data[5] > 0.3 || data_receive[0].Item_Current_Value - data[5] < -0.3){
-	    					socket.emit("deviceStatusChange",data[0],data[1],data[5]);
-	    					//	log.logger('Device', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
-	    						log.logger('Device', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');	
-	    				}
-	    			}else
-	    			{
-	    					socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
-    					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
-    					log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
-	    				myconsole.log(err);
-	    			}
-	    		});
-	    	
-	    		
-	    	}else if(data[2] == 1 && sensorTypes.indexOf(data[4]) != -1 ){
-	    		myconsole.log("Mysensor: Sensor updated2");
-	    		
-	    		
-	    		
-	    		db.getdata('Items',{Select:'Item_Current_Value, Item_Type',whereClause:'Node_Id = "' + data[0] + '"AND Node_Port = "' + data[1] +'"'},function(err,data_receive){
-	    			
-	    			if(data_receive){
-	    			//	myconsole.log(data_receive);
-	    				db.getdata('Item_Types',{Select:'Type',whereClause:'Id = "' + data_receive[0].Item_Type +'"' },function(err,data_receive2){
-	    				//	if(data_receive[0].Item_Current_Value - data[5] > 0.3 || data_receive[0].Item_Current_Value - data[5] < -0.3){
-	    				
-	    				if(data_receive2){
-	    				//	myconsole.log(data_receive2);
-			    			if(data_receive[0].Item_Current_Value - data[5] > 0.3 || data_receive[0].Item_Current_Value - data[5] < -0.3){
-			    					socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
-			    					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
-			    					log.logger(data_receive2[0].Type, '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
-			    				}
-	    				}else{
-	    					myconsole.log(err);
-	    				}
-	    			
-	    			//else{
-	    			//	socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
-    					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
-    				//	log.logger(data_receive2[0].Type, '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
-	    			//}
-	    			
-	    			
-	    		});
-	    		}else{
-	    			myconsole.log(err);
-	    		}
-	    		
-	    		
-	    		});
-	    	}
-	    	
-	    
-	    	
-	    	if(data[2] == 3){
-	    		if(data[4] == 3){  //id request
-	    			
-	    			myconsole.log("Id Request received");
-	    			sendNewId();
-	    			
-	    		}
-	    		if(data[4] == 18){  //id request
-	    			
-	    		//	myconsole.log("Alive received");
-	    		
-	    			
-	    		}
-	    		
-	    	}
-	    	
-	    	
-	    	
-	    	
-	    }       
-	
-			
-		
-	   
-		  	function connect(){
-		  		myconsole.log('Mysensors: Trying to connect to MQTT @ ' + gatewayip + ':' + gatewayport);
-		  		
-					actual.connect({port: gatewayport, host:gatewayip}, function() {
-					    myconsole.log('Mysensors: MQTT connected');
-					    
-				        socket.emit("gatewayConnected",1);
-	                	if(retrytimer)clearInterval(retrytimer);      
-	                	
-	                	
-					});
-					
-					
-					
-		  
-		  	}
-		
-	
-	   
-	    
-	    process.on('uncaughtException', function(err) {
-	    if(err.code == 'EHOSTUNREACH'){
-	        //retryconnect();
-	        socket.emit("gatewayConnected",0);
-	        	if(retrytimer)clearInterval(retrytimer);    
-		  		retrytimer = setInterval(function() {connect()},5000);
-	    }
-	    
-	   
-		});
-			
-			
-		actual.on('error', function(e) {
-				
-				
-			/*	if(e.code == 'ECONNREFUSED') {}  */
-				
-			myconsole.log("Mysensors: Gateway connection error = " + e);	
-				socket.emit("gatewayConnected",0);
-				if(retrytimer)clearInterval(retrytimer);    
-		  		retrytimer = setInterval(function() {connect()},5000);
-	
-			 
-		});
-			
-		actual.on('close', function() {
-				
-			myconsole.log("Mysensors: Gateway connection closed" );
-				socket.emit("gatewayConnected",0);
-				if(retrytimer)clearInterval(retrytimer);    
-		  		retrytimer = setInterval(function() {connect()},5000);
-	
-				
-		});
-			
-		actual.on('timeout', function() {
-				
-			myconsole.log("Mysensors: Gateway connection timeout" );
-				socket.emit("gatewayConnected",0);
-				if(retrytimer)clearInterval(retrytimer);    
-		  		retrytimer = setInterval(function() {connect()},5000);
-		
-				
-		});
-		
-		
-		actual.on('disconnect', function() {
-			
-		myconsole.log("Mysensors: Gateway connection disconnected" );	
-			socket.emit("gatewayConnected",0);
-			if(retrytimer)clearInterval(retrytimer);    
-		  	retrytimer = setInterval(function() {connect()},5000);
-	
-				
-		});
-		
-		actual.on('data', function(data) {
-	    	var dataslice = data.toString().replace(/[\n\r]/g, '').split(';');
-	        myconsole.log(dataslice);    
-	        
-	        processData(dataslice);
-	  
-		});
-		
-		
-		
-		
-	    	
-	    	
-	    function sendData(NodeId,NodePort,State,rulereq){		
+		  function sendData(NodeId,NodePort,State,rulereq){		
 	    	//myconsole.log("mysens data: " + NodeId + " " + NodePort  );
 	    		
 	    		db.getdata('Items',{Select: 'Item_Type,Item_Is_Toggle,Item_Toggle_Delay,Item_Current_Value',whereClause:'Node_Id = ' + NodeId.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
@@ -305,39 +141,25 @@ function start() {
 		    			 	if(data_receive[0].Item_Type == Access_Type && data_receive[0].Item_Is_Toggle == 1 ){
 		    			 	
 					    	 	if(State == 0){
-						    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;0\n',function(){
-					       
-					                       //myconsole.log('data sent');
-					                   });
+					    	 		client.publish('ctrlOut/'+NodeId.toString()+'/command', '{"cmd":"set","port":"'+NodePort.toString()+'","value":"0"}');
+						    	 	
 						    	 	
 						    	 }else{
-						    	 	
-					    	 		actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;47;' + time.toString() + '\n',function(){
-					       
-					                       //myconsole.log('data sent');
-					                   });
+						    	 	client.publish('ctrlOut/'+NodeId.toString()+'/command', '{"cmd":"set","port":"'+NodePort.toString()+'","value":"' + time.toString() + '"}');
+					    	 		
 						    	 }
 			    			 }else 	if(data_receive[0].Item_Type == Irrigation_Type && data_receive[0].Item_Is_Toggle == 1 ){
 						    	 
 						    	 if(State == 0){
-						    	 	actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;0\n',function(){
-					       
-					                       //myconsole.log('data sent');
-					                   });
+						    	 	client.publish('ctrlOut/'+NodeId.toString()+'/command', '{"cmd":"set","port":"'+NodePort.toString()+'","value":"0"}');
 						    	 	
 						    	 }else{
-							    	 actual.write(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + time.toString() + '\n',function(){
-							       
-							                      // myconsole.log(NodeId.toString() + ';' +  NodePort.toString() +';1;1;48;' + data_receive[0].Item_Toggle_Delay);
-							                   });
+							    	client.publish('ctrlOut/'+NodeId.toString()+'/command', '{"cmd":"set","port":"'+NodePort.toString()+'","value":"' + time.toString() + '"}');
 						    	 }
 			    			  }else 
 			    			 {
+			    			 		client.publish('ctrlOut/'+NodeId.toString()+'/command', '{"cmd":"set","port":"'+NodePort.toString()+'","value":"'+ State.toString() +'"}');
 			    			 	
-			    			 	actual.write(NodeId.toString() + ';' + NodePort.toString()+';1;1;2;' + State.toString() +'\n',function(){
-						       
-						                       //myconsole.log('data sent');
-						                   });	
 			    			 }
 	    			 	}
 				                   
@@ -350,74 +172,124 @@ function start() {
 		    	 
 		    });
 	    }
-	    
-	    function sendNewId(){
-	    	
-	    	
-	    	
-	    	db.getdata('Items',{Select: 'Node_Id',whereClause:'Node_Id > 0 ORDER BY Node_Id DESC LIMIT 1'},function(err,data_receive){
-	        // myconsole.log(data_receive);
-	         if(data_receive[0]){
-	                    //myconsole.log(data_receive);
-	                    ID = data_receive[0].Node_Id + 1;
-	                    // data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-	                    
-	                    
-	                    actual.write('255;255;3;1;4;'+ ID.toString()+'\n',function(){
-	       
-	                       myconsole.log('Sent new ID ' +  ID.toString());
-	                   });
-	        }else 
-	        if(err)
-	        {
-	            myconsole.log(err);
-	        }
-	    	
-	    	 
-	    });
-	    
-	                   
-	                   
-		}
+		 
+		 
+		function processData(topic,message){
+		//	myconsole.log(topic[topic.length-1] );
 		
-		function checkOffTimes(){
-		 var time = new Date().getTime()	
-		//	myconsole.log(time);
-		//	myconsole.log(offTimes);
-        	//return t.setSeconds(t.getSeconds() + onTime);
-			for(var i = 0;i < offTimes.length;i++){
-				myconsole.log(offTimes[i]['data']['node'] + " " + offTimes[i]['data']['port'] + " " + offTimes[i]['data']['offTime']);
-				if(time >= offTimes[i]['data']['offTime']){
-					
-					
-					if(offTimes[i]['data']['virtual'] == 1){
-						data = {Set:'Item_Current_Value',Where:'Id',Current_State:0,Name:offTimes[i]['data']['node']};
-                        
-                        db.update('Items',data,function(){});
-						 rules.updateRuleStates(offTimes[i]['data']['node'], 0);
-						 
-					}else{
-						sendData(offTimes[i]['data']['node'],offTimes[i]['data']['port'],offTimes[i]['data']['state']);
-					}
-					offTimes.splice(i, 1);
-					myconsole.log("Switch Off");
-					i--;
-				}
+			var jsonMessage = JSON.parse(message);     
+			
+			
+			myconsole.log("JSON " + jsonMessage['status']);
+		
+			if(topic[topic.length-1] == "status" && (jsonMessage['status'] == 'online' || jsonMessage['status'] == 'offline')){
+				myconsole.log("setting " + topic[topic.length-2] + " to " + jsonMessage['status']);
+		    	socket.emit("nodeAlive",topic[topic.length-2],jsonMessage['status']);
+		    	
+			}
+			
+			
+			if(topic[topic.length-1] == "cmd"){   //if command topic is received check the command
 				
+				
+				var command = jsonMessage['cmd'];
+				var port = jsonMessage['port'];
+				var value = jsonMessage['value'];
+				var type = jsonMessage['type'];
+				var node = topic[topic.length-2];
+				var IP = jsonMessage['IP'];
+				
+					myconsole.log("command = " + command + " value = " + value + " type = " + type + " port = " + port + " IP = " + IP );
+				
+				if(command == "set"){
+				myconsole.log("setting " + node + "/" + port + " to " + value);
+		    	//socket.emit("nodeAlive",topic[topic.length-2],message);
+		    	
+				
+		    	
+		    	   myconsole.log("MQTT sensor: Device updated");
+		    		
+		    		
+	    			db.getdata('Items',{Select:'Item_Current_Value',whereClause:'Node_Id = "' + node + '" AND Node_Port = "' + port.toString() +'"'},function(err,data_receive){
+	    			
+		    			if(data_receive){
+		    				
+		    				if(data_receive[0].Item_Current_Value - value > 0.3 || data_receive[0].Item_Current_Value - value < -0.3){
+		    					//  myconsole.log("MQTT sensor: " + message);
+		    					socket.emit("deviceStatusChange",node,port,value);
+		    					//	log.logger('Device', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
+		    						log.logger('Device', '{"node":"' + node + '","port":"' + port + '","value":"' + value + '"}');	
+		    				}
+		    			}else if(err){
+		    				
+		    				myconsole.log(err);
+		    			}
+		    			
+		    		
+		    		});
+		    	
+		    	
+				}else if(command == "reqId")
+				
+				{
+				myconsole.log("requesting a new node ID for IP: " + IP);
+		    	//socket.emit("nodeAlive",topic[topic.length-2],message);
+		    	
+				
+		    	
+		    	   myconsole.log("MQTT sensor: New Id requested");
+		    		
+		    		
+	    			db.getdata('Items',{Select:'Item_Current_Value',whereClause:'Node_Id = "' + topic[topic.length-3] + '"AND Node_Port = "' + topic[topic.length-1] +'"'},function(err,data_receive){
+	    			
+		    			if(data_receive){
+		    				
+		    				if(data_receive[0].Item_Current_Value - message > 0.3 || data_receive[0].Item_Current_Value - message < -0.3){
+		    					//  myconsole.log("MQTT sensor: " + message);
+		    					socket.emit("deviceStatusChange",topic[topic.length-3],topic[topic.length-1],parseInt(message));
+		    					//	log.logger('Device', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
+		    						log.logger('Device', '{"node":"' + topic[topic.length-3] + '","port":"' + topic[topic.length-1] + '","value":"' + message + '"}');	
+		    				}
+		    			}
+		    		
+		    		});
+		    	
+		    		
+		    	
+	    	
+			}
 				
 				
 			}
-		
-		
-		}
+			
+			
+			
 	
-		
-	
+	    
+	    /*	if(data[2] == 3){
+	    		if(data[4] == 3){  //id request
+	    			
+	    			myconsole.log("Id Request received");
+	    			sendNewId();
+	    			
+	    		}
+	    		if(data[4] == 18){  //id request
+	    			
+	    		//	myconsole.log("Alive received");
+	    		
+	    			
+	    		}
+	    		
+	    	}*/
+			
+			
+		    	
+		 }  
+		 
 	});
-	
 
+		
 }
-
 	
                    
-exports.start = start;                   
+exports.start = start;       

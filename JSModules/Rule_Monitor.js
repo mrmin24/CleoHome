@@ -6,7 +6,7 @@ var rules = require('../JSModules/Rule_UpdateStates');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 var myconsole = require('../JSModules/myconsole.js');
 
-var intervaltime = 300;
+var intervaltime = 1000;
 
 //var timezone = 2;
 
@@ -86,9 +86,9 @@ function ruleMonitor(){
     
      db.getdata('Rules_toCheck',{Select: 'Id,Item_Id,State',whereClause:'id > ' + latestId },function(err,data_receive){
                    
-         if(data_receive){
+         if(data_receive[0]){
                
-             //  myconsole.log("ruleMON: " + data_receive);
+              myconsole.log("ruleMON: " + latestId + " " + data_receive[0][0]);
                
               
                for(var i = 0;i < data_receive.length;i++){
