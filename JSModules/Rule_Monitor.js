@@ -51,14 +51,16 @@ function start() {
     //myconsole.log(debug);
     myconsole.log("Rule Monitor started");
    
+    clearRules();
    
   
 	
 	if(io)
-	{ myconsole.log('RuleMonitor Module Listening on ' + '44603');}
+	{ 
+	    myconsole.log('RuleMonitor Module Listening on ' + '44603');}
 	
 	
-	io.sockets.on('connection', function(socket){
+	    io.sockets.on('connection', function(socket){
 	    myconsole.log('Client connected to ruleMonitor');
 	  
 	  
@@ -155,7 +157,18 @@ function ruleMonitor(){
        
 }
                    
- 
+function clearRules(){
+    
+     myconsole.log("clearing old rules");
+     db.deletedata('Rules_toCheck',{whereClause:'id > 0' },function(err,result){
+                   
+                   
+      if(err){
+          myconsole.log(err);
+      } 
+   });
+     
+}
 
 function sendPanic(){
     alarmsocket.emit('panic',function(){

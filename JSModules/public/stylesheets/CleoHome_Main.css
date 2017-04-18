@@ -109,4 +109,28 @@ th {
 }
 
 
-#screensaver { position: absolute; width: 100%; height:100%; left:0px; top: 0px; display: none; z-index:9999;
+#screensaver { position: absolute; width: 100%; height:100%; left:0px; top: 0px; display: none; z-index:9999}
+
+
+.panel-custom-red {
+    border-color: #d9534f;
+}
+
+.panel-custom-red > .panel-heading {
+    background: #d9534f; 
+    color: #ffffff;
+    border-color: #d9534f;
+}
+
+
+
+
+.panel-custom-green {
+    border-color: #5cb85c;
+}
+
+.panel-custom-green > .panel-heading {
+    background: #5cb85c; 
+    color: #ffffff;
+    border-color: #5cb85c;
+}

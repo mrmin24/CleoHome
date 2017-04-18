@@ -21,12 +21,13 @@ timer = setTimeout(function() {
     var Alarm = require('../AlarmProxy/Alarm_Module.js');
     var mqtt = require('./MQTTParse.js');
     var mySensor = require('./mySensorsParse.js');
-    var ESP8266 = require('./ESP8266Parse.js');
+    //var ESP8266 = require('./ESP8266Parse.js');
     var Suncalc = require('./SunCalc.js');
     var Time = require('./timeUpdate');
     var Weather = require('./weatherUpdate');
-    var Health = require('./health.js');
     var ruleMon = require('./Rule_Monitor.js');
+    var Health = require('./health.js');
+    
   //  var ping = require('./ping.js');
  //  var Rules = require('./Rule_Evaluate.js');
     

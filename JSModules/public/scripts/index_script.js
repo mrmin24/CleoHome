@@ -20,12 +20,13 @@
     var config;
     var selectedRow;
     var selectedRuleRow;
-     var tabData;
-     var distinct2 = [];
+    var tabData;
+    var distinct2 = [];
   // var noSleep = new NoSleep();
    const Last_Seen_Error = 601000;
    const heartBeatinterval = 30;
-   
+   var checkNodeStatusInterval = 60000;
+   var selectedTab;
     
   var Items = null;
   
@@ -34,9 +35,17 @@
     setUpDropdowns();
    
    
-   
-   
-   
+   setInterval(function(){ 
+       
+       
+       if(selectedTab == "Nodes"){
+           
+           socket.emit("getNodesStatus",function(){});
+          // console.log("get node status");
+       }
+       
+       
+   }, checkNodeStatusInterval);
     
     
     
@@ -123,7 +132,8 @@
         
          var unique = {};
          var container = [];
-         
+         selectedTab = tab;
+         console.log("Active tab = " + selectedTab);
          
          for( var i in tabData ){
              
@@ -271,6 +281,7 @@
           
            $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
          socket.emit("getNodesStatus",function(){});
+         selectedTab = "Nodes";
          
          
          return;
@@ -842,6 +853,9 @@
         selectedRuleRow.remove();
         
     });
+    
+    
+    
      
      socket.on('lastAlarmEvents',function(data){
          
@@ -1035,29 +1049,77 @@
          var time = new Date().getTime() - data['Current_State'];
           lastseen = (time/1000/60).toString();
           lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
-         //console.log("nodestatus");
+         console.log("Node Update " +data['Device'] + " " + data['Status']);
          
-         if ( !$('#node'+data['Id'] ).length ){
+         if ( !$('#node'+data['Node_Port'] ).length ){
            //  console.log(data['Id']);
-            addNodes(data['Id'],data['Device'],data['Current_State']); 
+            addNodes(data['Id'],data['Device'],data['Current_State'],data['Status'],data['Node_Port'],data['IPAddress'],data['Vcc'],data['RSSI'],data['Uptime']); 
              
          }
          
-         if(time > Last_Seen_Error)
+         if( data['Status'] == 'offline')
         {
          
-         $('#node'+data['Id']).removeClass('btn btn-success').addClass('btn btn-danger');
-        }else
+         $('#node'+data['Node_Port']).removeClass('panel panel-custom-green').addClass('panel panel-custom-red');
+         
+         
+         var newHtml = '<div class="panel-heading"> '+ data['Device'] + ' (' + data['Node_Port'] + ') </div><div class="panel-body"><strong>IP Address:</strong> N/A</br><strong>Vcc:</strong> N/A</br><strong>RSSI:</strong> N/A</br><strong>UPTime:</strong> N/A</br><strong>Last Seen: </strong>'+lastseen+'</div>';
+         
+         
+        }
+        
+        if(data['Status'] == 'online')
         {
-         $('#node'+data['Id']).removeClass("btn btn-danger").addClass('btn btn-success ');
+         $('#node'+data['Node_Port']).removeClass("panel panel-custom-red").addClass('panel panel-custom-green ');
+         
+         var newHtml = '<div class="panel-heading"> '+ data['Device'] + ' ('+ data['Node_Port'] +')</div><div class="panel-body"><strong>IP Address:</strong> '+ data['IPAddress'] +"</br><strong>Vcc:</strong> " + data['Vcc'] + "</br><strong>RSSI:</strong> " + data['RSSI'] + "</br><strong>UPTime:</strong> " + data['Uptime']  +'</br><strong>Last Seen: </strong>'+lastseen+'</div> ';
         }
         
         
-        $('#nodebadge'+data['Id']).html( lastseen);
+         if ( $('#node'+data['Node_Port'] ).length ){
+             console.log("set " + '#node'+data['Node_Port'])
+           var radioFragment = document.getElementById('node'+data['Node_Port']);
+            radioFragment.innerHTML = newHtml;
+             
+         }
+        
+        
+        //$('#nodebadge'+data['Id']).html( lastseen);
         
         
         
      });
+     
+     
+     socket.on('newNode', function(Id,Ip,oldId) {
+         console.log("New Id requisted for node " + Ip);
+         console.log("New Id requisted for node " + oldId);
+        
+        $('#nodeID').val(Id); 
+        $('#IPAddress').val(Ip); 
+        $('#oldNodeId').val(oldId); 
+        
+        $('#addNodeModal').modal('show');
+        
+        
+        
+     });
+     
+     /* socket.on('nodeStatusReport', function(Id,Ip) {
+         console.log("Node Status " + Id);
+       
+        $('#nodeID').val(Id); 
+        $('#IPAddress').val(Ip); 
+        $('#oldNodeId').val(Id); 
+        
+        $('#addNodeModal').modal('show');
+        
+        
+        
+     });*/
+     
+     
+     
     
     socket.on("alarmTrigger",function(data){
        console.log(data);
@@ -1689,7 +1751,87 @@ function customFormat(formatString,date){
     
     
     
+    function savePort(){
+        
+        var id = $("#nodeID").val();
+        var name = $("#nodeName").val();
+        var oldId = $("#oldNodeId").val();
+        
+        var ports = [8,6];
+        var portdata = "";
+        
+        portdata += '{"Node_Id":'+id+',"Node_Name":"'+name+'","Node_Old_Id":"'+oldId+'"';
+        
+        for(var i = 0;i<8;i++){
+           portdata += ",";
+          
+          
+            ports[i,0] = $("#port"+i+"Name").val();
+            ports[i,1] = $("input[name=port"+i+"]:checked").val();
+            ports[i,2] = document.getElementById("port"+i+"Toggle").checked ? 1:0;
+            ports[i,3] = $("#port"+i+"ToggleValue").val();
+            ports[i,4] = document.getElementById("port"+i+"Default").checked? 1:0;
+            ports[i,5] = document.getElementById("port"+i+"Enable").checked? 0:1;
+            ports[i,6] = document.getElementById("port"+i+"OnValue").checked? 0:1;
+            ports[i,7] = document.getElementById("port"+i+"Remember").checked? 1:0;
+            ports[i,8] = $("#portNum"+i).val();
+           
+          
+           portdata += '"Node_Port'+i+'":"'+ports[i,8]+'","Item_Name'+i+'":"'+ports[i,0]+'","Item_Port_Type'+i+'":'+ports[i,1]+',"Item_Toggle'+i+'":'+ports[i,2]+',"Item_Toggle_Val'+i+'":"'+ports[i,3]+'","Item_Default'+i+'":'+ports[i,4]+',"Item_Enable'+i+'":'+ports[i,5]+',"Node_Child'+i+'":'+i+',"Item_On_Value'+i+'":'+ports[i,6]+',"Item_Remember'+i+'":'+ports[i,7];
+            
+            
+            //console.log(ports[i,0] + " " + ports[i,1] + " " + ports[i,2] + " " + ports[i,3] + " " + ports[i,4] + " " + ports[i,5] );
+        }
+        
+         portdata += "}";
+         console.log(portdata);
+        //{Item_Name:data['port'+i+'Name'],Item_Port_Type:data['port'+i+'Type'],Node_Id:data['nodeID'],Node_Port:i}
     
+        
+        
+       /* var port0Name =$("#port0Name").val(); 
+        var port1Name =$("#port1Name").val(); 
+        var port2Name =$("#port2Name").val(); 
+        var port3Name =$("#port3Name").val(); 
+        var port4Name =$("#port4Name").val(); 
+        var port5Name =$("#port5Name").val(); 
+        var port6Name =$("#port6Name").val(); 
+        var port7Name =$("#port7Name").val(); 
+        
+       
+        var port0Type =$("input[name=port0]:checked").val();
+        var port1Type =$("input[name=port1]:checked").val();
+        var port2Type =$("input[name=port2]:checked").val();
+        var port3Type =$("input[name=port3]:checked").val();
+        var port4Type =$("input[name=port4]:checked").val();
+        var port5Type =$("input[name=port5]:checked").val();
+        var port6Type =$("input[name=port6]:checked").val();
+        var port7Type =$("input[name=port7]:checked").val();
+        
+        
+       
+       
+        var nodeparams = {"nodeID":id,"nodeName":name, "port0Name":port0Name,"port1Name":port1Name, "port2Name":port2Name, "port3Name":port3Name, "port4Name":port4Name, "port5Name":port5Name, "port6Name":port6Name, "port7Name":port7Name,  "port0Type":port0Type, 
+           "port1Type":port1Type, "port2Type":port2Type, "port3Type":port3Type, "port4Type":port4Type, "port5Type":port5Type, "port6Type":port6Type, "port7Type":port7Type};
+        */
+       
+        socket.emit('saveNode',portdata,function(err,result){
+            
+            if(err){
+                console.log(err);
+            }else if(result){
+                
+                console.log(result);
+                
+            }
+            
+            
+            
+        });
+        
+        
+        
+    }
     
     //LOCAL FUNCTION START///////////////////////////////////////////////////////////////////////////////////////////////////////
     function updateConfigPage(){
@@ -2008,22 +2150,25 @@ function customFormat(formatString,date){
     
     
     
-    function addNodes(id,device,state/*,NodeID,NodePort*/){
+    function addNodes(id,device,state,status,port,IP,Vcc,RSSI,Uptime/*,NodeID,NodePort*/){
        // console.log(new Date().getTime() - state);
       //  console.log( state);
+      
       var time = new Date().getTime() - state;
       lastseen = (time/1000/60).toString();
       lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
-        if(time > Last_Seen_Error)
+        if((time > Last_Seen_Error && status == 'offline') || status == 'offline'  )
         {
           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" style="white-space: normal" >'+ device +'    ' + '<span class="badge" id = "nodebadge'+id+'">'+ lastseen + ' </span> </button></span>';
+          // var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off" style="white-space: normal" onclick="nodeProperties('+ port +')" >'+ device +'    ' + '<span class="badge" id = "nodebadge'+id+'">'+ lastseen + ' </span> </button></span>';
+        var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><div class="panel panel-custom-red" id="node'+ port +'" ><div class="panel-heading"> '+ device +' ('+ port +') </div><div class="panel-body"><strong>IP Address:</strong> N/A</br><strong>Vcc:</strong> N/A</br><strong>RSSI:</strong> N/A</br><strong>UPTime:</strong> N/A</br><strong>RSSI:</strong> N/A</br><strong>Last Seen: </strong>'+lastseen+'</div> </div></span>';
+            
         }
-        else
+        else if(status == 'online' || time <= Last_Seen_Error)
         {
             
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off"  style="white-space: normal" >'+ device +'    '+ '<span class="badge" id = "nodebadge'+id+'">'+ lastseen + ' </span> </button></span>';
-            
+         //   var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off"  style="white-space: normal" onclick="nodeProperties('+ port +')" >'+ device +'    '+ '<span class="badge" id = "nodebadge'+id+'">'+ lastseen + ' </span> </button></span>';
+            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><div class="panel panel-custom-green" id="node'+ port +'"><div class="panel-heading"> '+ device +' ('+ port +') </div><div class="panel-body"><strong>IP Address:</strong> '+ IP +"</br><strong>Vcc:</strong> " + Vcc + "</br><strong>RSSI:</strong> " + RSSI + "</br><strong>UPTime:</strong> " + Uptime  +'</br><strong>Last Seen: </strong>'+lastseen+'</div> </div></span>';
            // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
         }
         
@@ -2102,6 +2247,19 @@ function customFormat(formatString,date){
     }
     
     
+    function nodeProperties(node){
+        
+        
+        
+        console.log(node);    
+        
+       socket.emit("getNodesStatus",node,function(){});
+        
+        
+        
+    
+    }
+    
     
     
     
@@ -2167,11 +2325,11 @@ function customFormat(formatString,date){
     /**************************************************************************************************/
     function test(){
        // $( "<div>hello!</div>" ).dialog();
-        socket.emit('test',function(err,ack){                  //testing purposes only
-         return    
-        });
-        
-        }
+        //socket.emit('test',function(err,ack){                  //testing purposes only
+       //  return    
+        //});
+        $('#addNodeModal').modal('show');
+    }
         
     /*****************************************************************************************************/
     

@@ -3,7 +3,7 @@ var db = require('./dbhandler');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 var myconsole = require('./myconsole.js');
 var intervaltime = 1 * 60 * 1000;
-var healthCheckInterval = 60 ;
+var healthCheckInterval = 2 ;
 var now = Date.now();  
 var exclude = [];
 
@@ -29,24 +29,25 @@ function start() {
 
 function checkNodeHealth(){
     
-    data = {'Select':'Name,Last_Seen','whereClause':'Id > 0'};
+    data = {'Select':'Name,Last_Seen,Status','whereClause':'Id > 0'};
         
         db.getdata('Nodes',data,function(err,result){
            
            if(err){
                
                myconsole.log(err);
+               
            }else if(result){
                  
                  
-                for(var i = 0;i<result.length;i++){
+                for(var i = 0; i< result.length;i++){
                      
                       var time = new Date().getTime() - result[i].Last_Seen;
                       lastseen = (time/1000/60).toString();
                       lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
                      
                      
-                   if(lastseen >= healthCheckInterval){
+                   if( result[i].Status == "offline"){
                      // myconsole.log(lastseen);
                        //myconsole.log("Cleopatra Health: " + result[i].Name + " node offline");
                       if(exclude.indexOf(result[i].Name) == -1){
@@ -56,7 +57,7 @@ function checkNodeHealth(){
                      
                    }
                    
-                    if(lastseen < healthCheckInterval){
+                    if( result[i].Status == "online"){
                      // myconsole.log(lastseen);
                        //myconsole.log("Cleopatra Health: " + result[i].Name + " node offline");
                       if(exclude.indexOf(result[i].Name) != -1){

@@ -879,6 +879,741 @@
                 </div> <!-- event panel  -->
                 
                
+               
+               <!--confirm modal-->
+				<div class="modal fade" id="addNodeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+				    <div class="modal-dialog">
+				        <div class="modal-content">
+
+				            <div class="modal-header">
+				                <h4>Add a new node</h4>
+				            </div>
+				            <div class="modal-body">				             
+								<p>Please select the node id and port configuration required</p>
+								<div class="input-group">
+                                  <span class="input-group-addon" id="basic-addon1">ID:</span>
+                                  <input type="text" class="form-control" placeholder="Node ID" aria-describedby="basic-addon1" id="nodeID">
+                                </div>
+                                <div class="input-group">
+                                  <span class="input-group-addon" id="basic-addon1">Name:</span>
+                                  <input type="text" class="form-control" placeholder="Node Name" aria-describedby="basic-addon1" id="nodeName">
+                                </div>
+                                <div class="input-group">
+                                  <span class="input-group-addon" id="basic-addon1">IP Address:</span>
+                                  
+                                  <input type="text" class="form-control" placeholder="0.0.0.0" aria-describedby="basic-addon1" id="IPAddress" readonly>
+                                  
+                                </div>
+                                
+                                <input type="text"  placeholder="0" aria-describedby="basic-addon1" id="oldNodeId"   >
+                                </br>
+                                </br>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          <span class="input-group-addon" id="basic-addon1">Port 0:</span>
+                                          <input type="text" class="form-control" placeholder="Item Name" aria-describedby="basic-addon1" id="port0Name">
+                                          </br>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port0" value = "1" aria-label="..." >
+                                            Switch
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port0" value = "2" aria-label="...">
+                                            Trigger
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port0" value = "3" aria-label="...">
+                                            Sensor
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port0" value = "4" aria-label="...">
+                                            Dimmer
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port0" value = "5" aria-label="...">
+                                            Spare
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port0" value = "0" aria-label="..." checked>
+                                            None
+                                          </span>
+                                        </div><!-- /input-group -->
+                                      </div><!-- /.col-lg-6 -->
+                                      <div class="col-lg-12">
+                                      <div class="input-group" >
+                                          <span class="input-group-addon" id="basic-addon1">Port:</span>
+                                          <input type="text" class="form-control" placeholder="Port Number" aria-describedby="basic-addon1" id="portNum0">
+                                        </div>
+                                      </div>
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <input type="checkbox" id="port0Toggle"  aria-label="..." >
+                                                isToggle
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Toggle Time (s)" aria-describedby="basic-addon1" id="port0ToggleValue">
+                                            
+                                            
+                                            
+                                        </div>
+                                     </div> 
+                                        
+                                        
+                                        <div class="col-xs-12">
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port0Default"  aria-label="..." >
+                                                    Default On
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port0Enable"  aria-label="..." >
+                                                    Normally On
+                                                </span>
+                                                
+                                                <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port0OnValue"  aria-label="..." >
+                                                    On Value Low
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port0Remember"  aria-label="..." >
+                                                    Remember Last
+                                                </span>
+                                            
+                                      </div> 
+                                      
+                                     
+                                       
+                                     </br>
+                                    </br> 
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                          <span class="input-group-addon" id="basic-addon1">Port 1:</span>
+                                          <input type="text" class="form-control" placeholder="Item Name" aria-describedby="basic-addon1" id="port1Name">
+                                          </br>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port1" value = "1" aria-label="..." >
+                                            Switch
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port1" value = "2" aria-label="...">
+                                            Trigger
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port1" value = "3" aria-label="...">
+                                            Sensor
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port1" value = "4" aria-label="...">
+                                            Dimmer
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port1" value = "5" aria-label="...">
+                                            Spare
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port1" value = "0" aria-label="..." checked>
+                                            None
+                                          </span>
+                                        </div><!-- /input-group -->
+                                      </div><!-- /.col-lg-6 -->
+                                      <div class="col-lg-12">
+                                      <div class="input-group" >
+                                          <span class="input-group-addon" id="basic-addon1">Port:</span>
+                                          <input type="text" class="form-control" placeholder="Port Number" aria-describedby="basic-addon1" id="portNum1">
+                                        </div>
+                                      </div>
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <input type="checkbox" id="port1Toggle"  aria-label="..." >
+                                                isToggle
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Toggle Time (s)" aria-describedby="basic-addon1" id="port1ToggleValue">
+                                            
+                                            
+                                            
+                                        </div>
+                                     </div> 
+                                        <div class="col-xs-12">
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port1Default"  aria-label="..." >
+                                                    Default On
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port1Enable"  aria-label="..." >
+                                                    Normally On
+                                                </span>
+                                                
+                                                
+                                                 <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port1OnValue"  aria-label="..." >
+                                                    On Value Low
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port1Remember"  aria-label="..." >
+                                                    Remember Last
+                                                </span>
+                                            
+                                      </div> 
+                                      
+                                      
+                                     </br>
+                                    </br>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          <span class="input-group-addon" id="basic-addon1">Port 2:</span>
+                                          <input type="text" class="form-control" placeholder="Item Name" aria-describedby="basic-addon1" id="port2Name">
+                                          </br>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port2" value = "1" aria-label="..." >
+                                            Switch
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port2" value = "2" aria-label="...">
+                                            Trigger
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port2" value = "3" aria-label="...">
+                                            Sensor
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port2" value = "4" aria-label="...">
+                                            Dimmer
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port2" value = "5" aria-label="...">
+                                            Spare
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port2" value = "0" aria-label="..." checked>
+                                            None
+                                          </span>
+                                        </div><!-- /input-group -->
+                                      </div><!-- /.col-lg-6 -->
+                                      <div class="col-lg-12">
+                                      <div class="input-group" >
+                                          <span class="input-group-addon" id="basic-addon1">Port:</span>
+                                          <input type="text" class="form-control" placeholder="Port Number" aria-describedby="basic-addon1" id="portNum2">
+                                        </div>
+                                      </div>
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <input type="checkbox" id="port2Toggle"  aria-label="..." >
+                                                isToggle
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Toggle Time (s)" aria-describedby="basic-addon1" id="port2ToggleValue">
+                                            
+                                            
+                                            
+                                        </div>
+                                     </div> 
+                                        <div class="col-xs-12">
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port2Default"  aria-label="..." >
+                                                    Default On
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port2Enable"  aria-label="..." >
+                                                    Normally On
+                                                </span>
+                                            
+                                             <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port2OnValue"  aria-label="..." >
+                                                    On Value Low
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port2Remember"  aria-label="..." >
+                                                    Remember Last
+                                                </span>
+                                                
+                                                
+                                      </div> 
+                                      
+                                      
+                                     </br>
+                                    </br>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          <span class="input-group-addon" id="basic-addon1">Port 3:</span>
+                                          <input type="text" class="form-control" placeholder="Item Name" aria-describedby="basic-addon1" id="port3Name">
+                                          </br>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port3" value = "1" aria-label="..." >
+                                            Switch
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port3" value = "2" aria-label="...">
+                                            Trigger
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port3" value = "3" aria-label="...">
+                                            Sensor
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port3" value = "4" aria-label="...">
+                                            Dimmer
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port3" value = "5" aria-label="...">
+                                            Spare
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port3" value = "0" aria-label="..." checked>
+                                            None
+                                          </span>
+                                        </div><!-- /input-group -->
+                                      </div><!-- /.col-lg-6 -->
+                                      <div class="col-lg-12">
+                                      <div class="input-group" >
+                                          <span class="input-group-addon" id="basic-addon1">Port:</span>
+                                          <input type="text" class="form-control" placeholder="Port Number" aria-describedby="basic-addon1" id="portNum3">
+                                        </div>
+                                      </div>
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <input type="checkbox" id="port3Toggle"  aria-label="..." >
+                                                isToggle
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Toggle Time (s)" aria-describedby="basic-addon1" id="port3ToggleValue">
+                                            
+                                            
+                                            
+                                        </div>
+                                     </div> 
+                                        <div class="col-xs-12">
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port3Default"  aria-label="..." >
+                                                    Default On
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port3Enable"  aria-label="..." >
+                                                    Normally On
+                                                </span>
+                                                
+                                                
+                                                
+                                                 <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port3OnValue"  aria-label="..." >
+                                                    On Value Low
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port3Remember"  aria-label="..." >
+                                                    Remember Last
+                                                </span>
+                                            
+                                      </div> 
+                                      
+                                     </br>
+                                    </br>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          <span class="input-group-addon" id="basic-addon1">Port 4:</span>
+                                          <input type="text" class="form-control" placeholder="Item Name" aria-describedby="basic-addon1" id="port4Name">
+                                          </br>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port4" value = "1" aria-label="..." >
+                                            Switch
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port4" value = "2" aria-label="...">
+                                            Trigger
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port4" value = "3" aria-label="...">
+                                            Sensor
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port4" value = "4" aria-label="...">
+                                            Dimmer
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port4" value = "5" aria-label="...">
+                                            Spare
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port4" value = "0" aria-label="..." checked>
+                                            None
+                                          </span>
+                                        </div><!-- /input-group -->
+                                      </div><!-- /.col-lg-6 -->
+                                      <div class="col-lg-12">
+                                      <div class="input-group" >
+                                          <span class="input-group-addon" id="basic-addon1">Port:</span>
+                                          <input type="text" class="form-control" placeholder="Port Number" aria-describedby="basic-addon1" id="portNum4">
+                                        </div>
+                                      </div>
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <input type="checkbox" id="port4Toggle"  aria-label="..." >
+                                                isToggle
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Toggle Time (s)" aria-describedby="basic-addon1" id="port4ToggleValue">
+                                            
+                                            
+                                            
+                                        </div>
+                                     </div> 
+                                        <div class="col-xs-12">
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port4Default"  aria-label="..." >
+                                                    Default On
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port4Enable"  aria-label="..." >
+                                                    Normally On
+                                                </span>
+                                                
+                                                
+                                                 <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port4OnValue"  aria-label="..." >
+                                                    On Value Low
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port4Remember"  aria-label="..." >
+                                                    Remember Last
+                                                </span>
+                                                
+                                                
+                                            
+                                      </div> 
+                                      
+                                      
+                                     </br>
+                                    </br>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          <span class="input-group-addon" id="basic-addon1">Port 5:</span>
+                                          <input type="text" class="form-control" placeholder="Item Name" aria-describedby="basic-addon1" id="port5Name">
+                                          </br>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port5" value = "1" aria-label="..." >
+                                            Switch
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port5" value = "2" aria-label="...">
+                                            Trigger
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port5" value = "3" aria-label="...">
+                                            Sensor
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port5" value = "4" aria-label="...">
+                                            Dimmer
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port5" value = "5" aria-label="...">
+                                            Spare
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port5" value = "0" aria-label="..." checked>
+                                            None
+                                          </span>
+                                        </div><!-- /input-group -->
+                                      </div><!-- /.col-lg-6 -->
+                                      <div class="col-lg-12">
+                                      <div class="input-group" >
+                                          <span class="input-group-addon" id="basic-addon1">Port:</span>
+                                          <input type="text" class="form-control" placeholder="Port Number" aria-describedby="basic-addon1" id="portNum5">
+                                        </div>
+                                      </div>
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <input type="checkbox" id="port5Toggle"  aria-label="..." >
+                                                isToggle
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Toggle Time (s)" aria-describedby="basic-addon1" id="port5ToggleValue">
+                                            
+                                            
+                                            
+                                        </div>
+                                     </div> 
+                                        <div class="col-xs-12">
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port5Default"  aria-label="..." >
+                                                    Default On
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port5Enable"  aria-label="..." >
+                                                    Normally On
+                                                </span>
+                                                
+                                                
+                                                
+                                                 <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port5OnValue"  aria-label="..." >
+                                                    On Value Low
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port5Remember"  aria-label="..." >
+                                                    Remember Last
+                                                </span>
+                                            
+                                      </div> 
+                                      
+                                      
+                                     </br>
+                                    </br>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          <span class="input-group-addon" id="basic-addon1">Port 6:</span>
+                                          <input type="text" class="form-control" placeholder="Item Name" aria-describedby="basic-addon1" id="port6Name">
+                                          </br>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port6" value = "1" aria-label="..." >
+                                            Switch
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port6" value = "2" aria-label="...">
+                                            Trigger
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port6" value = "3" aria-label="...">
+                                            Sensor
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port6" value = "4" aria-label="...">
+                                            Dimmer
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port6" value = "5" aria-label="...">
+                                            Spare
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port6" value = "0" aria-label="..." checked>
+                                            None
+                                          </span>
+                                        </div><!-- /input-group -->
+                                      </div><!-- /.col-lg-6 -->
+                                      <div class="col-lg-12">
+                                      <div class="input-group" >
+                                          <span class="input-group-addon" id="basic-addon1">Port:</span>
+                                          <input type="text" class="form-control" placeholder="Port Number" aria-describedby="basic-addon1" id="portNum6">
+                                        </div>
+                                      </div>
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <input type="checkbox" id="port6Toggle"  aria-label="..." >
+                                                isToggle
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Toggle Time (s)" aria-describedby="basic-addon1" id="port6ToggleValue">
+                                            
+                                            
+                                            
+                                        </div>
+                                     </div> 
+                                        <div class="col-xs-12">
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port6Default"  aria-label="..." >
+                                                    Default On
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port6Enable"  aria-label="..." >
+                                                    Normally On
+                                                </span>
+                                                
+                                                
+                                                
+                                                 <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port6OnValue"  aria-label="..." >
+                                                    On Value Low
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port6Remember"  aria-label="..." >
+                                                    Remember Last
+                                                </span>
+                                            
+                                      </div> 
+                                      
+                                      
+                                     </br>
+                                    </br>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          <span class="input-group-addon" id="basic-addon1">Port 7:</span>
+                                          <input type="text" class="form-control" placeholder="Item Name" aria-describedby="basic-addon1" id="port7Name">
+                                          </br>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="input-group">
+                                          
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port7" value = "1" aria-label="..." >
+                                            Switch
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port7" value = "2" aria-label="...">
+                                            Trigger
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port7" value = "3" aria-label="...">
+                                            Sensor
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port7" value = "4" aria-label="...">
+                                            Dimmer
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port7" value = "5" aria-label="...">
+                                            Spare
+                                          </span>
+                                          <span class="input-group-addon">
+                                            <input type="radio" name="port7" value = "0" aria-label="..." checked>
+                                            None
+                                          </span>
+                                        </div><!-- /input-group -->
+                                      </div><!-- /.col-lg-6 -->
+                                      <div class="col-lg-12">
+                                      <div class="input-group" >
+                                          <span class="input-group-addon" id="basic-addon1">Port:</span>
+                                          <input type="text" class="form-control" placeholder="Port Number" aria-describedby="basic-addon1" id="portNum7">
+                                        </div>
+                                      </div>
+                                      <div class="col-lg-12">
+                                        <div class="input-group">
+                                            <span class="input-group-addon" >
+                                                <input type="checkbox" id="port7Toggle"  aria-label="..." >
+                                                isToggle
+                                            </span>
+                                            <input type="text" class="form-control" placeholder="Toggle Time (s)" aria-describedby="basic-addon1" id="port7ToggleValue">
+                                            
+                                            
+                                            
+                                        </div>
+                                     </div> 
+                                        <div class="col-xs-12">
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port7Default"  aria-label="..." >
+                                                    Default On
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port7Enable"  aria-label="..." >
+                                                    Normally On
+                                                </span>
+                                                
+                                                
+                                                 <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port7OnValue"  aria-label="..." >
+                                                    On Value Low
+                                                </span>
+                                            
+                                        
+                                            
+                                              <span class="input-group-addon" >
+                                                    <input type="checkbox" id="port7Remember"  aria-label="..." >
+                                                    Remember Last
+                                                </span>
+                                            
+                                      </div> 
+                                     </br>
+                                    </br>
+                                </br> 
+                                
+				            </div>
+				            <div class="modal-footer">
+				                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+				                <button type="button" id="submitButton" class="btn btn-success" onclick="savePort()" data-dismiss="modal">Save</button>
+				            </div>				     
+				        </div>
+				    </div>
+				</div><!--  end confirm modal -->
+               
+               
+               
+               
                     
             </div> <!--row-->
         

@@ -102,42 +102,18 @@ require('./routes/routes.js')(app, passport); // load our routes and pass in our
 var io = require('socket.io')(http);
 
 http.listen(port);
-
+ var oldip = externalip;  
 
 
 function start() {
     //log(debug);
-    var oldip = externalip;    
-
+     
+    updateIP();
     var nodeinterval = setInterval(updateNodeStatus,nodeCheckInterval);
     var dnsinterval = setInterval(function() {
         
    
-    getip(function(ip){
-        
-        if(ip){
-        externalip = ip;
-        
-        	if(oldip != externalip)
-        	{
-             if(configure2.server[0].dnsupdate[0] == 'true')  {
-    		    updatedns(ip,function(){});
-    		    updatednshome(ip,function(){});  
-             }
-    		 
-    		 if(configure2.server[0].dnsemail[0] == 'true')  
-    		    sendemail("Your current IP is http://" + ip);   
-    		    
-    		 if(configure2.server[0].dnsproxy[0] == 'true')  
-    		   updatednsproxy(function(){});   
-		       
-		      oldip = externalip;   
-        	
-		    }
-	
-	}
-    
-});
+    updateIP();
         
      
     
@@ -211,6 +187,14 @@ io.on('connection', function(socket){
       
       sendusers();
       
+  });
+  
+  socket.on('saveNode',function(data){
+    
+     saveNode(data);
+   
+   
+   
   });
   
   
@@ -370,12 +354,12 @@ io.on('connection', function(socket){
             if(ip){
                
     		    updatedns(ip,function(){});
-    		  updatednshome(ip,function(){});
+    		    updatednshome(ip,function(){});
     		 
     		    sendemail("Your current IP is http://" + ip);   
     		    
     		
-    		   updatednsproxy(function(){});   
+    		    updatednsproxy(function(){});   
     		  
         	}
             
@@ -406,9 +390,10 @@ io.on('connection', function(socket){
    
     });
     
-    socket.on("getNodesStatus",function(){
-       // myconsole.log("test");
-        updateNodeStatus();
+    socket.on("getNodesStatus",function(node){
+        myconsole.log("test");
+        
+        getNodeStatus();
     });
     
     socket.on('deviceSwitch',function(Id){
@@ -427,7 +412,7 @@ io.on('connection', function(socket){
           	    {
                  mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
                  MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
-                 //myconsole.log('deviceSwitch2');
+                 myconsole.log('deviceSwitch2');
           	    }
             }else
             {    if(data_receive[0].Item_Type == Virtual_Item_Type || data_receive[0].Item_Type == Virtual_Alarm_Item_Type)
@@ -437,7 +422,7 @@ io.on('connection', function(socket){
       	        {
                     mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
                     MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
-                   // myconsole.log('deviceSwitch3');
+                    myconsole.log('deviceSwitch3');
       	        }
             } 
       	  }
@@ -687,6 +672,34 @@ io.on('connection', function(socket){
 
 }
 
+
+
+function saveNode(data){
+ 
+  
+ var nodedata = JSON.parse(data);
+ 
+ //myconsole.log("nodedata: " + nodedata['Item_Name0']);
+ 
+ 
+ db.insert('Nodes',{Node_Port:nodedata['Node_Id'],Name:nodedata['Node_Name']});
+ 
+ for(var i = 0;i<8;i++){
+  
+  if(nodedata['Item_Name'+i] && nodedata['Item_Port_Type'+i] > 0)
+  {
+  //myconsole.log(nodedata['Item_Port_Type'+i]);
+   db.insert('Items',{Node_Port:nodedata['Node_Port'+i],Item_Name:nodedata['Item_Name'+i],Item_Port_Type:nodedata['Item_Port_Type'+i],Node_Id:nodedata['Node_Id'],Node_Child:nodedata['Node_Child'+i],Item_Default_Value:nodedata['Item_Default'+i],Item_Enabled_Value:nodedata['Item_Enable'+i],Item_Is_Toggle:nodedata['Item_Toggle'+i],Item_Toggle_Delay:nodedata['Item_Toggle_Val'+i]});
+  }
+  
+ }
+ 
+ MQTTsocket.emit('newNode',nodedata);
+
+ //'"Item_Name'+i+'":"'+ports[i,0]+'","Item_Port_Type'+i+'":'+ports[i,1]+',"Item_Toggle'+i+'":'+ports[i,2]+',"Item_Toggle_Val'+i+'":"'+ports[i,3]+'","Item_Default'+i+'":'+ports[i,4]+',"Item_Enable'+i+'":'+ports[i,5]+',"Node_Id'+i+'":'+id+',"Node_Name'+i+'":"'+name+'","Node_Port'+i+'":'+i
+ 
+ 
+}
 
 function getLatestVirtualStatus(){
  myconsole.log('Get latest zone');
@@ -984,9 +997,25 @@ mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
 });
 
 
+
+
+
+MQTTsocket.on('newNode',function(newNodeId,newNodeIP,oldId){
+ 
+  myconsole.log(newNodeIP);
+  io.emit('newNode',newNodeId,newNodeIP,oldId);
+ 
+ 
+ 
+ 
+});
+
+
 MQTTsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
     myconsole.log("Device Status Change4");
+   // State = parseInt(State);
     myconsole.log(State);
+     
   // var evaluate = require('../JSModules/Rule_Items_Evaluate');
    if(State > 0){State = 1;}
    
@@ -1143,20 +1172,20 @@ mySensorsocket.on('nodeAlive',function(NodeID){
              }
             
     }); 
-    updateNodeStatus();
+    updateNodeStatus(NodeID);
     
 });
 
 
 MQTTsocket.on('nodeAlive',function(NodeID,Status){
-    var timenow = new Date().getTime();
-     data = {Set:'Status',Current_State:Status,Where:"Node_Port",Name:NodeID};
+     var timenow = new Date().getTime();
+     data = {Set:'Status',Current_State:Status.toLowerCase(),Where:"Node_Port",Name:NodeID};
      db.update("Nodes",data,function(err,data_receive){
               
               
             
              if(data_receive){
-                // myconsole.log(ID + " " + State);
+                 myconsole.log(NodeID + " " + State);
                  data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
                  db.update("Nodes",data2,function(err2,data_receive2){
                            
@@ -1174,7 +1203,7 @@ MQTTsocket.on('nodeAlive',function(NodeID,Status){
                           }
                          
                  });
-                 
+                 updateNodeStatus(NodeID);
                  
              }else
              {
@@ -1183,10 +1212,34 @@ MQTTsocket.on('nodeAlive',function(NodeID,Status){
              }
             
     }); 
-    updateNodeStatus();
+    
     
 });
 
+
+MQTTsocket.on('updateNodeStatus',function(NodeID){
+   var timenow = new Date().getTime();
+   myconsole.log("MQTT: nodeupdate")
+   data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
+    db.update("Nodes",data2,function(err2,data_receive2){
+              
+              
+            
+             if(data_receive2){
+                // myconsole.log(ID + " " + State);
+                 myconsole.log("Node state updated");
+                 
+                 
+             }else
+             {
+                myconsole.log(err); 
+                 
+             }
+            
+    });
+    updateNodeStatus(NodeID);
+    
+});
 
   
 function sendusers(){
@@ -1393,7 +1446,6 @@ function deleteRule(rule){
 
     });
 }  
-
 
 
 
@@ -2046,7 +2098,7 @@ function getDeviceStatus(sockets){
 
 function getNodeStatus(sockets){
    
-    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
+    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
     if (err) {
     // error handling code goes here
         myconsole.log("ERROR2 : ",err);            
@@ -2059,7 +2111,7 @@ function getNodeStatus(sockets){
           // myconsole.log(data_receive[i]['Item_Name']);  
            // if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
             //{
-                var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node'};
+                var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node',Status:data_receive[i]['Status'],RSSI:data_receive[i]['RSSI'],IPAddress:data_receive[i]['IPAddress'],Vcc:data_receive[i]['Vcc'],Uptime:data_receive[i]['UpTime']};
                
                if(sockets)
                 sockets.emit('NodeStatusEvent',data);
@@ -2079,41 +2131,69 @@ function getNodeStatus(sockets){
    
 });
 
+
+
 return;
 }
 
-function updateNodeStatus(){
+
+
+function updateNodeStatus(node){
    
-    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
-    if (err) {
-    // error handling code goes here
-        myconsole.log("ERROR2 : ",err);            
-    } else {       
-        
-    // code to execute on data retrieval
-   // var device = [1 , 2 , 3 , 4 , 5,6,7,11,15];
-    
-       for(var i in data_receive){
-           //myconsole.log(data_receive[i]['Item_Name']);  
-           // if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
-            //{
-                var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node'};
-               
-                io.emit('NodeStatusEvent',data);
-                
-               
-            
-           // }
-            
-            
-           
+    if(node){
+     
+      
+     
+   
+       
+       myconsole.log(node + " update requested");
+      
+       db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"Node_Port = " + node + " ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
+       
+       if (err) {
+       // error handling code goes here
+           myconsole.log("ERROR4 : " + err);            
+       } else {       
+           myconsole.log("Update Data " + data_receive[0]); 
+            var data = {Id:data_receive[0]['Id'],Device: data_receive[0]['Name'],Current_State: data_receive[0]['Last_Seen'],Node_Port:data_receive[0]['Node_Port'],Item_Type:'Node',Status:data_receive[0]['Status'],RSSI:data_receive[0]['RSSI'],IPAddress:data_receive[0]['IPAddress'],Vcc:data_receive[0]['Vcc'],Uptime:data_receive[0]['UpTime']};
+                  
+            io.emit('NodeStatusEvent',data);
+              
+              
+           // pushOver.push("Cleopatra Health: " + data_receive[0]['Name'] + " node " + data_receive[i]['Status']);
+         
        }
-         
+      
+      });
+    }/*else{
+     
+       myconsole.log("all update requested");
+      
+       db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"Node_Port > 0 ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
+       
+       if (err) {
+       // error handling code goes here
+           myconsole.log("ERROR4 : " + err);            
+       } else {      
         
+        for(var i = 0;i<data_receive.length;i++){
+           myconsole.log("Update Data " + data_receive[0]); 
+            var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node',Status:data_receive[i]['Status'],RSSI:data_receive[i]['RSSI'],IPAddress:data_receive[i]['IPAddress'],Vcc:data_receive[i]['Vcc'],Uptime:data_receive[i]['UpTime']};
+                  
+            io.emit('NodeStatusEvent',data);
+              
+              
+           // pushOver.push("Cleopatra Health: " + data_receive[i]['Name'] + " node " + data_receive[i]['Status']);
+            
+        }
          
-    }
-   
-});
+       }
+      
+      });
+     
+     
+     
+    }*/
        
     
     
@@ -2507,6 +2587,39 @@ function getModeStatus(callback){
                                  
 }
 
+function updateIP(){
+ 
+  getip(function(ip){
+        
+        if(ip){
+        externalip = ip;
+        
+        	if(oldip != externalip)
+        	{
+             if(configure2.server[0].dnsupdate[0] == 'true')  {
+    		    updatedns(ip,function(){});
+    		    updatednshome(ip,function(){});  
+             }
+    		 
+    		 if(configure2.server[0].dnsemail[0] == 'true')  
+    		    sendemail("Your current IP is http://" + ip);   
+    		    
+    		 if(configure2.server[0].dnsproxy[0] == 'true')  
+    		   updatednsproxy(function(){});   
+		       
+		      oldip = externalip;   
+        	
+		    }
+	
+	}
+    
+ });
+
+ 
+ 
+ 
+}
+
 function getip(callback){
    
    require('http').request({
@@ -2539,7 +2652,7 @@ function getip(callback){
 
 function updatedns(ip,callback2){
     
-    var http2 = require('http');
+    var http2 = require('http'), https = require('https');
     var username = configure2.server[0].dnsusername[0];
     var password = configure2.server[0].dnspassword[0];
     var auth = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
@@ -2547,7 +2660,7 @@ function updatedns(ip,callback2){
     //'Host': 'https://ydns.eu/api/v1/update/?host=example.ydns.eu&ip='+ip,
    
     var options = {
-      host: 'ydns.eu',
+      host: 'https://ydns.eu',
       path: '/api/v1/update/?host=cleohome.ydns.eu',//&ip='+ip.substring(0,15),
       port: '80',
       //This is the only line that is new. `headers` is an object with the headers to request
@@ -2559,12 +2672,12 @@ function updatedns(ip,callback2){
   //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		myconsole.log('DNS Update1: ' + chunk);
+    		myconsole.log('DNS Update1 - YDNS: ' + chunk);
   	});
   });
 
 req.on('error', function(e) {
-  myconsole.log('problem with request: ' + e.message);
+  myconsole.log('YDNS: problem with request: ' + e.message);
 });
 
 // write data to request body
@@ -2583,10 +2696,10 @@ function updatednshome(ip,callback2){
     var pass = configure2.server[0].dnspassword2[0];
     //var auth = 'Basic ' + new Buffer(username + ':' + password).toString('base64');
    // var header = { 'Authorization': auth};
-    //'Host': 'https://ydns.eu/api/v1/update/?host=example.ydns.eu&ip='+ip,
+    //curl "http://dyn.example.com:password@dyn.dns.he.net/nic/update?hostname=dyn.example.com&myip=192.168.0.1
   // myconsole.log(pass);
     var options = {
-      host: 'minny.co.za',
+      host: 'http://minny.co.za',
       path: ':' + pass + '@dyn.dns.he.net/nic/update?hostname=minny.co.za&myip=' + ip,//&ip='+ip.substring(0,15),
       port: '80',
       //This is the only line that is new. `headers` is an object with the headers to request
@@ -2598,7 +2711,7 @@ function updatednshome(ip,callback2){
   //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		myconsole.log('DNS Update2: ' + chunk);
+    		myconsole.log('HE DNS Update2: ' + chunk);
   	});
   });
 
@@ -2640,7 +2753,7 @@ function updatednsproxy(callback2){
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
     		//myconsole.log('DNS Proxy Update: ' + chunk);
-    		myconsole.log('DNS Proxy Update: OK');
+    		myconsole.log('Unotelly Update: OK');
   	});
   });
 
