@@ -6,6 +6,7 @@
     const Network_Type = 20;
     const Virtual_Type = 15;
     const Virtual_Alarm_Type = 18;
+     const Device_Type = 2;
     
     var socket = io();
     var eventdroptext = 10;
@@ -1040,27 +1041,31 @@
      // console.log(data);
          
               var newHtml = '';
-              
+              var type = null;
+              if(data.Item_Type == Device_Type || data.Item_Type == Irrigation_Type){ //check if device or not.
+                  type = "device";
+              }
                 if(data.Current_State == 1)
                 {
                   // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
                    if(data.Item_Enabled_Value == 1){
-                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-success btn.lg btn-block " data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
+                       
+                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 '+type+'"><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-success btn.lg btn-block '+type+'" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
                    }
                    else
                    {
-                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-danger btn.lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
+                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 '+type+'" "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-danger btn.lg btn-block '+type+'" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
                    }
                 }else if(data.Current_State == 3)
                 {
                  
-                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-grey btn.lg btn-block " data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
+                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 '+type+'" "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-grey btn.lg btn-block '+type+'" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
                   
                 }
                 else
                 {
                     
-                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id  +'" type="button" class="btn btn-default btn.lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')" ><strong>'+ data.Device +'</strong></button></span>';
+                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id  +'" type="button" class="btn btn-default btn.lg btn-block '+type+'" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')" ><strong>'+ data.Device +'</strong></button></span>';
                 
                    // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
                 }
@@ -2218,7 +2223,10 @@ function customFormat(formatString,date){
                  socket.emit('deviceSwitch',Id,0);
              
             }else{
-                $('#toggleTime').modal('show');
+                if($('#device'+Id).hasClass("device"))
+                    $('#toggleTime').modal('show');
+                else
+                     socket.emit('deviceSwitch',Id,1);
                 // socket.emit('deviceSwitch',Id,1);
                 
             }
