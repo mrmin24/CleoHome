@@ -696,7 +696,7 @@ function start() {
 		    			 		}else{
 		    			 			if(timeOn > 0){
 		    			 				
-		    			 				time = timeOn;
+		    			 				time = timeOn + 100;
 		    			 				
 		    			 			}else{
 		    			 				time = data_receive[0].Item_Toggle_Delay;
