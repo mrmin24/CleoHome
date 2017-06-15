@@ -6,7 +6,7 @@ var myconsole = require('./myconsole.js');
 var intervaltime = 15 * 60 * 1000;
 var rules = require('./Rule_UpdateStates.js');
 
-
+var log = require('./logger.js');
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
@@ -56,11 +56,11 @@ function checkWeather(city){
   	    
   	    chunk = JSON.parse(chunk)
         if(chunk['cod'] == 200){
-    		myconsole.log('Weather Update: ' + chunk["wind"]['speed']);
+    		myconsole.log('Weather Update: ' + chunk["main"]['temp_max']);
     		
     		logData("Wind Speed", chunk["wind"]['speed']);
     		logData("Temperature",(chunk["main"]['temp_max']-273).toFixed(2));
-    		//myconsole.log('DNS Proxy Update: OK');
+    	
     		backup = 0;
         }else
         {
@@ -122,7 +122,7 @@ function logData(item,weatherData){
            }else if(result){
                
              
-             data = {'Set':'Item_Current_Value','Where':'Id','Current_State':weatherData ,'Name':result[0].Id};
+            var data = {'Set':'Item_Current_Value','Where':'Id','Current_State':weatherData ,'Name':result[0].Id};
                                 
             db.update('Items',data,function(err,result){
                 
@@ -131,7 +131,15 @@ function logData(item,weatherData){
                 }
             });   
            
+           if(item == "Temperature"){
+               
+             log.logger("Temp", '{"Item_Id":"'+result[0].Id+'","Node":"'+ 0 +'","Value":"'+weatherData+'"}');
+           }
            
+            if(item == "Wind Speed"){
+               
+             log.logger("Wind", '{"Item_Id":"'+result[0].Id+'","Node":"'+ 0 +'","Value":"'+weatherData+'"}');
+           }
            rules.updateRuleStates(result[0].Id, weatherData);
              
             /* evaluate.evaluateChange(result[0].Id,weatherData,function(node,port,state,virtual,cancelTime,func){

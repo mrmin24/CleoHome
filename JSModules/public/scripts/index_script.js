@@ -29,6 +29,9 @@
    var selectedTab;
     
   var Items = null;
+   var TempId = 0;  
+  
+      
   
     j = 1;
     
@@ -52,7 +55,7 @@
     
     $( document ).ready(function(){
       
-    
+        
    
         showAllEvents(numEvents2,false);
        socket.emit('firstConnect');
@@ -927,6 +930,28 @@
     
     });
     
+     socket.on('addGraphButtons', function(data) {
+    
+    
+       // console.log("Graph Data: " + data);
+            for(var i = 0;i<data.length;i++){
+              
+              
+              if(document.getElementById("graphBtn"+data[i]['Id']) == null){ 
+                
+                addGraphButtons(data[i]['Id'],data[i]['Item_Name'],data[i]['Type']);
+              }
+            }
+            
+        
+        
+    
+    
+    });
+    
+    
+    
+    
    
     socket.on('PageTabs',function(data){
         
@@ -1026,6 +1051,11 @@
                    {
                      newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-danger btn.lg btn-block" data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
                    }
+                }else if(data.Current_State == 3)
+                {
+                 
+                     newHtml = '<span class= "col-xs-12 col-md-6 col-lg-2 "><button id="device'+ data.Id +'" name="device'+ data.Id +'" type="button" class="btn btn-grey btn.lg btn-block " data-toggle="button" aria-pressed="false" autocomplete="off" onclick="deviceSwitch('+ data.Id +')"><strong>'+ data.Device +'</strong></button></span>';
+                  
                 }
                 else
                 {
@@ -1063,7 +1093,7 @@
          $('#node'+data['Node_Port']).removeClass('panel panel-custom-green').addClass('panel panel-custom-red');
          
          
-         var newHtml = '<div class="panel-heading"> '+ data['Device'] + ' (' + data['Node_Port'] + ') </div><div class="panel-body"><strong>IP Address:</strong> N/A</br><strong>Vcc:</strong> N/A</br><strong>RSSI:</strong> N/A</br><strong>UPTime:</strong> N/A</br><strong>Last Seen: </strong>'+lastseen+'</div>';
+         var newHtml = '<div class="panel-heading"> '+ data['Device'] + ' (' + data['Node_Port'].toString() + ') </div><div class="panel-body"><strong>IP Address:</strong> N/A</br><strong>Vcc:</strong> N/A</br><strong>RSSI:</strong> N/A</br><strong>UPTime:</strong> N/A</br><strong>Last Seen: </strong>'+lastseen+'</div>';
          
          
         }
@@ -1072,7 +1102,7 @@
         {
          $('#node'+data['Node_Port']).removeClass("panel panel-custom-red").addClass('panel panel-custom-green ');
          
-         var newHtml = '<div class="panel-heading"> '+ data['Device'] + ' ('+ data['Node_Port'] +')</div><div class="panel-body"><strong>IP Address:</strong> '+ data['IPAddress'] +"</br><strong>Vcc:</strong> " + data['Vcc'] + "</br><strong>RSSI:</strong> " + data['RSSI'] + "</br><strong>UPTime:</strong> " + data['Uptime']  +'</br><strong>Last Seen: </strong>'+lastseen+'</div> ';
+         var newHtml = '<div class="panel-heading"> '+ data['Device'] + ' ('+ data['Node_Port'].toString() +')</div><div class="panel-body"><strong>IP Address:</strong> <a href=http://'+data['IPAddress']+'>'+ data['IPAddress'] +"</a></br><strong>Vcc:</strong> " + data['Vcc'] + "</br><strong>RSSI:</strong> " + data['RSSI'] + "</br><strong>UPTime:</strong> " + data['Uptime']  +'</br><strong>Last Seen: </strong>'+lastseen+'</div> ';
         }
         
         
@@ -1150,7 +1180,7 @@
     
     
         //console.log(data);
-        document.getElementById('device' + data['Id']).innerHTML = data['Current_State'] + "A / " + (((data['Current_State'])*230)/1000).toFixed(2)  + 'KW';
+      //  document.getElementById('device' + data['Id']).innerHTML = data['Current_State'] + "A / " + (((data['Current_State'])*230)/1000).toFixed(2)  + 'KW';
     
     
     });
@@ -1512,7 +1542,13 @@
     }
     
     
-    socket.on("sendGraphs",function(graphs){
+    
+    socket.on("sendGraphs",function(graphs,itemId){
+       // console.log(graphs);
+        drawChart(graphs,itemId);
+        
+    });
+  /*  socket.on("sendGraphs",function(graphs){
         
      
       //  console.log(graphs.sort());
@@ -1731,7 +1767,7 @@ function customFormat(formatString,date){
         graphd3(data3,axis);  
         
      
-    }) ;  
+    }) ; */ 
     
     
   
@@ -1756,6 +1792,7 @@ function customFormat(formatString,date){
         var id = $("#nodeID").val();
         var name = $("#nodeName").val();
         var oldId = $("#oldNodeId").val();
+        
         
         var ports = [8,6];
         var portdata = "";
@@ -1939,9 +1976,9 @@ function customFormat(formatString,date){
     }
     
     
-    function getgraphs(type){
-        console.log(type);
-        socket.emit('getgraphs',type,function(){  });
+    function getgraphs(type,itemId){
+       // console.log(type);
+        socket.emit('getgraphs',type,itemId,function(){  });
     }
     
     
@@ -2070,7 +2107,12 @@ function customFormat(formatString,date){
         if(state == 1)
         {
           // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4  col-lg-2 btn btn-danger"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true" checked>'+description +'</label>'
-           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><button id="zone'+zone +'" name="zone'+zone +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off">'+description +'</button></span>';
+           var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"  ><button id="zone'+zone +'" name="zone'+zone +'" type="button" class="btn btn-danger fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off">'+description +'</button></span>';
+        }else if(state == 3)
+        {
+         
+             var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"  ><button id="zone'+zone +'" name="zone'+zone +'" type="button" class="btn btn-grey fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off">'+description +'</button></span>';
+          
         }
         else
         {
@@ -2087,10 +2129,31 @@ function customFormat(formatString,date){
         return ;
     }
     
+    function addGraphButtons(buttonItem,description,Graphtype){   
+        
+        
+        console.log("Graphs: " + buttonItem + description + Graphtype);
+       var onclickstring = "getgraphs('"+ Graphtype + "','" + buttonItem+"')";
+           
+           
+           
+           
+           var newHtml = "<btn class='btn btn-default' id ='graphBtn"+ buttonItem +"' onclick="+onclickstring+">"+description+"</btn>";
+       
+        
+            var radioFragment = document.getElementById('graph_buttons');
+            radioFragment.innerHTML += newHtml;
+         
+ 
+        return ;
+    }
+    
+     
+    
    
     function checkUncheckDevice(item, state,enabledState){
     
-       
+       console.log(item + " update")
        
         
         if (state == 1) {
@@ -2099,9 +2162,9 @@ function customFormat(formatString,date){
             if(elem){
                //elem.style.color = "red";
                if(enabledState == 1){
-                $('#'+item).removeClass("btn-default").addClass("btn btn-success");
+                $('#'+item).removeClass("btn-default btn-grey btn-success btn-danger").addClass("btn-success");
                }else{
-                   $('#'+item).removeClass("btn-default").addClass("btn btn-danger");
+                   $('#'+item).removeClass("btn-default btn-grey btn-danger btn-success").addClass("btn-danger");
                }
                  
             }            
@@ -2111,7 +2174,14 @@ function customFormat(formatString,date){
             var elem = document.getElementById(item);
             if(elem){
                 //elem.style.color = "black";
-                $('#'+item).removeClass("btn-success btn-danger").addClass("btn btn-default");
+                $('#'+item).removeClass("btn-default btn-grey btn-danger btn-success").addClass("btn-default");
+            }
+        }else if (state == 3) {
+    
+            var elem = document.getElementById(item);
+            if(elem){
+                //elem.style.color = "black";
+                $('#'+item).removeClass("btn-default btn-grey btn-danger btn-success").addClass("btn-grey");
             }
         }
         
@@ -2142,12 +2212,28 @@ function customFormat(formatString,date){
     function deviceSwitch(Id){
         
             console.log("Switch :" + Id);
-            socket.emit('deviceSwitch',Id);
+            TempId = Id;
+            
+            if($('#device'+Id).hasClass("btn-success") || $('#device'+Id).hasClass("btn-danger")){
+                 socket.emit('deviceSwitch',Id,0);
+             
+            }else{
+                $('#toggleTime').modal('show');
+                // socket.emit('deviceSwitch',Id,1);
+                
+            }
+            
+          //  socket.emit('deviceSwitch',Id);
             
             
         
     }
     
+    function deviceSwitchChooseTime(time){
+        var Id = TempId;
+        console.log(time);
+        socket.emit('deviceSwitch',Id,time);
+    }
     
     
     function addNodes(id,device,state,status,port,IP,Vcc,RSSI,Uptime/*,NodeID,NodePort*/){
@@ -2166,9 +2252,10 @@ function customFormat(formatString,date){
         }
         else if(status == 'online' || time <= Last_Seen_Error)
         {
-            
+           
+            console.log(IP);
          //   var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"><button id="node'+ id +'" name="node'+ id +'" type="button" class="btn btn-success fullwidth" data-toggle="button" aria-pressed="false" autocomplete="off"  style="white-space: normal" onclick="nodeProperties('+ port +')" >'+ device +'    '+ '<span class="badge" id = "nodebadge'+id+'">'+ lastseen + ' </span> </button></span>';
-            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2" ><div class="panel panel-custom-green" id="node'+ port +'"><div class="panel-heading"> '+ device +' ('+ port +') </div><div class="panel-body"><strong>IP Address:</strong> '+ IP +"</br><strong>Vcc:</strong> " + Vcc + "</br><strong>RSSI:</strong> " + RSSI + "</br><strong>UPTime:</strong> " + Uptime  +'</br><strong>Last Seen: </strong>'+lastseen+'</div> </div></span>';
+            var newHtml = '<span class = "col-xs-6 col-md-4 col-lg-2"  ><div class="panel panel-custom-green" id="node'+ port +'" onclick="showNode(\'http://' + IP + '\')" ><div class="panel-heading"> '+ device +' ('+ port +') </div><div class="panel-body"><strong>IP Address:</strong> '+ IP +"</br><strong>Vcc:</strong> " + Vcc + "</br><strong>RSSI:</strong> " + RSSI + "</br><strong>UPTime:</strong> " + Uptime  +'</br><strong>Last Seen: </strong>'+lastseen+'</div> </div></span>';
            // var newHtml = '<label id="labelzone'+zone +'" class="col-xs-6 col-md-4 col-lg-2 btn btn-primary"> <input  type="checkbox" autocomplete="off" id="zone'+zone +'" name="zone'+zone +'" value="true">'+description +'</label>'
         }
         
@@ -2331,6 +2418,13 @@ function customFormat(formatString,date){
         $('#addNodeModal').modal('show');
     }
         
+        
+    function showNode(IP){
+        //$('#sonoffwebshow').data(IP);
+        document.getElementById("sonoffwebshow").setAttribute('data', IP);
+        $('#sonoff-modal').modal('show');
+        
+    }
     /*****************************************************************************************************/
     
   $('#datepicker .input-daterange').datepicker({
@@ -2352,3 +2446,108 @@ function showdatepicker2(){
 
        
 }
+
+
+
+
+
+
+  
+      
+      
+      // Callback that creates and populates a data table,
+      // instantiates the pie chart, passes in the data and
+      // draws it.
+     function drawChart(graphdata,itemId) {
+
+      
+       console.log(graphdata);
+        var graphdata_parsed = [];
+        var type;
+        graphdata_parsed[0] = [{label: "Time", type: "date"},"Value1"];
+       
+        
+        
+         var data = new google.visualization.DataTable();
+         
+          data.addColumn('datetime', 'Time');
+          data.addColumn('number', 'Value');
+      
+
+        
+        var j = 0;
+        type = graphdata[0]['Type'];
+        for(var i = 0;i<graphdata.length;i++){
+            
+            if(JSON.parse(graphdata[i]['Event']).Item_Id == itemId){
+               
+                data.addRow([new Date(graphdata[i]['Time']),  parseFloat(JSON.parse(graphdata[i]['Event']).Value)]);
+               // graphdata_parsed[j+1] = [new Date(graphdata[i]['Time']),parseFloat(JSON.parse(graphdata[i]['Event']).Value)];
+                //console.log(graphdata_parsed[j+1]);
+                j++;
+            }
+            
+        }
+        
+       
+        
+        console.log(data);
+        
+       // var data = google.visualization.arrayToDataTable(graphdata_parsed);
+
+        var options = {
+          title: type,
+          curveType: 'function',
+          legend: { position: 'bottom' }
+        };
+          // Create a dashboard.
+        var dashboard = new google.visualization.Dashboard(document.getElementById('dashboard_div'));
+
+        
+        
+        
+        var is_mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+        // ChartRangeFilter doesn't work on mobile. Use a dateRangeSlider to manipulate it
+        if ( is_mobile )
+        {
+             var RangeSlider = new google.visualization.ControlWrapper({
+              'controlType': 'DateRangeFilter',
+              'containerId': 'filter_div',
+              'options': {
+                'filterColumnLabel': 'Time'
+              }
+            });	
+        }else{
+            
+            // Create a range slider, passing some options
+       
+           var RangeSlider = new google.visualization.ControlWrapper({
+          'controlType': 'ChartRangeFilter',
+          'containerId': 'filter_div',
+          'options': {
+            'filterColumnLabel': 'Time'
+          }
+        });
+        }
+        
+        
+
+      
+
+      //  var chart = new google.visualization.LineChart(document.getElementById('curve_chart'));
+        
+        var chart = new google.visualization.ChartWrapper({
+          'chartType': 'LineChart',
+          
+          'containerId': 'curve_chart',
+          'options': {
+          'curveType': 'function'
+            
+          }
+        });
+       // dashboard.bind(timeRangeSlider, chart);
+        dashboard.bind(RangeSlider, chart);
+        
+        dashboard.draw(data);
+        //chart.draw(data, options);
+      }

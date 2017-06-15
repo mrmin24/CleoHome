@@ -1,7 +1,7 @@
 var net = require('net');
 var log = require('./logger.js');
 
-var gatewayip = '10.0.0.22';
+var gatewayip = '192.168.2.22';
 var gatewayport = '5003';
 var actual = new net.Socket();
 var retrytimer;
@@ -37,7 +37,7 @@ function start() {
 		checkOffTimes();
 		var offTimeTimer = setInterval(checkOffTimes,offTimeInterval);
 		
-		 socket.on('deviceSwitch',function(NodeId,NodePort,State,rulereq){
+		 socket.on('deviceSwitch',function(NodeId,NodePort,State,rulereq,timeOn){
 		 	
 		 	
 		 //	myconsole.log("is array " + Array.isArray(NodeId));
@@ -46,14 +46,14 @@ function start() {
 			 	{
 			 		myconsole.log("mysens1 " + NodeId[i] + " " + NodePort[i] + " " + State[i] + " " + rulereq[i] );
 			 		setTimeout(function() {
-					    sendData(NodeId[i],NodePort[i],State[i],rulereq[i])	;
+					    sendData(NodeId[i],NodePort[i],State[i],rulereq[i],timeOn)	;
 					}, 250);
 			 	}
 		 	else
 		 	{   myconsole.log("mysens2 " + NodeId + " " + NodePort + " " + State + " " + rulereq );
 		 	
 		 	
-		 		sendData(NodeId,NodePort,State,rulereq)	;
+		 		sendData(NodeId,NodePort,State,rulereq,timeOn)	;
 		 	
 		 			
 		 	}
@@ -289,18 +289,24 @@ function start() {
 		
 	    	
 	    	
-	    function sendData(NodeId,NodePort,State,rulereq){		
+	    function sendData(NodeId,NodePort,State,rulereq,timeOn){		
 	    	//myconsole.log("mysens data: " + NodeId + " " + NodePort  );
 	    		
 	    		db.getdata('Items',{Select: 'Item_Type,Item_Is_Toggle,Item_Toggle_Delay,Item_Current_Value',whereClause:'Node_Id = ' + NodeId.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
 	    			 if(data_receive[0]){
 	    			 	if(data_receive[0].Item_Current_Value != State){
-	    			 			var time = 0;
-		    			 	//	myconsole.log("Mysensor state: " + State);
+	    			 				var time = 0;
+		    			 		//myconsole.log("Mysensor state" + State);
 		    			 		if(rulereq == 1){
 		    			 			time = State;
 		    			 		}else{
-		    			 			time = data_receive[0].Item_Toggle_Delay;
+		    			 			if(timeOn > 0){
+		    			 				
+		    			 				time = timeOn;
+		    			 				
+		    			 			}else{
+		    			 				time = data_receive[0].Item_Toggle_Delay;
+		    			 			}
 		    			 		}
 		    			 	if(data_receive[0].Item_Type == Access_Type && data_receive[0].Item_Is_Toggle == 1 ){
 		    			 	
@@ -359,7 +365,7 @@ function start() {
 	        // myconsole.log(data_receive);
 	         if(data_receive[0]){
 	                    //myconsole.log(data_receive);
-	                    ID = data_receive[0].Node_Id + 1;
+	                   var  ID = data_receive[0].Node_Id + 1;
 	                    // data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
 	                    
 	                    
@@ -391,13 +397,13 @@ function start() {
 					
 					
 					if(offTimes[i]['data']['virtual'] == 1){
-						data = {Set:'Item_Current_Value',Where:'Id',Current_State:0,Name:offTimes[i]['data']['node']};
+					var 	data = {Set:'Item_Current_Value',Where:'Id',Current_State:0,Name:offTimes[i]['data']['node']};
                         
                         db.update('Items',data,function(){});
 						 rules.updateRuleStates(offTimes[i]['data']['node'], 0);
 						 
 					}else{
-						sendData(offTimes[i]['data']['node'],offTimes[i]['data']['port'],offTimes[i]['data']['state']);
+						sendData(offTimes[i]['data']['node'],offTimes[i]['data']['port'],offTimes[i]['data']['state'],1,0);
 					}
 					offTimes.splice(i, 1);
 					myconsole.log("Switch Off");

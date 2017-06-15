@@ -1,14 +1,27 @@
 var myconsole = require('./myconsole.js');
 
+var debug = 0;
+
+process.argv.forEach(function (val, index, array) {
+  if(index == 2){
+     
+     debug = val;
+  }
+});
+
+
+  
+   
+    
 
 
 const startup_delay = 1000; 
-
+const startup_delay2 = 60 * 1000; 
 
 myconsole.log('Controller active, delay for router is ' + startup_delay/1000  + ' seconds, please wait...');
 
 
-timer = setTimeout(function() {
+var timer = setTimeout(function() {
  myconsole.log('starting....');       
     var Config = require('./GetConfig.js');
     
@@ -25,7 +38,7 @@ timer = setTimeout(function() {
     var Suncalc = require('./SunCalc.js');
     var Time = require('./timeUpdate');
     var Weather = require('./weatherUpdate');
-    var ruleMon = require('./Rule_Monitor.js');
+    //var ruleMon = require('./Rule_Monitor.js');    
     var Health = require('./health.js');
     
   //  var ping = require('./ping.js');
@@ -37,13 +50,17 @@ timer = setTimeout(function() {
     Events.start();
     mqtt.start();
     mySensor.start();
-   // ESP8266.start();
+   
     Server.start();
     Suncalc.start();
     Time.start();
     Weather.start();
     Health.start();
-    ruleMon.start();
+    
+     if(debug < 2)
+       delayStart();
+    
+  // ruleMon.start();
     
    // ping.start();
   
@@ -57,4 +74,23 @@ timer = setTimeout(function() {
 
 
 
-
+function delayStart(){
+    var timer2 = setTimeout(function() {
+     var ruleMon = require('./Rule_Monitor.js');    
+     
+     
+     
+     
+     
+     ruleMon.start(); 
+        
+        
+        
+        
+        
+       
+    }, startup_delay2); 
+    
+    
+    
+}

@@ -2,7 +2,7 @@ var db = require('./dbhandler');
 //var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 var myconsole = require('./myconsole.js');
-var intervaltime = 1 * 60 * 1000;
+var intervaltime = 1 * 1 * 1000;
 var healthCheckInterval = 2 ;
 var now = Date.now();  
 var exclude = [];
@@ -29,7 +29,7 @@ function start() {
 
 function checkNodeHealth(){
     
-    data = {'Select':'Name,Last_Seen,Status','whereClause':'Id > 0'};
+   var  data = {'Select':'Name,Last_Seen,Status','whereClause':'Id > 0'};
         
         db.getdata('Nodes',data,function(err,result){
            
@@ -43,7 +43,7 @@ function checkNodeHealth(){
                 for(var i = 0; i< result.length;i++){
                      
                       var time = new Date().getTime() - result[i].Last_Seen;
-                      lastseen = (time/1000/60).toString();
+                     var  lastseen = (time/1000/60).toString();
                       lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
                      
                      

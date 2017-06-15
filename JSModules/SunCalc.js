@@ -32,7 +32,7 @@ function start() {
 function checkSunCalc(){
     
     
-        data = {'Select':'Id,Item_Current_Value','whereClause':'Item_Name = ' + '"' + 'Is_Dark' + '"'};
+       var  data = {'Select':'Id,Item_Current_Value','whereClause':'Item_Name = ' + '"' + 'Is_Dark' + '"'};
         
         db.getdata('Items',data,function(err,result){
            
@@ -51,8 +51,8 @@ function checkSunCalc(){
            
            
            
-            compareSunrise = calcTime.isTimeNowBigger(sunrise);
-            compareSunset = calcTime.isTimeNowBigger(sunset);
+           var  compareSunrise = calcTime.isTimeNowBigger(sunrise);
+           var  compareSunset = calcTime.isTimeNowBigger(sunset);
             
            
            
@@ -72,7 +72,7 @@ function checkSunCalc(){
                 
                 
                 
-                data = {Set:'Item_Current_Value',Where:'Item_Name',Current_State:isDark,Name:'Is_Dark'};
+               var  data = {Set:'Item_Current_Value',Where:'Item_Name',Current_State:isDark,Name:'Is_Dark'};
                         
                 db.update('Items',data,function(){});   
                  

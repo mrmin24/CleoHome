@@ -20,7 +20,7 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var morgan = require('morgan');
 var logger = morgan('combined');
-
+var log = require('./logger.js');
 require('./public/scripts/passport.js')(passport); // pass passport for configuration
 
 var email = require('./public/scripts/email.js');
@@ -107,11 +107,12 @@ http.listen(port);
 
 function start() {
     //log(debug);
-     
+    setStartupStatus(); 
     updateIP();
     var nodeinterval = setInterval(updateNodeStatus,nodeCheckInterval);
     var dnsinterval = setInterval(function() {
-        
+      
+       
    
     updateIP();
         
@@ -139,7 +140,7 @@ io.on('connection', function(socket){
    getAlarmStatus(socket,1);   //send on update
    getDeviceStatus(socket);   //send on update
    getNodeStatus(socket);    //send on update
-   
+   getGraphButtons();
    
    sendConfig(socket); 
   
@@ -150,6 +151,7 @@ io.on('connection', function(socket){
   getAlarmStatus(socket,0);   //send on update
   getLatestAlarmStatus();
   getLatestVirtualStatus();
+  getGraphButtons();
  });
   
   socket.on('disconnect',function(socket){
@@ -205,9 +207,9 @@ io.on('connection', function(socket){
       
   });
   
-  socket.on('getgraphs',function(type){
+  socket.on('getgraphs',function(type,itemId){
       
-      sendgraphs(type);
+      sendgraphs(type,itemId);
       
   });
   
@@ -391,12 +393,12 @@ io.on('connection', function(socket){
     });
     
     socket.on("getNodesStatus",function(node){
-        myconsole.log("test");
+       // myconsole.log("test");
         
         getNodeStatus();
     });
     
-    socket.on('deviceSwitch',function(Id){
+    socket.on('deviceSwitch',function(Id,timeOn){
     //  myconsole.log("deviceSwitch1");
       
         db.getdata('Items',{Select: 'Item_Type,Item_Current_Value,Node_Id,Node_Port',whereClause:'Id = ' + Id.toString()},function(err,data_receive){
@@ -410,8 +412,8 @@ io.on('connection', function(socket){
           	       virtualDeviceStatusChange(Id,0);
           	    }else
           	    {
-                 mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
-                 MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
+                 mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0,0,timeOn);
+                 MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0,0,timeOn);
                  myconsole.log('deviceSwitch2');
           	    }
             }else
@@ -420,8 +422,8 @@ io.on('connection', function(socket){
       	            virtualDeviceStatusChange(Id,1);
       	        }else
       	        {
-                    mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
-                    MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
+                    mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1,0,timeOn);
+                    MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1,0,timeOn);
                     myconsole.log('deviceSwitch3');
       	        }
             } 
@@ -556,8 +558,8 @@ io.on('connection', function(socket){
                                        db.getSQL('SELECT Id FROM Items WHERE Item_Name = "' + ruleData['dropdownMenuAction1'] + '" UNION SELECT Id FROM Alarm_Items WHERE Description = "' + ruleData['dropdownMenuAction1'] + '"',function(err,data_receive){    
                                          if(data_receive[0]){
                                             
-                                          action =  data_receive[0]['Id'] + ';=;' + ruleData['ActionValue1'] ;  
-                                          onTime = ruleData['ActionOnValue1'] ;
+                                        var   action =  data_receive[0]['Id'] + ';=;' + ruleData['ActionValue1'] ;  
+                                         var  onTime = ruleData['ActionOnValue1'] ;
                                           myconsole.log(action);
                                           
                                           
@@ -577,9 +579,9 @@ io.on('connection', function(socket){
                                              
                                              for(var m = 0;m<nonNull.length;m++)
                                               {
-                                                  newRules = selectedItemRules[nonNull[m]] + ';' + ruleId;
+                                                var   newRules = selectedItemRules[nonNull[m]] + ';' + ruleId;
                                                   
-                                                   data = {Set:'Rule_Id',Current_State:newRules,Where:"Second_Id",Name:ids2[nonNull[m]]};
+                                                var    data = {Set:'Rule_Id',Current_State:newRules,Where:"Second_Id",Name:ids2[nonNull[m]]};
                                                     db.update("Rule_Items",data,function(err,data_receive){
                                                           
                                                           
@@ -689,7 +691,7 @@ function saveNode(data){
   if(nodedata['Item_Name'+i] && nodedata['Item_Port_Type'+i] > 0)
   {
   //myconsole.log(nodedata['Item_Port_Type'+i]);
-   db.insert('Items',{Node_Port:nodedata['Node_Port'+i],Item_Name:nodedata['Item_Name'+i],Item_Port_Type:nodedata['Item_Port_Type'+i],Node_Id:nodedata['Node_Id'],Node_Child:nodedata['Node_Child'+i],Item_Default_Value:nodedata['Item_Default'+i],Item_Enabled_Value:nodedata['Item_Enable'+i],Item_Is_Toggle:nodedata['Item_Toggle'+i],Item_Toggle_Delay:nodedata['Item_Toggle_Val'+i]});
+   db.insert('Items',{Node_Port:nodedata['Node_Port'+i],Item_Name:nodedata['Item_Name'+i],Item_Port_Type:nodedata['Item_Port_Type'+i],Node_Id:nodedata['Node_Id'],Item_Sort_Position:nodedata['Node_Id'],Node_Child:nodedata['Node_Child'+i],Item_Default_Value:nodedata['Item_Default'+i],Item_Enabled_Value:nodedata['Item_Enable'+i],Item_Is_Toggle:nodedata['Item_Toggle'+i],Item_Toggle_Delay:nodedata['Item_Toggle_Val'+i]});
   }
   
  }
@@ -707,9 +709,9 @@ function getLatestVirtualStatus(){
  
     if(data_receive[0]){
      for(var i = 0;i<data_receive.length;i++){
-      ID = data_receive[i].Id;
-      enabledValue = data_receive[i].Item_Enabled_Value;
-      State = data_receive[i].Item_Current_Value;
+     var  ID = data_receive[i].Id;
+     var  enabledValue = data_receive[i].Item_Enabled_Value;
+     var  State = data_receive[i].Item_Current_Value;
      
       io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
      }
@@ -729,11 +731,11 @@ function getLatestAlarmStatus(){
     if(data_receive[0]){
      for(var i = 0;i<data_receive.length;i++){
       
-      ID = data_receive[i].Name.substring(5, 8);
+     var  ID = data_receive[i].Name.substring(5, 8);
    //  myconsole.log(data_receive[i].Name.substring(5, 8)  +  "   "  + data_receive[i].Name);
      
      
-      State = data_receive[i].Current_State;
+     var  State = data_receive[i].Current_State;
      
       io.emit('AlarmZoneEvent', {Zone:ID,Current_State:State});
      }
@@ -756,9 +758,9 @@ function virtualDeviceStatusChange(Id,State){
         // myconsole.log(data_receive);
          if(data_receive[0]){
                     //myconsole.log(data_receive);
-                    ID = data_receive[0].Id;
-                    enabledValue = data_receive[0].Item_Enabled_Value;
-                     data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                    var ID = data_receive[0].Id;
+                   var  enabledValue = data_receive[0].Item_Enabled_Value;
+                   var   data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
                     db.update("Items",data,function(err,data_receive){
                           
                           
@@ -816,8 +818,8 @@ function virtualDeviceStatusChangebyRule(Id,State){
         // myconsole.log(data_receive);
          if(data_receive[0]){
                     //myconsole.log(data_receive);
-                    ID = data_receive[0].Id;
-                    enabledValue = data_receive[0].Item_Enabled_Value;
+                   var  ID = data_receive[0].Id;
+                   var  enabledValue = data_receive[0].Item_Enabled_Value;
                  //    data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
                    // db.update("Items",data,function(err,data_receive){
                           
@@ -876,9 +878,9 @@ mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
         // myconsole.log(data_receive);
          if(data_receive[0]){
                     //myconsole.log(data_receive);
-                    ID = data_receive[0].Id;
-                    enabledValue = data_receive[0].Item_Enabled_Value;
-                     data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                  var  ID = data_receive[0].Id;
+                var     enabledValue = data_receive[0].Item_Enabled_Value;
+                   var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
                     db.update("Items",data,function(err,data_receive){
                           
                           
@@ -942,9 +944,9 @@ mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
         // myconsole.log(data_receive);
          if(data_receive[0]){
                     //myconsole.log(data_receive);
-                    ID = data_receive[0].Id;
+                 var   ID = data_receive[0].Id;
                     
-                     data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                    var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
                     db.update("Items",data,function(err,data_receive){
                           
                           //	myconsole.log("Server: Sensor updated");
@@ -952,7 +954,7 @@ mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
                          if(data_receive){
                             // myconsole.log(ID + " " + State);
                              io.emit('SensorEvent', {Id:ID,Current_State:State});
-                             
+                             log.logger(Type, State);
                              rules.updateRuleStates(ID, State);
                              
                             /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
@@ -1017,16 +1019,16 @@ MQTTsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
     myconsole.log(State);
      
   // var evaluate = require('../JSModules/Rule_Items_Evaluate');
-   if(State > 0){State = 1;}
+  // if(State > 0){State = 1;}
    
      db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
         myconsole.log(data_receive);
          if(data_receive[0]){
                    // myconsole.log(data_receive);
-                    ID = data_receive[0].Id;
-                    enabledValue = data_receive[0].Item_Enabled_Value;
+                  var  ID = data_receive[0].Id;
+                  var   enabledValue = data_receive[0].Item_Enabled_Value;
                     
-                    data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                 var   data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
                     db.update("Items",data,function(err,data_receive){
                           
                           
@@ -1085,42 +1087,41 @@ MQTTsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
    //var evaluate = require('../JSModules/Rule_Items_Evaluate');
    
    
-     db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+     db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
         // myconsole.log(data_receive);
          if(data_receive[0]){
                     //myconsole.log(data_receive);
-                    ID = data_receive[0].Id;
-                    
-                     data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-                    db.update("Items",data,function(err,data_receive){
+                  var  ID = data_receive[0].Id;
+                  var currentValue = data_receive[0].Item_Current_Value;
+                  var updateTime = data_receive[0].Time_Updated;
+                  var doUpdate = false;
+                  var timediff = (new Date() - new Date(updateTime))/1000;
+                  myconsole.log("Time diff1: " + timediff);
+                  
+                  if((State <= currentValue - 0.3) || (State >= currentValue + 0.3) || (timediff >= 5*60) ){
+                    doUpdate = true;
+                  }
+                  
+                  if(doUpdate == true){
+                 //  myconsole.log("Updated: " + State + " " + (currentValue - 0.3) + " " + (currentValue + 0.3) + " " + (timediff >= 5*60)  );
+                  // var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                   // db.update("Items",data,function(err,data_receive2){
+                   var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+                   
+                   var time = (new Date(Date.now() - tzoffset)).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+                   
+                  //  myconsole.log(time);
+                   db.getSQL("Update Items SET Item_Current_Value = " + State + " ,Time_Updated = '" + time + "' WHERE Id = " + ID,function(err,data_receive2){
                           
                           //	myconsole.log("Server: Sensor updated");
                         
-                         if(data_receive){
+                         if(data_receive2){
                             // myconsole.log(ID + " " + State);
                              io.emit('SensorEvent', {Id:ID,Current_State:State});
-                             
+                              log.logger(Type, '{"Item_Id":"'+ID+'","Node":"'+NodeID+'","Value":"'+State+'"}');
                              rules.updateRuleStates(ID, State);
                              
-                            /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
-                                 
-                                    eval(func);             
-                                 if(node && port && state){
-                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
-                                 }
-                                 
-                                 if(cancelTime){
-                                             
-                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                                 }
-                                 
-                                  if(virtual == 1){
-                                     virtualDeviceStatusChange(node,state);
-                                  
-                                     
-                                 }
-                             //myconsole.log(data_receive[0]);
-                             });*/
+                           
                              
                              
                          }else
@@ -1130,6 +1131,8 @@ MQTTsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
                          }
                         
                     }); 
+                   doUpdate = false;
+                  }
         }else 
         if(err)
         {
@@ -1155,7 +1158,7 @@ mySensorsocket.on('gatewayConnected',function(gatewayState){
 
 mySensorsocket.on('nodeAlive',function(NodeID){
     var timenow = new Date().getTime();
-     data = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
+    var  data = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
     db.update("Nodes",data,function(err,data_receive){
               
               
@@ -1174,19 +1177,20 @@ mySensorsocket.on('nodeAlive',function(NodeID){
     }); 
     updateNodeStatus(NodeID);
     
+    
 });
 
 
 MQTTsocket.on('nodeAlive',function(NodeID,Status){
      var timenow = new Date().getTime();
-     data = {Set:'Status',Current_State:Status.toLowerCase(),Where:"Node_Port",Name:NodeID};
+   var   data = {Set:'Status',Current_State:Status.toLowerCase(),Where:"Node_Port",Name:NodeID};
      db.update("Nodes",data,function(err,data_receive){
               
               
             
              if(data_receive){
                  myconsole.log(NodeID + " " + State);
-                 data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
+               var   data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
                  db.update("Nodes",data2,function(err2,data_receive2){
                            
                            
@@ -1194,6 +1198,54 @@ MQTTsocket.on('nodeAlive',function(NodeID,Status){
                           if(data_receive2){
                              // myconsole.log(ID + " " + State);
                               myconsole.log("Node state updated");
+                              
+                              if(Status.toLowerCase() == "offline"){
+                               
+                              var  data3 = {Set:'Item_Current_Value',Current_State:3,Where:"Node_Id",Name:NodeID};
+                               db.update("Items",data3,function(err2,data_receive3){
+                           
+                           
+                         
+                                       if(data_receive3){
+                                          // myconsole.log(ID + " " + State);
+                                           myconsole.log("Node state updated2");
+                                           
+                                           db.getdata('Items',{Select: 'Id,Item_Current_Value,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() },function(err,data_receive4){
+                                              myconsole.log(data_receive4[0]);
+                                              if(data_receive4[0]){
+                                                         myconsole.log(data_receive4[0].Id);
+                                                       
+                                                         for(var i = 0;i<data_receive4.length;i++){
+                                                          
+                                                          
+                                                            io.emit('DeviceEvent', {Id:data_receive4[i].Id,Current_State:data_receive4[i].Item_Current_Value,Item_Enabled_Value:data_receive4[i].Item_Enabled_Value});
+                                          
+                                                          
+                                                          
+                                                         }
+                                                         
+                                                         
+                                             }else 
+                                             if(err)
+                                             {
+                                                 myconsole.log(err);
+                                             }
+                                              
+                                          });
+                                         
+                                          
+                                           
+                                           
+                                       }else
+                                       {
+                                          myconsole.log(err); 
+                                           
+                                       }
+                                      
+                              });
+                               
+                               
+                              }
                               
                               
                           }else
@@ -1220,7 +1272,7 @@ MQTTsocket.on('nodeAlive',function(NodeID,Status){
 MQTTsocket.on('updateNodeStatus',function(NodeID){
    var timenow = new Date().getTime();
    myconsole.log("MQTT: nodeupdate")
-   data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
+   var  data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
     db.update("Nodes",data2,function(err2,data_receive2){
               
               
@@ -1287,16 +1339,16 @@ function sendrules(){
 }  
 
 
-function sendgraphs(Type){
-    myconsole.log("Getting Graphs...");
+function sendgraphs(Type,itemId){
+    myconsole.log("Getting Graphs..."); 
      
-      db.getdata('Event_Log',{Select: 'Id,Type,Event,TimeStamp',whereClause:'Type LIKE "'+Type+'" ORDER BY Id ASC LIMIT 500'},function(err,data_receive){
+      db.getBackData('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:'Type LIKE "'+Type+'" ORDER BY Id DESC LIMIT 2500'},function(err,data_receive){
                       // myconsole.log(data_receive); 
            if(data_receive[0]){
             
-          //  myconsole.log(data_receive);
+           // myconsole.log(data_receive[data_receive.length-1]['TimeStamp']);
             
-            io.emit("sendGraphs",data_receive);
+            io.emit("sendGraphs",data_receive,itemId);
             
         }else{
             if (err) {
@@ -1371,7 +1423,7 @@ function deleteRule(rule){
                  //myconsole.log(ids);
                     var where = "Second_Id IN (" + ids + ")  ORDER BY FIELD (Second_Id," + ids + ")";
                    
-                   data = {'Select':'Second_Id,Rule_Id','whereClause':where };
+                  var  data = {'Select':'Second_Id,Rule_Id','whereClause':where };
             
                     db.getdata('Rule_Items',data,function(err,result2){
                        
@@ -1402,7 +1454,7 @@ function deleteRule(rule){
                                  }
                                  
                                 
-                                 data = {Set:'Rule_Id',Current_State:newRuleId,Where:"Second_Id",Name:res[i]};
+                               var   data = {Set:'Rule_Id',Current_State:newRuleId,Where:"Second_Id",Name:res[i]};
                                 db.update("Rule_Items",data,function(err,data_receive){
                                           
                                           
@@ -1870,6 +1922,30 @@ function getState(requiredState,callback){
 
 }
 
+
+function getGraphButtons(){
+ 
+  db.getdatajoin('Items','Item_Types',{Select: 'T1.Id,T1.Item_Name,T2.Type',join1: 'Item_Type' ,join2: 'Id',whereClause:"T1.Id LIKE '%' AND T2.hasGraph = 1 ORDER BY T1.Item_Name ASC"},function(err,data_receive){
+                      
+                       
+                        if (err) {
+                        // error handling code goes here
+                            myconsole.log("ERROR2 : ",err);            
+                        } else {       
+                            
+                           // myconsole.log(data_receive);         
+                            io.emit('addGraphButtons',data_receive);
+                            
+                        }
+                        
+                        
+                        
+  });
+ 
+ 
+}
+
+
 function getAlarmStatus(sockets,newpage){  //newpage 1 if first load of page
     
     db.getdatajoin('Alarm_Items','Alarm_Item_Types',{Select: 'Name,Current_State,Description,Alarm_Event,T1.Type',join1: 'Type' ,join2: 'Id',whereClause:"T1.Id LIKE '%' AND T2.ShowOnPage = 1 ORDER BY T1.Description ASC"},function(err,data_receive){
@@ -2092,6 +2168,29 @@ function getDeviceStatus(sockets){
                
                
     
+}
+
+function setStartupStatus(){
+ 
+    myconsole.log("Items to unknown ");
+    // data = {Set:'Item_Current_Value',Current_State:3,Where:"Id > 0"};
+     db.getSQL('UPDATE Items SET Item_Current_Value = 3 WHERE ID > 0 AND Item_IsVirtual = 0',function(err,data_receive){
+               
+               
+             
+              if(data_receive){
+                 // myconsole.log(ID + " " + State);
+                  myconsole.log("Items set to unknown ");
+                  
+                  
+              }else
+              {
+                 myconsole.log(err); 
+                  
+              }
+             
+     }); 
+ 
 }
 
 
@@ -2597,8 +2696,8 @@ function updateIP(){
         	if(oldip != externalip)
         	{
              if(configure2.server[0].dnsupdate[0] == 'true')  {
-    		    updatedns(ip,function(){});
-    		    updatednshome(ip,function(){});  
+        		    updatedns(ip,function(){});
+        		    updatednshome(ip,function(){});  
              }
     		 
     		 if(configure2.server[0].dnsemail[0] == 'true')  

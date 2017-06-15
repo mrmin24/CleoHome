@@ -14,6 +14,11 @@ var latestId = 0;
 var mySensorio = require('socket.io-client');
 var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
+
+var MQTTio = require('socket.io-client');
+var MQTTsocket = MQTTio.connect('http://localhost:'+ 44607);
+
+
 var getconfig = require('../JSModules/GetConfig.js');
 var writeXML = require('../JSModules/WriteConfig.js');
 var configure = getconfig.data;
@@ -57,22 +62,23 @@ function start() {
 	
 	if(io)
 	{ 
-	    myconsole.log('RuleMonitor Module Listening on ' + '44603');}
+	    myconsole.log('RuleMonitor Module Listening on ' + '44603');
 	
 	
 	    io.sockets.on('connection', function(socket){
-	    myconsole.log('Client connected to ruleMonitor');
+	        
+	        myconsole.log('Client connected to ruleMonitor');
 	  
-	  
-        socket2 = socket;	  
+            socket2 = socket;	  
         	      	  
-      
 	  
-	});
+	    });
+	    
+	
     
     ruleMonitor();
     
-    timerRules = setInterval(function(){
+    var timerRules = setInterval(function(){
 
 
         ruleMonitor();
@@ -81,46 +87,85 @@ function start() {
      
     }, intervaltime);
     
+	}
+    
 }
 
 function ruleMonitor(){
     //    myconsole.log('test1'); 
     
-     db.getdata('Rules_toCheck',{Select: 'Id,Item_Id,State',whereClause:'id > ' + latestId },function(err,data_receive){
+     db.getdata('Rules_toCheck',{Select: 'Id,Item_Id,State',whereClause:'Id > ' + latestId },function(err,data_receive){
                    
          if(data_receive[0]){
                
-              myconsole.log("ruleMON: " + latestId + " " + data_receive[0][0]);
+             // myconsole.log("ruleMONxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: " + data_receive[0].Id + " " + data_receive.length);
                
-              
+              var j = 0;
                for(var i = 0;i < data_receive.length;i++){
                     
                  
-                deviceSendUpdate(data_receive[i].Item_Id);   
+                   // deviceSendUpdate(data_receive[i].Item_Id);   
+                    latestId = data_receive[data_receive.length-1].Id;
                     
-                evaluate.evaluateChange(data_receive[i].Item_Id,data_receive[i].State,function(node,port,state,virtual,cancelTime,func){
-                     eval(func);             
-                     if(node && port && state){
-                     
-                     	    mySensorsocket.emit('deviceSwitch',node,port,state,1);
-                     
-                     }
-                    //myconsole.log(cancelTime);
-                     if(cancelTime != null){
-                                 
-                         mySensorsocket.emit('switchOff',node,port,0,virtual,cancelTime);
-                     }
-                     
-                     if(virtual == 1){
-                        data = {Set:'Item_Current_Value',Where:'Id',Current_State:state,Name:node};
+                    // myconsole.log("ruleMONxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx222: " + latestId );
+                   
+                    evaluate.evaluateChange(data_receive[i].Item_Id,data_receive[i].State,function(node,port,state,virtual,cancelTime,func){
                         
-                        db.update('Items',data,function(){});  
-                        rules.updateRuleStates(node, state);
-                       
+                          j++;
+                        eval(func);             
+                       //  myconsole.log("rule items are: " + node + "   " + port + "    " + state );
+                         if(node && port && state){
                          
-                     }
-                 //myconsole.log(data_receive[0]);
-                 });
+                         	    mySensorsocket.emit('deviceSwitch',node,port,state,1,0);
+                         	    MQTTsocket.emit('deviceSwitch',node,port,state,1,0);
+                         
+                         }
+                        //myconsole.log(cancelTime);
+                         if(cancelTime != null){
+                                     
+                             mySensorsocket.emit('switchOff',node,port,0,virtual,cancelTime);
+                         }
+                         
+                         
+                         if(virtual == 1){
+                           var  data = {Set:'Item_Current_Value',Where:'Id',Current_State:state,Name:node};
+                            
+                            db.update('Items',data,function(){});  
+                            rules.updateRuleStates(node, state);
+                           
+                             
+                         }
+                         
+                         
+                         
+                         
+                        
+                         if(j == data_receive.length){
+                             myconsole.log("Clear2");
+                             latestId = data_receive[data_receive.length-1].Id;
+                             myconsole.log(latestId);
+                       
+                               db.deletedata('Rules_toCheck',{whereClause:'Id <= ' + latestId },function(err,result){
+                                   
+                                   
+                                  if(err){
+                                      myconsole.log(err);
+                                  }else{
+                                      
+                                     // myconsole.log("rules cleared: " + result);
+                                      
+                                  } 
+                               });
+                               
+                         }
+                         
+                         
+                         
+                         
+                        
+                     });
+                 
+                        
                  
                  
                
@@ -130,15 +175,7 @@ function ruleMonitor(){
                
                
                
-               latestId = data_receive[data_receive.length-1].Id;
                
-               db.deletedata('Rules_toCheck',{whereClause:'id <= ' + latestId },function(err,result){
-                   
-                   
-                  if(err){
-                      myconsole.log(err);
-                  } 
-               });
                
                
                
@@ -160,7 +197,7 @@ function ruleMonitor(){
 function clearRules(){
     
      myconsole.log("clearing old rules");
-     db.deletedata('Rules_toCheck',{whereClause:'id > 0' },function(err,result){
+     db.deletedata('Rules_toCheck',{whereClause:'Id > 0' },function(err,result){
                    
                    
       if(err){

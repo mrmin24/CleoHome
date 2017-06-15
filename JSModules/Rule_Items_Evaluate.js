@@ -3,7 +3,7 @@ var rule = require('./Rule_Evaluate');
 var myconsole = require('./myconsole.js');
 
 exports.evaluateChange = function(itemId,itemValue,callback){
-    myconsole.log("evaluate itemid: " + itemId);
+    myconsole.log("evaluate itemid1: " + itemId);
     //myconsole.log(itemValue);
     
     data = {'Select':'Second_Id,Rule_Id,Equals,Greater_Than,Less_Than,Not_Equal,Secondary_Item','whereClause':'Item_Id = ' + itemId };

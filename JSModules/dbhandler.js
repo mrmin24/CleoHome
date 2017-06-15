@@ -39,16 +39,16 @@ exports.update = function(table,data,callback) {
 
    // myconsole.log(data);
         pool.getConnection(function(err, connection){
-    connection.query('UPDATE '+ table +' SET ' + data.Set + '=? WHERE ' + data.Where + '= ?', [data.Current_State,data.Name], function(err, result) {
-       connection.release();
-        if(err) {
-             callback(err,null);
-            }
-            else {
-             callback(null,result);
-            }
-            
-    });
+            connection.query('UPDATE '+ table +' SET ' + data.Set + '=? WHERE ' + data.Where + '= ?', [data.Current_State,data.Name], function(err, result) {
+            connection.release();
+            if(err) {
+                 callback(err,null);
+                }
+                else {
+                 callback(null,result);
+                }
+                
+            });
        });
  
 }
@@ -60,7 +60,7 @@ exports.getdata = function(table,data,callback) {
     
     //myconsole.log(data.whereClause);
    
-    connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause, [table], function(err, result) {
+    connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause , [table], function(err, result) {
       
   // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
       // myconsole.log(result);
@@ -77,6 +77,28 @@ exports.getdata = function(table,data,callback) {
     });
 }
 
+exports.getBackData = function(table,data,callback) {
+
+   pool.getConnection(function(err, connection){
+    
+    //myconsole.log(data.whereClause);
+   
+    connection.query('SELECT * FROM (SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause +')sub ORDER BY Id ASC' , [table], function(err, result) {
+      
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+      // myconsole.log(result);
+       connection.release();
+        if(err) {
+             callback(err,null);
+            }
+            else {
+             callback(null,result);
+            }
+            
+    });
+   
+    });
+}
 
 
 

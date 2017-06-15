@@ -35,7 +35,7 @@ exports.power = function(state,type,port){
     
 }
 
-function getPowerState(port){
+exports.getPowerState = function(port){
     
   //  Power<x>         |              | Show current power state of relay<x> as On or Off
   //  Power<x>         | 0 | off      | Turn relay<x> power Off
@@ -45,6 +45,20 @@ function getPowerState(port){
   //  Power<x>         | 4 | blinkoff | Stop blinking power of relay<x>
     
     return '{"CMD":"POWER' + port.toString() + '","MSG":""}';;
+    
+    
+}
+
+exports.newNodeSend = function(){
+    
+  //  Power<x>         |              | Show current power state of relay<x> as On or Off
+  //  Power<x>         | 0 | off      | Turn relay<x> power Off
+  //  Power<x>         | 1 | on       | Turn relay<x> power On
+  //  Power<x>         | 2 | toggle   | Toggle power of relay<x>
+  //  Power<x>         | 3 | blink    | Blink power of relay<x>
+  //  Power<x>         | 4 | blinkoff | Stop blinking power of relay<x>
+    
+    return '{"CMD":"TOPIC' + port.toString() + '","MSG":""}';;
     
     
 }

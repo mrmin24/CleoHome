@@ -27,6 +27,8 @@
     <script src="/jquery/jquery.dataTables.min.js"></script>
     <script src="./scripts/Chart.min.js"></script>
      <script src="/scripts/index_script.js"></script>
+      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      
     <!--<script src="./scripts/NoSleep.min.js"></script>-->
      <!-- <script src="/scripts/screenSaver.js"></script>-->
      
@@ -43,16 +45,22 @@
             
         </div>
         
-        
-        
+      
+        <nav class="nav navbar-inverse " role="navigation">
         <div class="container-fluid " >
-            <nav class="nav nav-tabs " role="navigation">
-                <!--<div class="container-fluid">-->
+            
+             
+                
                     <div class="navbar-header" >
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse-1">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span> 
+                      </button>
                         <a class="navbar-brand" href="/">CleoHome</a>
                     </div>
                    
-                    <div class="navbar-collapse collapse  " id="navbar-collapse-1">
+                    <div class="collapse navbar-collapse   " id="navbar-collapse-1">
                          <ul class="nav nav-tabs" id="tabs" >
                           
                            
@@ -65,7 +73,7 @@
                             </li>
                             <li onclick="switchGraphsTab()">
                                 <a  data-toggle="tab">Graphs</a>
-                            </li>
+                            </li> 
                             <li onclick="settings()">
                                 <a  data-toggle="tab">Settings</a>
                             </li>
@@ -80,11 +88,19 @@
                                 <a  data-toggle="tab">Rules</a>
                             </li>
                         </ul>
+                       
                         
                       
                     </div> <!-- navbar-collapse-->
                     
-                    <a href="/logout" class="btn btn-default pull-right"><span class="fa fa-sign-out"></span> Logout</a>  
+                             
+                 <!-- container-fluid-->
+               </div> <!--container-fluid -->    
+            </nav>
+            
+                 <br>  
+                    
+                   <a href="/logout" class="btn btn-default pull-right"><span class="fa fa-sign-out"></span> Logout</a>  
                     
                     
                     <button class="btn btn-default" type="button">
@@ -113,11 +129,10 @@
                     
                     
                    
-                 <!-- container-fluid-->
-                  
-            </nav>
+               
             
             <br>
+           <!-- <div class="container">-->
             <div id="body" class = "row">
             
             
@@ -231,7 +246,7 @@
                         
                         <div class="panel-body" id="nodes_container">
                         
-                        
+                         
                         
                         
                             
@@ -256,23 +271,38 @@
                     <div class="panel panel-default">
                         <div class="panel-heading">
                            <strong>Graphs  </strong>
-                           <btn class="btn btn-default" id = "Rain" onClick= "getgraphs('RainRate')">Rain</btn>
-                            <btn class="btn btn-default" id = "Power" onClick= "getgraphs('Power')">Power</btn>
+                           
                             <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
                             
                         </div>
                         
-                        
-                        <div class="panel-body" id="graphs_container">
-                        
-                        
-                           
-                               
-                              <!-- <canvas id="myChart" width="400" class="col-xs-12"></canvas>-->
+                        <div class = "well" id="graph_buttons">
                            
                         </div>
-                    </div>
-                </div>            
+                       
+                        <div class="panel-body" id="graphs_container">
+                        <div  id="dashboard_div">
+                            <table style="width: 100%;">
+                                <tbody >
+                                    <tr>
+                                        <td>
+                                          <div id="filter_div" style="width: 100%; height: 50px;" data-role="rangeslider"></div>
+                                        </td>  
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                        
+                                          <div id="curve_chart" style="width: 100%; height:500px;"></div>
+                                          </td>  
+                                    </tr>
+                              </tbody>
+                           </table>    
+                              <!-- <canvas id="myChart" width="400" class="col-xs-12"></canvas>-->
+                            </div>
+                        </div>
+                    
+                </div>  
+                </div>
                 
           
                 <!---------------------Rules PANEL----------------->
@@ -341,6 +371,8 @@
                
                
                
+               
+              
              <!--Rules Add Modal -->  
                
             
@@ -511,7 +543,48 @@
 			    </div>
 			</div><!--  end confirm modal -->
 			
+			<!--Confirm toggle time Modal -->
+            	
+            	<div class="modal fade in" id="toggleTime" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			    <div class="modal-dialog">
+			        <div class="modal-content">
+			            <div class="modal-header">
+			                <h4>Choose toggle time</h4>
+			            </div>
+			            <div class="modal-body">
+			               <p>Please choose the time for device to stay on for:</p>
+			               <btn class="btn btn-default col-xs-8" onclick="deviceSwitchChooseTime(0)" data-dismiss="modal">Default</btn>
+			               <btn class="btn btn-default col-xs-8" onclick="deviceSwitchChooseTime(10)" data-dismiss="modal">10 mins</btn>
+			               <btn class="btn btn-default col-xs-8" onclick="deviceSwitchChooseTime(30)" data-dismiss="modal">30 mins</btn>
+			               <btn class="btn btn-default col-xs-8" onclick="deviceSwitchChooseTime(60)" data-dismiss="modal">60 mins</btn>
+			               <btn class="btn btn-default col-xs-8" onclick="deviceSwitchChooseTime(1440)" data-dismiss="modal">24 Hrs</btn>
+			            </div>
+			            <div class="modal-footer">
+			                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+			               
+			            </div>
+			        </div>
+			    </div>
+			</div><!--  end confirm modal -->
 			
+			
+			
+			
+			<!--sonoff Modal -->
+            	
+            	<div class="modal fade in" id="sonoff-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+			    <div class="modal-dialog">
+			        <div class="modal-content">
+			            <div class="col-sm-12"> 
+                            <object id="sonoffwebshow" class="col-sm-12"  type="text/html" data="" height="750px" style="overflow:auto;border:5px ridge black;background:white">
+                            </object>
+                         </div>
+			        </div>
+			    </div>
+			</div><!--  end sonoff modal -->
+			
+			
+			 
             	
             	<!--Confirm Delete Modal -->
             	
@@ -878,7 +951,7 @@
                     </div> <!-- panel -->
                 </div> <!-- event panel  -->
                 
-               
+          <!--  </div>    <!-- end container -->   
                
                <!--confirm modal-->
 				<div class="modal fade" id="addNodeModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -1618,7 +1691,7 @@
             </div> <!--row-->
         
         
-        </div> <!--container-fluid -->
+       
         
         
           <script src="/scripts/d3.min.js"></script>
@@ -1648,8 +1721,15 @@
       
       
         </script>
+        
+        <script>
+       // Load the Visualization API and the corechart package.
+      //google.charts.load('current', {'packages':['corechart']});
+      google.charts.load('current', {'packages':['corechart', 'controls']});
+      // Set a callback to run when the Google Visualization API is loaded.
+      google.charts.setOnLoadCallback(drawChart);
   
-  
+     </script>
   
 			
 			

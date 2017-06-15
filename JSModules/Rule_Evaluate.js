@@ -6,7 +6,7 @@ var myconsole = require('./myconsole.js');
 exports.checkRule = function(rule,callback){
     myconsole.log("Checking rule: "  + rule);
     
-   data = {'Select':'Conditions,Result,RuleOnTime,FunctionName','whereClause':'Id = ' + rule + ' AND Rule_Enabled = 1'  };
+  var  data = {'Select':'Conditions,Result,RuleOnTime,FunctionName','whereClause':'Id = ' + rule + ' AND Rule_Enabled = 1'  };
     
     db.getdata('Rules',data,function(err,result){
        
@@ -40,7 +40,7 @@ exports.checkRule = function(rule,callback){
         
            //AND Secondary_Item = 0
            
-           data = {'Select':'Status,Second_Id,Secondary_Item','whereClause':where };
+          var  data = {'Select':'Status,Second_Id,Secondary_Item','whereClause':where };
     
             db.getdata('Rule_Items',data,function(err,result2){
                
@@ -77,7 +77,7 @@ exports.checkRule = function(rule,callback){
                   // myconsole.log(eval(cond));
                    
                   var executeRule = eval(cond);
-                 // myconsole.log(cond);
+                  myconsole.log("rule: " + cond);
                   if(executeRule > 0){
                       
                       var res2 = result[0].Result.split(';');
@@ -90,7 +90,7 @@ exports.checkRule = function(rule,callback){
                       if(res2[0] != 0){
                           for(var i = 0;i< res2.length/3;i++){
                               
-                               data = {'Select':'Node_Id,Node_Port,Item_IsVirtual','whereClause':"Id = " + res2[i*3] };
+                            var    data = {'Select':'Node_Id,Node_Port,Item_IsVirtual','whereClause':"Id = " + res2[i*3] };
                                 
                                var value = res2[i*3+2];
                                // myconsole.log(res2 + "  " + i);

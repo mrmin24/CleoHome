@@ -26,7 +26,7 @@ var ackStatus = null;
 var acktimer1,connectTimer;
 var config2;
 var connected = 0;
-var alarmip = '10.0.0.20';
+var alarmip = '192.168.2.20';
 var alarmport = '4025';
 
 function checkAlarmConnected(){

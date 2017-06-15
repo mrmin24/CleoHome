@@ -1378,7 +1378,14 @@ function startDisarmCheck(){
     
             myconsole.log("Retry Disarm");
             disarmRetry++;
-            disarmcommand(0);
+            if(disarmRetry <10)
+            {
+             disarmcommand(0);
+            }else{
+                clearInterval(disarmTimer);
+                disarmRetry = 0;
+                
+            }
             
             
          

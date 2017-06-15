@@ -2,15 +2,15 @@ var db = require('./dbhandler');
 //var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var myconsole = require('../JSModules/myconsole.js');
 var calcTime = require('../JSModules/compareTime');
-var pushOver = require('./public/scripts/pushOver.js');
-
+//var pushOver = require('./public/scripts/pushOver.js');
+ var ruleMon = require('./Rule_Monitor.js');
 var rules = require('./Rule_UpdateStates.js');
 var intervaltime = 1 * 60 * 1000;
 
 
 
-var mySensorio = require('socket.io-client');
-var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+//var mySensorio = require('socket.io-client');
+//var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 
 function start() {
@@ -26,15 +26,17 @@ function start() {
         timeUpdate();
         dayMinutesUpdate();
         myconsole.log("timer started");
-        timer();
+        timerstart();
+        //ruleMon.start();
         
     });
 }
 
-function timer(){
-    timer = setInterval(function(){
+function timerstart(){
     
+   var timer2 = setInterval(function(){
     
+      //  myconsole.log("Time:yyyyyyyyyyyy ");
         timeUpdate();
         dayMinutesUpdate();
        // weekDayUpdate();
@@ -44,24 +46,40 @@ function timer(){
 }
 
 function timeUpdate(){
+       // myconsole.log("time updatexxxxxxxxxxxxxxxxx");
     
-    
-        data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + 'Current_Time' + '"'};
+        var data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + 'Current_Time' + '"'};
         
         db.getdata('Items',data,function(err,result){
            
            if(err){
                
-               myconsole.log(err);
+               myconsole.log("Time:  " + err);
+               
            }else if(result){
                
                
-                newTime = Date.now();
-                data = {'Set':'Item_Current_Value','Where':'Id','Current_State':newTime ,'Name':result[0].Id};
+               var  newTime = Date.now();
+                myconsole.log("time update: " + newTime);
+                
+               var  data = {'Set':'Item_Current_Value','Where':'Id','Current_State':newTime ,'Name':result[0].Id};
                         
-                db.update('Items',data,function(){});   
+                db.update('Items',data,function(err,result){
+                    
+                    if(err){
+                        
+                        myconsole.log("time update err: " + err);
+                        
+                    }else{
+                        
+                        myconsole.log("time update result: " + result);
+                        
+                    }
+                    
+                    
+                });   
                  
-                 
+                 // myconsole.log("time: " + newTime);
                  rules.updateRuleStates(result[0].Id, newTime);
                
                 /* evaluate.evaluateChange(result[0].Id,newTime,function(node,port,state,cancelTime,func){
@@ -96,11 +114,11 @@ function zeroTime(callback){
     myconsole.log("Waiting to zero time. Can take up to 1 min");
     var timezero = 1;
     
-     timer = setInterval(function(){
+    var  timer = setInterval(function(){
     
     
-        date = new Date();
-        timezero = date.getSeconds();
+      var   date = new Date();
+       var  timezero = date.getSeconds();
         
         if(timezero == 0){
             myconsole.log("Time zeroed");
@@ -120,7 +138,7 @@ function zeroTime(callback){
 function dayMinutesUpdate(){
     
     
-        data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + 'Current_Day_Minutes' + '"'};
+       var  data = {'Select':'Id','whereClause':'Item_Name = "Current_Day_Minutes"'};
         
         db.getdata('Items',data,function(err,result){
            
@@ -132,9 +150,9 @@ function dayMinutesUpdate(){
                
                 var newTime = calcTime.calculateMinutes();
                 
+             //   myconsole.log("time: " + newTime);
                 
-                
-                data = {'Set':'Item_Current_Value','Where':'Id','Current_State':newTime ,'Name':result[0].Id};
+              var   data = {'Set':'Item_Current_Value','Where':'Id','Current_State':newTime ,'Name':result[0].Id};
                         
                 db.update('Items',data,function(){});   
                  
@@ -180,7 +198,7 @@ function dayMinutesUpdate(){
 
 function weekDayUpdate(){
     
-    data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + 'Day_Of_Week' + '"'};
+   var  data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + 'Day_Of_Week' + '"'};
         
     db.getdata('Items',data,function(err,result){
        
@@ -189,11 +207,11 @@ function weekDayUpdate(){
            myconsole.log(err);
        }else if(result){
            
-        day = new Date();
+       var  day = new Date();
         day = day.getDay();
         myconsole.log("Setting day to: " + day);
          
-         data = {'Set':'Item_Current_Value','Where':'Id','Current_State':day ,'Name':result[0].Id};
+        var  data = {'Set':'Item_Current_Value','Where':'Id','Current_State':day ,'Name':result[0].Id};
             
          db.update('Items',data,function(){});   
          
@@ -219,5 +237,7 @@ function weekDayUpdate(){
                     
                     
 }
+
+
                    
 exports.start = start;                   
