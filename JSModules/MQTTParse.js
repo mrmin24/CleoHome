@@ -692,7 +692,13 @@ function start() {
 	    			 			var time = 0;
 		    			 		//myconsole.log("Mysensor state" + State);
 		    			 		if(rulereq == 1){
-		    			 			time = State;
+		    			 			if(data_receive[0].Item_Is_Toggle == 1)
+		    			 			{
+		    			 				time = data_receive[0].Item_Toggle_Delay;
+		    			 			}else{
+		    			 				time = State;	
+		    			 			}
+		    			 			
 		    			 		}else{
 		    			 			if(timeOn > 0){
 		    			 				

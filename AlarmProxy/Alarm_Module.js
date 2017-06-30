@@ -976,7 +976,7 @@ function armDisarm(type){
                     nap.manualCommand('0301', false, function(ack, nack, retry) {
 
                         if (ack) {
-
+                              disarmRetry = 10;
                             myconsole.log('Away mode');
                              log.ownDb('Alarm_Items', {
                                             Set: 'Current_State',
@@ -1006,7 +1006,7 @@ function armDisarm(type){
                     nap.manualCommand('0311', false, function(ack, nack, retry) {
 
                         if (ack) {
-
+                              disarmRetry = 10;
                             myconsole.log('Stay mode');
                              log.ownDb('Alarm_Items', {
                                             Set: 'Current_State',
@@ -1062,7 +1062,7 @@ function armDisarm(type){
                                 nap.manualCommand('0711*1', false, function(ack, nack, retry) {
 
                                     if (ack) {
-
+                                          disarmRetry = 10;
                                         log.ownDb('Alarm_Items', {
                                             Set: 'Current_State',
                                             Where: 'Type',
@@ -1332,7 +1332,7 @@ function disarmcommand(retryOn){
     nap.manualCommand('0401', true, function(ack, nack, retry) {
     
         if (ack) {
-    
+              disarmRetry = 10;
              myconsole.log('Disarmed');
              log.ownDb('Alarm_Items', {
                 Set: 'Current_State',
@@ -1390,6 +1390,10 @@ function startDisarmCheck(){
             
          
         }, 700);
+    }else{
+        
+          disarmRetry = 10;
+          clearInterval(disarmTimer);
     }
     
 }
