@@ -28,6 +28,8 @@
     <script src="./scripts/Chart.min.js"></script>
      <script src="/scripts/index_script.js"></script>
       <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      <script src="jsmpeg.min.js"></script>
+      
       
     <!--<script src="./scripts/NoSleep.min.js"></script>-->
      <!-- <script src="/scripts/screenSaver.js"></script>-->
@@ -86,6 +88,10 @@
                              <li onclick="switchRulesTab()">
                                 <!--<a href="./rules" >Rules</a>-->
                                 <a  data-toggle="tab">Rules</a>
+                            </li>
+                            <li onclick="switchCamerasTab()">
+                                <!--<a href="./rules" >Rules</a>-->
+                                <a  data-toggle="tab">Cameras</a>
                             </li>
                         </ul>
                        
@@ -370,7 +376,25 @@
                 </div>
                
                
-               
+            <!---------------------Cameras PANEL----------------->
+                
+                 <div class = "col-xs-12 hidden " id="Rules_Panel"> 
+                
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                           <strong>Cameras  </strong>
+                            <!--<span ></span> <label id="partition1" class = "label label-default">Unknown</label></span>-->
+                            
+                        </div>
+                        
+                        <div class="panel-body" id="cameras_container">
+                            
+                           
+                           
+                        </div>
+                    </div>
+                    
+                </div>   
                
               
              <!--Rules Add Modal -->  

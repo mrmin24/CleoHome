@@ -32,7 +32,11 @@
   var Items = null;
    var TempId = 0;  
   
-      
+//      client = new Websocket('ws://192.168.2.21:9999');
+ //       player = new jsmpeg(client, {
+//            canvas: canvas // Canvas should be a canvas DOM element
+//        });
+                        
   
     j = 1;
     
@@ -309,6 +313,27 @@
           return;
          
      }
+     
+     function switchCamerasTab(){
+         getrules();
+         $("#Alarm_Panel").removeClass().addClass('hidden ');
+         $("#Event_Panel").removeClass().addClass('hidden');
+        $("#Event_Panel_Title").removeClass().addClass('hidden');
+         $("#event_controls").removeClass().addClass('well hidden');
+         $("#alarm_controls").removeClass().addClass('well hidden');
+         $("#Settings_Panel").removeClass().addClass('hidden');
+         
+         $("#Nodes_Panel").removeClass().addClass('hidden');
+         $("#Rules_Panel").removeClass().addClass('hidden');
+         $("#Cameras_Panel").removeClass().addClass('col-xs-12');
+         $("#Graphs_Panel").removeClass().addClass('hidden');
+         
+       //   $("[id$=_Panel_Auto]").removeClass().addClass('hidden');
+          
+          return;
+         
+     }
+     
      
      function switchGraphsTab(){
          console.log("Graphs");

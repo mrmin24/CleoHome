@@ -390,6 +390,41 @@ function start() {
     		
 				}
 				
+				if(jsonMessage.Counter1 >= 0){
+		    	
+		    		myconsole.log("Counter: " + jsonMessage.Counter1.toString());
+		    		
+					data = {'Select':'Node_Id,Node_Port,Item_Current_Value','whereClause':'Item_Name = ' + '"LocalRainCurrent"'};   // can only be one LocalRainCurrent in system
+        
+			        db.getdata('Items',data,function(err,result){
+			           
+			           if(err){
+			               
+			               myconsole.log(err);
+			           }else if(result){
+			           	
+			           		if(result[0].Node_Id == node){
+			               
+			                	myconsole.log("Rain now is: " + result[0].Item_Current_Value);
+			                	
+			                	MQTT_Publish('ctrlOut/'+node+'/Counter1','0',1,false);
+			                	
+			                	
+			                	 socket.emit("sensorStatusChange",node,1,jsonMessage.Counter1,'RainRate');    //update node
+			                
+			           		}
+			                
+			                
+			           }
+			           
+			           
+			        });
+			    
+		                    
+		          
+		        }
+		        
+		        
 				if(jsonMessage.DS18x20.DS1.Temperature){
 		    	
 		    		myconsole.log("Temp: " + jsonMessage.DS18x20.DS1.Temperature.toString());
@@ -399,6 +434,9 @@ function start() {
 		                    
 		           socket.emit("sensorStatusChange",node,99,jsonMessage.DS18x20.DS1.Temperature,'Temp');    //update node
 		        }
+		        
+		        	
+				
 				     
 			    
 		    	

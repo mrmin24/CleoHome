@@ -4,6 +4,7 @@ var db = require('./dbhandler');
 var pushOver = require('./public/scripts/pushOver.js');
 var myconsole = require('./myconsole.js');
 var intervaltime = 15 * 60 * 1000;
+var intervaltime2 = 15 * 1000;
 var rules = require('./Rule_UpdateStates.js');
 
 var log = require('./logger.js');
@@ -19,11 +20,20 @@ const moreletta = 8030071;
 function start() {
    // myconsole.log(debug);
     checkWeather(wingate);
+    checkLocalWeather();
     timerweather = setInterval(function(){
 
         checkWeather(wingate);
+       
 
     },intervaltime);
+    
+    timerweather2 = setInterval(function(){
+
+        
+        checkLocalWeather();
+
+    },intervaltime2);
     
 }
 
@@ -84,6 +94,33 @@ function checkWeather(city){
 //callback2();
 }
 
+
+function checkLocalWeather(){
+    
+    myconsole.log("Check local weather");
+    
+     data = {'Select':'Id,Item_Current_Value','whereClause':'Item_Name = ' + '"LocalRainCurrent"'};   // can only be one LocalRainCurrent in system
+        
+        db.getdata('Items',data,function(err,result){
+           
+           if(err){
+               
+               myconsole.log(err);
+           }else if(result){
+               
+                myconsole.log("Rain now is: " + result[0].Item_Current_Value);
+                
+                
+                
+                
+           }
+           
+           
+        });
+    
+    
+    
+}
 function error(){
     
     if(backup == 0){

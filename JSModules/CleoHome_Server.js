@@ -1087,7 +1087,7 @@ MQTTsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
    //var evaluate = require('../JSModules/Rule_Items_Evaluate');
    
    
-     db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
+     db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated,Item_Type',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
         // myconsole.log(data_receive);
          if(data_receive[0]){
                     //myconsole.log(data_receive);
