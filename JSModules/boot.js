@@ -1,5 +1,5 @@
 var myconsole = require('./myconsole.js');
-
+var sleep = require('sleep');
 var debug = 0;
 
 process.argv.forEach(function (val, index, array) {
@@ -16,10 +16,10 @@ process.argv.forEach(function (val, index, array) {
 
 
 const startup_delay = 1000; 
-const startup_delay2 = 60 * 1000; 
+const startup_delay2 = 30 * 1000; 
 
 myconsole.log('Controller active, delay for router is ' + startup_delay/1000  + ' seconds, please wait...');
-
+var ruleMon = null;
 
 var timer = setTimeout(function() {
  myconsole.log('starting....');       
@@ -27,42 +27,43 @@ var timer = setTimeout(function() {
     
     
     Config.config(function(){
+     ruleMon = require('./Rule_Monitor.js');    
     
-    var Server = require('./CleoHome_Server.js');
     
     var Events = require('./Event_Handler.js');
     var Alarm = require('../AlarmProxy/Alarm_Module.js');
     var mqtt = require('./MQTTParse.js');
     var mySensor = require('./mySensorsParse.js');
-    //var ESP8266 = require('./ESP8266Parse.js');
+   
     var Suncalc = require('./SunCalc.js');
     var Time = require('./timeUpdate');
     var Weather = require('./weatherUpdate');
-    //var ruleMon = require('./Rule_Monitor.js');    
+   ////////// //var ruleMon = require('./Rule_Monitor.js');    
     var Health = require('./health.js');
-    
-  //  var ping = require('./ping.js');
- //  var Rules = require('./Rule_Evaluate.js');
-    
-    
-    
-    Alarm.start();
-    Events.start();
-    mqtt.start();
-    mySensor.start();
+    var Server = require('./CleoHome_Server.js');
    
-    Server.start();
-    Suncalc.start();
-    Time.start();
-    Weather.start();
-    Health.start();
+    
+    
+    
+   try{Alarm.start();} catch(e){myconsole.dumpError(e)}
+    try{Events.start();} catch(e){myconsole.dumpError(e)}
+    try{mqtt.start();} catch(e){myconsole.dumpError(e)}
+    try{ mySensor.start();} catch(e){myconsole.dumpError(e)}
+  
+     try{Server.start();} catch(e){myconsole.dumpError(e)}
+    try{Suncalc.start();} catch(e){myconsole.dumpError(e)}
+    try{Time.start();} catch(e){myconsole.dumpError(e)}
+   try{ Weather.start();} catch(e){myconsole.dumpError(e)}
+   
+   
+   
+   
+   // Health.start();
     
      if(debug < 2)
        delayStart();
     
-  // ruleMon.start();
-    
-   // ping.start();
+  
   
   
     
@@ -76,7 +77,7 @@ var timer = setTimeout(function() {
 
 function delayStart(){
     var timer2 = setTimeout(function() {
-     var ruleMon = require('./Rule_Monitor.js');    
+     
      
      
      
@@ -94,3 +95,5 @@ function delayStart(){
     
     
 }
+
+

@@ -29,7 +29,7 @@ exports.config = function(callback) {
    
     
    
-}             
+}    ;         
             
             
             

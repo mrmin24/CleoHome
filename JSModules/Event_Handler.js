@@ -129,14 +129,14 @@ function setListen(type,lastId,callback){
     
     // if(timer2){clearInterval(timer2);}
    
-   timer2 =  setInterval(function() {
+   vartimer2 =  setInterval(function() {
        
        // myconsole.log(type + " " + lastId);
        
         db.getdata('Event_Log',{Select: 'Id,Type, Event, Time',whereClause:'Type = ' + type + ' AND Id > '+ lastId},function(err2,data_receive2){
                         if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR : ",err);            
+                            myconsole.log("ERROR : ",err2);            
                         } else {  
                            // myconsole.log(data_receive2);
                         // code to execute on data retrieval

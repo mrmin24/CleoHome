@@ -6,9 +6,9 @@
     const Network_Type = 20;
     const Virtual_Type = 15;
     const Virtual_Alarm_Type = 18;
-     const Device_Type = 2;
+    const Device_Type = 2;
     
-    var socket = io();
+    var socket = io({transports: ['websocket'], upgrade: false});   //added options for some reason otherwise clietn disconnects   {transports: ['websocket'], upgrade: false}
     var eventdroptext = 10;
     
     var names = [];
@@ -38,7 +38,7 @@
 //        });
                         
   
-    j = 1;
+   var j = 1;
     
     setUpDropdowns();
    
@@ -63,6 +63,7 @@
         
    
         showAllEvents(numEvents2,false);
+        
        socket.emit('firstConnect');
         setUpDropdowns();
         getWeather();
@@ -982,74 +983,75 @@
     socket.on('PageTabs',function(data){
         
         tabData = data;
-       // console.log(data);
-        
-            var unique = {};
-            var distinct = [];
-             var newHtml = '';
-             
-             var unique2 = {};
-           
-             var newHtml2 = '';
-            for( var i in data ){
-             if( typeof(unique[data[i].D1]) == "undefined"){
-              distinct.push(data[i].D1);
-              //console.log(distinct);
-              
-             }
-             unique[data[i].D1] = 0;
-              
+        // console.log(data);
+
+        var unique = {};
+        var distinct = [];
+        var newHtml = '';
+
+        var unique2 = {};
+
+        var newHtml2 = '';
+        for (var i in data) {
+            if (typeof(unique[data[i].D1]) == "undefined") {
+                distinct.push(data[i].D1);
+                //console.log(distinct);
+
             }
-            
-            
-            for( var i in distinct ){ 
-                
-               newHtml += '<li onclick=checkVisible("'+distinct[i]+'")><a  data-toggle="tab" >' + distinct[i] + '</a></li>';
-             }
-               //switch' + distinct[i]+ 'Tab()
-                var radioFragment = document.getElementById('tabs');
-                radioFragment.innerHTML =  newHtml + radioFragment.innerHTML ;
-                 
-         
-            
-            
-        
-            for( var i in data ){
-             if( typeof(unique2[data[i].D2]) == "undefined"){
-              distinct2.push(data[i].D2);
-              //console.log(distinct);
-              
-             }
-             unique2[data[i].D2] = 0;
-              
+            unique[data[i].D1] = 0;
+
+        }
+
+
+        for (var i in distinct) {
+
+            newHtml += '<li onclick=checkVisible("' + distinct[i] + '")><a  data-toggle="tab" >' + distinct[i] + '</a></li>';
+        }
+        //switch' + distinct[i]+ 'Tab()
+        var radioFragment = document.getElementById('tabs');
+        radioFragment.innerHTML = newHtml + radioFragment.innerHTML;
+
+
+
+
+
+        for (var i in data) {
+            if (typeof(unique2[data[i].D2]) == "undefined") {
+                distinct2.push(data[i].D2);
+                //console.log(distinct);
+
             }
-            
-            
-            for( var i in distinct2 ){ 
-                
-               newHtml2 += ' <div class = "col-xs-12 " id="'+ distinct2[i] +'_Panel_Auto">' 
-                
-                    + '<div class="panel panel-default"><div class="panel-heading"><strong>'+ distinct2[i] +'</strong>'
-                            + '</div><div class="panel-body" id="'+ distinct2[i] +'_container"></div></div></div>'  ;
-                            
-                             
-             }
-               
-            var eventHTML = ' <div class = "col-xs-12 "  id="Event_Panel">' + $("#Event_Panel").html(); + '</div';
-           // console.log(eventHTML);
-            
-            $("#Event_Panel").remove();
-          
-                
-             var radioFragment = document.getElementById('body');
-                
-             radioFragment.innerHTML =   radioFragment.innerHTML + newHtml2 + eventHTML ;
-           
-       
-        
-        
-        
-            checkVisible("Home");  
+            unique2[data[i].D2] = 0;
+
+        }
+
+
+        for (var i in distinct2) {
+
+            newHtml2 += ' <div class = "col-xs-12 " id="' + distinct2[i] + '_Panel_Auto">'
+
+            +
+            '<div class="panel panel-default"><div class="panel-heading"><strong>' + distinct2[i] + '</strong>' +
+                '</div><div class="panel-body" id="' + distinct2[i] + '_container"></div></div></div>';
+
+
+        }
+
+        var eventHTML = ' <div class = "col-xs-12 "  id="Event_Panel">' + $("#Event_Panel").html(); + '</div';
+        // console.log(eventHTML);
+
+        $("#Event_Panel").remove();
+
+
+        var radioFragment2 = document.getElementById('body');
+
+        radioFragment2.innerHTML = radioFragment2.innerHTML + newHtml2 + eventHTML;
+
+
+
+
+
+        checkVisible("Home");
     });
     
     

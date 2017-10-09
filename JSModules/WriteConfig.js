@@ -6,7 +6,7 @@ exports.json2xml = function(json, root, cb){
 	var isArray = function(obj) { return obj.constructor == Array; };
 	
 	var parseAttributes = function(node){
-		for(key in node){
+		for(var key in node){
 			var value = node[key];
 			
 			if(value == '<') value = '&lt;';
@@ -28,7 +28,7 @@ exports.json2xml = function(json, root, cb){
 			} else {
 				xml += '>';
 			}
-			for(key in node){
+			for(var key in node){
 				var value = node[key];
 				if(value == '<') value = '&lt;';
 			    if(value == '>') value = '&gt;';
@@ -60,7 +60,7 @@ exports.json2xml = function(json, root, cb){
 		
 		if (recursion === 0) {
 		    
-		    var fs = require('fs')
+		    var fs = require('fs');
 		    
 		    fs.writeFile('./config.xml',xml, function(err, data) {
                 if(err)

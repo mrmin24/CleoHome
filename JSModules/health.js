@@ -16,7 +16,7 @@ function start() {
     myconsole.log("Health check started");
    
     checkNodeHealth();
-    timer2 = setInterval(function(){
+    var timer2 = setInterval(function(){
 
 
         checkNodeHealth();

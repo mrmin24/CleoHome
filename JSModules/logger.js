@@ -4,7 +4,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 //var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var mySensorio = require('socket.io-client');
-var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+//var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 var myconsole = require('./myconsole.js');
 
 
@@ -18,7 +18,7 @@ exports.logger = function(type,event) {
 	
 	
 	return null;
-}
+};
 
 
 exports.ownDb = function(type,data) {
@@ -46,7 +46,7 @@ exports.ownDb = function(type,data) {
     return null;
 	
 
-}
+};
 
 
 /*function getID(name,callback){

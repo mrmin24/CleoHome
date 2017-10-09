@@ -2,17 +2,11 @@ var flash  = require('connect-flash');
 var express = require('express');
 var passport = require('passport');
 var app = express();
-var http = require('http').Server(app);
-//var app2 = express();
-//var ip = require('external-ip');
-//var routes = require('./routes');
-//var router = express.Router();
+var http = require('http').createServer(app);
+
 
 var rules = require('./Rule_UpdateStates.js');
 
- 
-//var nodeadmin = require('nodeadmin');
-//app2.use(nodeadmin(app2));
 
 
 var bodyParser = require('body-parser');
@@ -39,30 +33,30 @@ var configure2 = configure.xml;
 var gatewayStatus = 0;
 var ROWS = 0;
 
-var eventio = require('socket.io-client');
-var eventsocket = eventio.connect('http://localhost:' + configure2.eventmodule[0].port[0]);
+//var eventio = require('socket.io-client');
+//var eventsocket = eventio.connect('http://localhost:' + configure2.eventmodule[0].port[0]);
 
-var alarmio = require('socket.io-client');
-var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0].port[0]);
+//var alarmio = require('socket.io-client');
+//var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0].port[0]);
 
-var mySensorio = require('socket.io-client');
-var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+//var mySensorio = require('socket.io-client');
+//var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 
-var rulesio = require('socket.io-client');
-var rulessocket = rulesio.connect('http://localhost:'+ 44603);
+//var rulesio = require('socket.io-client');
+//var rulessocket = rulesio.connect('http://localhost:'+ 44603);
 
 var MQTTio = require('socket.io-client');
-var MQTTsocket = MQTTio.connect('http://localhost:'+ 44607);
+var MQTTsocket = MQTTio.connect('http://localhost:'+ 44607,{query:"name=Server",'force new connection': true});  //, {'force new connection': true}
 
+var io = null;
 
-
-const Virtual_Item_Type = 15
+const Virtual_Item_Type = 15;
 const Virtual_Alarm_Item_Type = 18;
 const Phone_Item_Type = 20;
 var nodeCheckInterval = 60000;
 
-var port = configure2.server[0].port[0];   
+var port =  configure2.server[0].port[0];   //port must be redirected to this port on debian using 'sudo iptables -A PREROUTING -t nat -i eth0 -p tcp --dport 80 -j REDIRECT --to--port 8080   use -D to undo'
 
 var myconsole = require('./myconsole.js');
 
@@ -99,62 +93,397 @@ var externalip = "127.0.0.1";
 
 require('./routes/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
-var io = require('socket.io')(http);
+try{
+  io = require('socket.io')(http);
+  
+ 
+ try{
+  
+  http.listen(port);
+  
+ }catch(e){
+   myconsole.log(e);
+ }
+ 
+ myconsole.log("Server on PORT: " + port);
+ 
+ 
+}catch(e){
+ 
+ myconsole.log(e);
+}
 
-http.listen(port);
+  const ipc = require('node-ipc');
+   
+//const ipc=require('../../../node-ipc');
+
+/***************************************\
+ *
+ * You should start both hello and world
+ * then you will see them communicating.
+ *
+ * *************************************/
+
+
  var oldip = externalip;  
 
-
+ //myconsole.log(io);
+ 
+ myconsole.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 function start() {
     //log(debug);
+    
+ //myconsole.log(io);
+  
+ipc.config.id = 'Server';
+ipc.config.retry= 1500;
+//ipc.config.silent = true;
+
+ipc.connectTo(
+    'MQTTParse',
+    function(){
+        ipc.of.MQTTParse.on(
+            'connect',
+            function(){
+                
+                myconsole.log(' CleoServer connected to MQTT Parser with IPC ##');
+                
+            }
+        );
+        ipc.of.MQTTParse.on(
+            'disconnect',
+            function(){
+               
+            }
+        );
+        
+        ipc.of.MQTTParse.on(
+            'deviceConnected',
+            function(){
+               
+                myconsole.log('vvvvvvvvvvvvvvvvvvvvv   ');
+               
+            }
+        );
+        
+        ipc.of.MQTTParse.on('deviceStatusChange',function(nodeData){
+           myconsole.log("Device Status Change4" + " " + nodeData['NodeID'] + " " + nodeData['NodePort'] + " " + nodeData['State']);
+          // State = parseInt(State);
+          // myconsole.log(nodeData['State']);
+            
+         // var evaluate = require('../JSModules/Rule_Items_Evaluate');
+          if(nodeData['State'] > 0){nodeData['State'] = 1;}
+          
+            db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
+              // myconsole.log(err2);
+               myconsole.log(data_receive);
+                if(data_receive[0]){
+                           
+                         var  ID = data_receive[0].Id;
+                         var   enabledValue = data_receive[0].Item_Enabled_Value;
+                           
+                        var   data = {Set:'Item_Current_Value',Current_State:nodeData['State'],Where:"Id",Name:ID};
+                           db.update("Items",data,function(err2,data_receive2){
+                                 
+                                 
+                               
+                                if(data_receive2){
+                                   // myconsole.log("data: " + ID + " " + enabledValue);
+                                    io.emit('DeviceEvent', {Id:ID,Current_State:nodeData['State'],Item_Enabled_Value:enabledValue});
+                                
+                                    rules.updateRuleStates(ID, nodeData['State']);
+                                   
+                                   /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
+                                        
+                                        eval(func);
+                                        
+                                        if(node && port && state){
+                                         mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                        }
+                                        
+                                        if(cancelTime){
+                                                    
+                                            mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                        }
+                                        
+                                         if(virtual == 1){
+                                            virtualDeviceStatusChange(node,state);
+                                          
+                                            
+                                        }
+                                    //myconsole.log(data_receive[0]);
+                                    });*/
+                                    
+                                    
+                                }else
+                                {
+                                   myconsole.log(err2); 
+                                    
+                                }
+                               
+                           }); 
+               }else 
+               if(err2)
+               {
+                   myconsole.log(err2);
+               }
+                
+            });
+           
+          
+           
+           
+       });    //devicestatuschange
+    
+
+   
+       ipc.of.MQTTParse.on('newNode',function(nodeData){
+        
+         myconsole.log(nodeData['newNodeIP']);
+         io.emit('newNode',nodeData['newNodeId'],nodeData['newNodeIP'],nodeData['oldId']);
+        
+        
+        
+        
+       });   //newNode
+       
+       
+       //MQTTsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
+       
+       
+       
+       ipc.of.MQTTParse.on('sensorStatusChange',function(nodeData){   //NodeID,NodePort,State,Type
+           //myconsole.log("Device Status Change");
+          // myconsole.log(NodePort);
+          //var evaluate = require('../JSModules/Rule_Items_Evaluate');
+          
+          
+            db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated,Item_Type',whereClause:'Node_Id = ' + nodeData['NodeID.toString()'] + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
+               // myconsole.log(data_receive);
+                if(data_receive[0]){
+                           //myconsole.log(data_receive);
+                         var  ID = data_receive[0].Id;
+                         var currentValue = data_receive[0].Item_Current_Value;
+                         var updateTime = data_receive[0].Time_Updated;
+                         var doUpdate = false;
+                         var timediff = (new Date() - new Date(updateTime))/1000;
+                         myconsole.log("Time diff1: " + timediff);
+                         
+                         if((nodeData['State'] <= currentValue - 0.3) || (nodeData['State'] >= currentValue + 0.3) || (timediff >= 5*60) ){
+                           doUpdate = true;
+                         }
+                         
+                         if(doUpdate == true){
+                        //  myconsole.log("Updated: " + State + " " + (currentValue - 0.3) + " " + (currentValue + 0.3) + " " + (timediff >= 5*60)  );
+                         // var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                          // db.update("Items",data,function(err2,data_receive2){
+                          var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+                          
+                          var time = (new Date(Date.now() - tzoffset)).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+                          
+                         //  myconsole.log(time);
+                          db.getSQL("Update Items SET Item_Current_Value = " + nodeData['State'] + " ,Time_Updated = '" + time + "' WHERE Id = " + ID,function(err2,data_receive2){
+                                 
+                                 //	myconsole.log("Server: Sensor updated");
+                               
+                                if(data_receive2){
+                                   // myconsole.log(ID + " " + State);
+                                    io.emit('SensorEvent', {Id:ID,Current_State:nodeData['State']});
+                                     log.logger(nodeData['Type'], '{"Item_Id":"'+ID+'","Node":"'+nodeData['NodeID'] +'","Value":"'+ nodeData['State'] +'"}');
+                                    rules.updateRuleStates(ID, nodeData['State']);
+                                    
+                                  
+                                    
+                                    
+                                }else
+                                {
+                                   myconsole.log(err2); 
+                                    
+                                }
+                               
+                           }); 
+                          doUpdate = false;
+                         }
+               }else 
+               if(err2)
+               {
+                   myconsole.log(err2);
+               }
+                
+            });
+           
+          
+           
+           
+       });   //sensorstatuschange
+
+ 
+
+     ipc.of.MQTTParse.on('nodeAlive',function(nodeData){   //NodeID,Status
+          var timenow = new Date().getTime();
+        var   data = {Set:'Status',Current_State:nodeData['Status'].toLowerCase(),Where:"Node_Port",Name:nodeData['NodeID']};
+          db.update("Nodes",data,function(err2,data_receive){
+                   
+                   
+                 
+                  if(data_receive){
+                      myconsole.log(nodeData['NodeID'] + " " + nodeData['Status']);
+                    var   data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:nodeData['NodeID']};
+                      db.update("Nodes",data2,function(err2,data_receive2){
+                                
+                                
+                              
+                               if(data_receive2){
+                                  // myconsole.log(ID + " " + State);
+                                   myconsole.log("Node state updated");
+                                   
+                                   if(nodeData['Status'].toLowerCase() == "offline"){
+                                    
+                                   var  data3 = {Set:'Item_Current_Value',Current_State:3,Where:"Node_Id",Name:nodeData['NodeID']};
+                                    db.update("Items",data3,function(err2,data_receive3){
+                                
+                                
+                              
+                                            if(data_receive3){
+                                               // myconsole.log(ID + " " + State);
+                                                myconsole.log("Node state updated2");
+                                                
+                                                db.getdata('Items',{Select: 'Id,Item_Current_Value,Item_Enabled_Value',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() },function(err2,data_receive4){
+                                                   myconsole.log(data_receive4[0]);
+                                                   if(data_receive4[0]){
+                                                              myconsole.log(data_receive4[0].Id);
+                                                            
+                                                              for(var i = 0;i<data_receive4.length;i++){
+                                                               
+                                                               
+                                                                 io.emit('DeviceEvent', {Id:data_receive4[i].Id,Current_State:data_receive4[i].Item_Current_Value,Item_Enabled_Value:data_receive4[i].Item_Enabled_Value});
+                                               
+                                                               
+                                                               
+                                                              }
+                                                              
+                                                              
+                                                  }else 
+                                                  if(err2)
+                                                  {
+                                                      myconsole.log(err2);
+                                                  }
+                                                   
+                                               });
+                                              
+                                               
+                                                
+                                                
+                                            }else
+                                            {
+                                               myconsole.log(err2); 
+                                                
+                                            }
+                                           
+                                   });
+                                    
+                                    
+                                   }
+                                   
+                                   
+                               }else
+                               {
+                                  myconsole.log(err2); 
+                                   
+                               }
+                              
+                      });
+                      updateNodeStatus(nodeData['NodeID']);
+                      
+                  }else
+                  {
+                     myconsole.log(err2); 
+                      
+                  }
+                 
+         }); 
+         
+         
+     });   //nodeAlive
+
+
+          ipc.of.MQTTParse.on('updateNodeStatus',function(nodeData){
+             var timenow = new Date().getTime();
+             myconsole.log("MQTT: nodeupdate");
+             var  data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:nodeData['NodeID']};
+              db.update("Nodes",data2,function(err2,data_receive2){
+                        
+                        
+                      
+                       if(data_receive2){
+                          // myconsole.log(ID + " " + State);
+                           myconsole.log("Node state updated");
+                           
+                           
+                       }else
+                       {
+                          myconsole.log(err2); 
+                           
+                       }
+                      
+              });
+              updateNodeStatus(nodeData['NodeID']);
+              
+          });  //updateNodeStatus
+
+ 
+ 
+ 
+ 
+ 
     setStartupStatus(); 
-    updateIP();
+  //  updateIP();
+  
     var nodeinterval = setInterval(updateNodeStatus,nodeCheckInterval);
     var dnsinterval = setInterval(function() {
       
-       
    
-    updateIP();
+   
+   // updateIP();
         
      
     
     } ,1000*60*configure2.server[0].dnsinterval[0]);
     
-
   
+  myconsole.log("ioXXXXXXXXXXXXXXXXXXX");
 
-io.on('connection', function(socket){
- 
+io.on('connection', function(Websocket){
    myconsole.log('Server: Client Connected');
 
-   getAlarmTriggers(lastArmTime,socket); 
+   getAlarmTriggers(lastArmTime,Websocket); 
    
-   sendGatewayStatus(socket);
+   sendGatewayStatus(Websocket);
      
    
- socket.on('firstConnect',function(){
+ Websocket.on('firstConnect',function(){
   
   
-   sendPageTabs(socket);
+   sendPageTabs(Websocket);
    
-   getAlarmStatus(socket,1);   //send on update
-   getDeviceStatus(socket);   //send on update
-   getNodeStatus(socket);    //send on update
+   getAlarmStatus(Websocket,1);   //send on update
+   getDeviceStatus(Websocket);   //send on update
+   getNodeStatus(Websocket);    //send on update
    getGraphButtons();
    
-   sendConfig(socket); 
+   sendConfig(Websocket); 
   
   
  });
  
- socket.on('ReConnect',function(){
-  getAlarmStatus(socket,0);   //send on update
+ Websocket.on('ReConnect',function(){
+  getAlarmStatus(Websocket,0);   //send on update
   getLatestAlarmStatus();
   getLatestVirtualStatus();
   getGraphButtons();
  });
   
-  socket.on('disconnect',function(socket){
+  Websocket.on('disconnect',function(Websocket){
      
      
      
@@ -168,7 +497,7 @@ io.on('connection', function(socket){
      }
   });
   
-  socket.on('updateconfig',function(config_receive){
+  Websocket.on('updateconfig',function(config_receive){
      // myconsole.log(config_receive);
      writeXML.json2xml(config_receive,'xml',function(xml){
          getconfig.config(function(){
@@ -180,18 +509,18 @@ io.on('connection', function(socket){
          });
        
          
-     })
+     });
      
       
   });
   
-  socket.on('getusers',function(){
+  Websocket.on('getusers',function(){
       
       sendusers();
       
   });
   
-  socket.on('saveNode',function(data){
+  Websocket.on('saveNode',function(data){
     
      saveNode(data);
    
@@ -201,25 +530,25 @@ io.on('connection', function(socket){
   
   
   
-  socket.on('getrules',function(){
+  Websocket.on('getrules',function(){
       
       sendrules();
       
   });
   
-  socket.on('getgraphs',function(type,itemId){
+  Websocket.on('getgraphs',function(type,itemId){
       
       sendgraphs(type,itemId);
       
   });
   
-  socket.on('getItems',function(callback){
+  Websocket.on('getItems',function(callback){
         myconsole.log('items requested');
       senditems();
       callback();
   });
   
-  socket.on('delete_user',function(userId,username){
+  Websocket.on('delete_user',function(userId,username){
       //myconsole.log(userId);
       db.deletedata('users',{whereClause:'id = "' + userId + '"'},function(){
           
@@ -236,7 +565,7 @@ io.on('connection', function(socket){
       
       
   });
-  socket.on('delete_user_token',function(username){
+  Websocket.on('delete_user_token',function(username){
       //myconsole.log(userId);
       
           db.deletedata('user_logins',{whereClause:'Username = "' + username + '"'},function(){
@@ -248,7 +577,7 @@ io.on('connection', function(socket){
      
   });
   
-  socket.on('deleteRule',function(rule){
+  Websocket.on('deleteRule',function(rule){
       //myconsole.log(userId);
       
          deleteRule(rule);
@@ -257,7 +586,7 @@ io.on('connection', function(socket){
   });
   
   
-  socket.on('getEvents',function(data){
+  Websocket.on('getEvents',function(data){
     
     
     
@@ -267,7 +596,7 @@ io.on('connection', function(socket){
     
 });
 
- socket.on('getImportantEvents',function(data){
+ Websocket.on('getImportantEvents',function(data){
     
     
    // myconsole.log(data);
@@ -278,7 +607,7 @@ io.on('connection', function(socket){
     
 });
 
- socket.on('getLastAlarm',function(data){
+ Websocket.on('getLastAlarm',function(data){
     
     
    // myconsole.log(data);
@@ -289,21 +618,21 @@ io.on('connection', function(socket){
     
 });
 
- socket.on('armDisarmAlarm',function(type){
+ Websocket.on('armDisarmAlarm',function(type){
     
-   myconsole.log(type + " requested") 
+   myconsole.log(type + " requested") ;
    alarmsocket.emit('armDisarmAlarm',type);
     
     
 });
 
   
- socket.on('bypassZone',function(zones,callback){
+ Websocket.on('bypassZone',function(zones,callback){
     
     var cancelBypass = [];
     cancelBypass.length = 0;
    
-     alarmsocket.emit('bypassZones',zones,function(err,ack,zones){
+     alarmsocket.emit('bypassZones',zones,function(err2,ack,zones){
          //myconsole.log(zones);
         
         for(var i in zones){
@@ -324,14 +653,14 @@ io.on('connection', function(socket){
             
         }
         myconsole.log("Bypassed zones are " + bypassedZones);
-       callback(err,ack,bypassedZones,cancelBypass);
+       callback(err2,ack,bypassedZones,cancelBypass);
          
          
      });
     }); 
     
     
- socket.on('clearBypassZone',function(){
+ Websocket.on('clearBypassZone',function(){
     
        clearBypass();
         
@@ -342,14 +671,14 @@ io.on('connection', function(socket){
     
     
     
- socket.on('panic',function(){
+ Websocket.on('panic',function(){
     
     panic();
    
      
     });    
     
- socket.on('refreshIP',function(){
+ Websocket.on('refreshIP',function(){
     
         getip(function(ip){
             
@@ -372,13 +701,13 @@ io.on('connection', function(socket){
     
     
     
-    socket.on('getWeather',function(){
+    Websocket.on('getWeather',function(){
         getWeather();
         
    
     });
     
-    socket.on('getPower',function(){
+    Websocket.on('getPower',function(){
          //  myconsole.log('test1'); 
         getPower();
         
@@ -386,22 +715,22 @@ io.on('connection', function(socket){
     });
 
 
-    socket.on('test',function(){
+    Websocket.on('test',function(){
        // test();
         
    
     });
     
-    socket.on("getNodesStatus",function(node){
+    Websocket.on("getNodesStatus",function(node){
        // myconsole.log("test");
         
         getNodeStatus();
     });
     
-    socket.on('deviceSwitch',function(Id,timeOn){
+    Websocket.on('deviceSwitch',function(Id,timeOn){
     //  myconsole.log("deviceSwitch1");
-      
-        db.getdata('Items',{Select: 'Item_Type,Item_Current_Value,Node_Id,Node_Port',whereClause:'Id = ' + Id.toString()},function(err,data_receive){
+      try{
+        db.getdata('Items',{Select: 'Item_Type,Item_Current_Value,Item_Toggle_Delay,Node_Id,Node_Port',whereClause:'Id = ' + Id.toString()},function(err2,data_receive){
       //	 myconsole.log("deviceSwitch: " + data_receive);
       	  if(data_receive){
       	      
@@ -412,9 +741,39 @@ io.on('connection', function(socket){
           	       virtualDeviceStatusChange(Id,0);
           	    }else
           	    {
-                 mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0,0,timeOn);
-                 MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0,0,timeOn);
-                 myconsole.log('deviceSwitch2');
+                // mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0,0,data_receive[0].Item_Toggle_Delay);
+                
+                
+                ipc.of.mySensParse.emit('deviceSwitch',
+                     {
+                      "NodeID":data_receive[0].Node_Id,
+                      "NodePort":data_receive[0].Node_Port,
+                      "State":0,
+                      "RuleReq":0,
+                      "NodeTimeOn":data_receive[0].Item_Toggle_Delay
+                      
+                     }
+                    );
+                
+                
+                
+                
+                
+                // MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0,0,data_receive[0].Item_Toggle_Delay);
+                	myconsole.log("mysensMQTT5 " + data_receive[0].Node_Id + " " + data_receive[0].Node_Port + " " + 0 + " " + 0);
+                 ipc.of.MQTTParse.emit('deviceSwitch',
+                     {
+                      "NodeID":data_receive[0].Node_Id,
+                      "NodePort":data_receive[0].Node_Port,
+                      "State":0,
+                      "RuleReq":0,
+                      "NodeTimeOn":data_receive[0].Item_Toggle_Delay
+                      
+                     }
+                    );
+                 
+                 
+                 myconsole.log('deviceSwitch2 :   ' + data_receive[0].Node_Port);
           	    }
             }else
             {    if(data_receive[0].Item_Type == Virtual_Item_Type || data_receive[0].Item_Type == Virtual_Alarm_Item_Type)
@@ -422,19 +781,46 @@ io.on('connection', function(socket){
       	            virtualDeviceStatusChange(Id,1);
       	        }else
       	        {
-                    mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1,0,timeOn);
-                    MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1,0,timeOn);
+                  //  mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1,0,data_receive[0].Item_Toggle_Delay);
+                   // MQTTsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1,0,data_receive[0].Item_Toggle_Delay);
+                   //	myconsole.log("mysensMQTT5 " + data_receive[0].Node_Id.toString() + " " + data_receive[0].Node_Port.toString() + " " + 0 + " " + 0 + "  " + data_receive[0].Item_Toggle_Delay.toString());
+                    
+                    
+                    ipc.of.mySensParse.emit('deviceSwitch',
+                     {
+                      "NodeID":data_receive[0].Node_Id,
+                      "NodePort":data_receive[0].Node_Port,
+                      "State":1,
+                      "RuleReq":0,
+                      "NodeTimeOn":data_receive[0].Item_Toggle_Delay
+                      
+                     }
+                    );
+                    
+                    
+                    
+                    ipc.of.MQTTParse.emit('deviceSwitch',
+                     {
+                      "NodeID":data_receive[0].Node_Id,
+                      "NodePort":data_receive[0].Node_Port,
+                      "State":1,
+                      "RuleReq":0,
+                      "NodeTimeOn":data_receive[0].Item_Toggle_Delay
+                      
+                     }
+                    );
                     myconsole.log('deviceSwitch3');
       	        }
             } 
       	  }
         });
+      }catch(e){myconsole.dumpError(e);}
   });
   
  
   
   
-  socket.on('saveRule',function(ruleData){
+  Websocket.on('saveRule',function(ruleData){
       
       var rule = "";
       var ids = [];
@@ -445,8 +831,8 @@ io.on('connection', function(socket){
       var j = 0;
       for(var i = 0;i<ruleData['length'];i++)
       {
-          //db.getdata('Items',{Select: 'Id',whereClause:'Item_Name = "' + ruleData['dropdownMenuReq'+(i+1)] +'"'},function(err,data_receive){
-            db.getSQL( 'SELECT Id FROM Items WHERE Item_Name = "' + ruleData['dropdownMenuReq'+ (i+1)] + '" UNION SELECT Id FROM Alarm_Items WHERE Description = "' + ruleData['dropdownMenuReq'+ (i+1)] + '"'  ,function(err,data_receive){
+          //db.getdata('Items',{Select: 'Id',whereClause:'Item_Name = "' + ruleData['dropdownMenuReq'+(i+1)] +'"'},function(err2,data_receive){
+            db.getSQL( 'SELECT Id FROM Items WHERE Item_Name = "' + ruleData['dropdownMenuReq'+ (i+1)] + '" UNION SELECT Id FROM Alarm_Items WHERE Description = "' + ruleData['dropdownMenuReq'+ (i+1)] + '"'  ,function(err2,data_receive){
              if(data_receive[0]){
               
               ids[j] = data_receive[0]['Id'];   
@@ -491,7 +877,7 @@ io.on('connection', function(socket){
                  }else{}
              
                  
-                  db.getdata('Rule_Items',{Select: 'Second_Id,Rule_Id',whereClause:newWhereClause},function(err,data_receive){
+                  db.getdata('Rule_Items',{Select: 'Second_Id,Rule_Id',whereClause:newWhereClause},function(err2,data_receive){
                         //myconsole.log("Returned: " + data_receive[0]);
                         
                          if(data_receive[0]){
@@ -501,9 +887,9 @@ io.on('connection', function(socket){
                           selectedItemRules[h] = data_receive[0]['Rule_Id'];
                           h++; 
                         
-                         }else if(err)
+                         }else if(err2)
                          {
-                             myconsole.log(err);
+                             myconsole.log(err2);
                          }else{
                              ids2[h] = null;
                              selectedItemRules[h] = null;
@@ -515,7 +901,7 @@ io.on('connection', function(socket){
                          if(h == j){
                             
                            
-                          db.getdata('Rule_Items',{Select: 'Second_Id',whereClause:'Id LIKE "%" ORDER BY Id DESC LIMIT 1'},function(err,data_receive){
+                          db.getdata('Rule_Items',{Select: 'Second_Id',whereClause:'Id LIKE "%" ORDER BY Id DESC LIMIT 1'},function(err2,data_receive){
                 
                              if(data_receive[0]){
                                  
@@ -554,8 +940,8 @@ io.on('connection', function(socket){
                                      
                                    
                                          
-                                    // db.getdata('Items',{Select: 'Id',whereClause:'Item_Name = "' + ruleData['dropdownMenuAction1'] +'"'},function(err,data_receive){
-                                       db.getSQL('SELECT Id FROM Items WHERE Item_Name = "' + ruleData['dropdownMenuAction1'] + '" UNION SELECT Id FROM Alarm_Items WHERE Description = "' + ruleData['dropdownMenuAction1'] + '"',function(err,data_receive){    
+                                    // db.getdata('Items',{Select: 'Id',whereClause:'Item_Name = "' + ruleData['dropdownMenuAction1'] +'"'},function(err2,data_receive){
+                                       db.getSQL('SELECT Id FROM Items WHERE Item_Name = "' + ruleData['dropdownMenuAction1'] + '" UNION SELECT Id FROM Alarm_Items WHERE Description = "' + ruleData['dropdownMenuAction1'] + '"',function(err2,data_receive){    
                                          if(data_receive[0]){
                                             
                                         var   action =  data_receive[0]['Id'] + ';=;' + ruleData['ActionValue1'] ;  
@@ -567,7 +953,7 @@ io.on('connection', function(socket){
                                           db.insert('Rules', {Conditions:condition, Result: action,RuleOnTime:onTime, Comments:ruleData['description']  });
                                           
                                           
-                                          db.getdata('Rules',{Select: 'Id',whereClause:'Id LIKE "%" ORDER BY Id DESC LIMIT 1'},function(err,data_receive2){
+                                          db.getdata('Rules',{Select: 'Id',whereClause:'Id LIKE "%" ORDER BY Id DESC LIMIT 1'},function(err2,data_receive2){
                                 
                                              if(data_receive2[0]){
                                                  
@@ -582,7 +968,7 @@ io.on('connection', function(socket){
                                                 var   newRules = selectedItemRules[nonNull[m]] + ';' + ruleId;
                                                   
                                                 var    data = {Set:'Rule_Id',Current_State:newRules,Where:"Second_Id",Name:ids2[nonNull[m]]};
-                                                    db.update("Rule_Items",data,function(err,data_receive){
+                                                    db.update("Rule_Items",data,function(err2,data_receive){
                                                           
                                                           
                                                         
@@ -600,13 +986,13 @@ io.on('connection', function(socket){
                                              
                                              
                                              
-                                              for(var m = 0;m<isNull.length;m++)
+                                              for(var n = 0;m<isNull.length;m++)
                                               {
                                                   
                                                  
-                                                db.insert('Rule_Items', {Second_Id:ids2[isNull[m]],Rule_Id:ruleId, Item_Id: ids[isNull[m]],Equals: ruleData['equalsValueReq'+ (isNull[m]+1)]?ruleData['equalsValueReq'+ (isNull[m]+1)]:null  , Greater_Than: ruleData['greaterValueReq'+ (isNull[m]+1)]?ruleData['greaterValueReq'+ (isNull[m]+1)]:null ,Less_Than: ruleData['lessValueReq'+ (isNull[m]+1)]?ruleData['lessValueReq'+ (isNull[m]+1)]:null ,Not_Equal:  ruleData['notEqualValueReq'+ (isNull[m]+1)]?ruleData['notEqualValueReq'+ (isNull[m]+1)]:null , Secondary_Item:  ruleData['secondaryRuleCheck'+ (isNull[m]+1)]  ,Status: 0, Comments: ''  });
+                                                db.insert('Rule_Items', {Second_Id:ids2[isNull[n]],Rule_Id:ruleId, Item_Id: ids[isNull[n]],Equals: ruleData['equalsValueReq'+ (isNull[n]+1)]?ruleData['equalsValueReq'+ (isNull[n]+1)]:null  , Greater_Than: ruleData['greaterValueReq'+ (isNull[n]+1)]?ruleData['greaterValueReq'+ (isNull[n]+1)]:null ,Less_Than: ruleData['lessValueReq'+ (isNull[n]+1)]?ruleData['lessValueReq'+ (isNull[n]+1)]:null ,Not_Equal:  ruleData['notEqualValueReq'+ (isNull[n]+1)]?ruleData['notEqualValueReq'+ (isNull[n]+1)]:null , Secondary_Item:  ruleData['secondaryRuleCheck'+ (isNull[n]+1)]  ,Status: 0, Comments: ''  });
                                               
-                                                if(m == b){
+                                                if(n == b){
                                                   myconsole.log('Rules Saved');
                                                  
                                                  }
@@ -616,7 +1002,7 @@ io.on('connection', function(socket){
                                                  
                                                  }else
                                                  {
-                                                     myconsole.log(err);
+                                                     myconsole.log(err2);
                                                  }
                                              
                                           });
@@ -626,7 +1012,7 @@ io.on('connection', function(socket){
                                          
                                          }else
                                          {
-                                             myconsole.log(err);
+                                             myconsole.log(err2);
                                          }
                                      
                                      
@@ -640,7 +1026,7 @@ io.on('connection', function(socket){
                              
                              }else
                              {
-                                 myconsole.log(err);
+                                 myconsole.log(err2);
                              }
                              
                           });
@@ -661,7 +1047,7 @@ io.on('connection', function(socket){
             
              }else
              {
-                 myconsole.log(err);
+                 myconsole.log(err2);
              }
                
                
@@ -672,6 +1058,222 @@ io.on('connection', function(socket){
     
 });     /////////////////////////////////////////////////////////////////////////////////////////////////////////end of webpage socket connection
 
+
+ });   //end mymqtt parse ipc
+ 
+ 
+  
+ ipc.connectTo(
+    'mySensParse',
+    function(){
+        ipc.of.mySensParse.on(
+            'connect',
+            function(){
+                
+                myconsole.log('CleoServer connected to mySensParse with IPC ##');
+                
+            }
+        );
+        ipc.of.mySensParse.on(
+            'disconnect',
+            function(){
+               
+            }
+        );
+        
+        ipc.of.mySensParse.on(
+            'deviceConnected',
+            function(){
+               
+                myconsole.log('vvvvvvvvvvvvvvvvvvvvv   ');
+               
+            }
+        );
+        
+        
+        
+         ipc.of.mySensParse.on('deviceStatusChange',function(nodeData){    //NodeID,NodePort,State
+           //  myconsole.log("Device Status Change");
+            // myconsole.log(NodePort);
+           // var evaluate = require('../JSModules/Rule_Items_Evaluate');
+            if(nodeData['State'] > 0){nodeData['State'] = 1;}
+            
+              db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
+                 // myconsole.log(data_receive);
+                  if(data_receive[0]){
+                             //myconsole.log(data_receive);
+                           var  ID = data_receive[0].Id;
+                         var     enabledValue = data_receive[0].Item_Enabled_Value;
+                            var data = {Set:'Item_Current_Value',Current_State:nodeData['State'],Where:"Id",Name:ID};
+                             db.update("Items",data,function(err2,data_receive){
+                                   
+                                   
+                                 
+                                  if(data_receive){
+                                    // myconsole.log(ID + " " + State);
+                                      io.emit('DeviceEvent', {Id:ID,Current_State:nodeData['State'],Item_Enabled_Value:enabledValue});
+                                  
+                                      rules.updateRuleStates(ID, nodeData['State']);
+                                     
+                                     /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
+                                          
+                                             eval(func);             
+                                          if(node && port && state){
+                                           mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                          }
+                                          
+                                          if(cancelTime){
+                                                      
+                                              mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                          }
+                                          
+                                           if(virtual == 1){
+                                              virtualDeviceStatusChange(node,state);
+                                            
+                                              
+                                          }
+                                      //myconsole.log(data_receive[0]);
+                                      });*/
+                                      
+                                      
+                                  }else
+                                  {
+                                     myconsole.log(err2); 
+                                      
+                                  }
+                                 
+                             }); 
+                 }else 
+                 if(err2)
+                 {
+                     myconsole.log(err2);
+                 }
+                  
+              });
+             
+            
+             
+             
+         });
+         
+         
+         
+         ipc.of.mySensParse.on('sensorStatusChange',function(nodeData){      //NodeID,NodePort,State,Type
+             //myconsole.log("Device Status Change");
+            // myconsole.log(NodePort);
+            //var evaluate = require('../JSModules/Rule_Items_Evaluate');
+            
+            
+              db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
+                 // myconsole.log(data_receive);
+                  if(data_receive[0]){
+                             //myconsole.log(data_receive);
+                          var   ID = data_receive[0].Id;
+                             
+                             var data = {Set:'Item_Current_Value',Current_State:nodeData['State'],Where:"Id",Name:ID};
+                             db.update("Items",data,function(err2,data_receive){
+                                   
+                                   //	myconsole.log("Server: Sensor updated");
+                                 
+                                  if(data_receive){
+                                     // myconsole.log(ID + " " + State);
+                                      io.emit('SensorEvent', {Id:ID,Current_State:nodeData['State']});
+                                      log.logger(nodeData['Type'], nodeData['State']);
+                                      rules.updateRuleStates(ID, nodeData['State']);
+                                      
+                                     /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
+                                          
+                                             eval(func);             
+                                          if(node && port && state){
+                                           mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                          }
+                                          
+                                          if(cancelTime){
+                                                      
+                                              mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                          }
+                                          
+                                           if(virtual == 1){
+                                              virtualDeviceStatusChange(node,state);
+                                           
+                                              
+                                          }
+                                      //myconsole.log(data_receive[0]);
+                                      });*/
+                                      
+                                      
+                                  }else
+                                  {
+                                     myconsole.log(err2); 
+                                      
+                                  }
+                                 
+                             }); 
+                 }else 
+                 if(err2)
+                 {
+                     myconsole.log(err2);
+                 }
+                  
+              });
+             
+            
+             
+             
+         });
+         
+         
+         
+         
+         
+         //MQTTsocket.on('newNode',function(newNodeId,newNodeIP,oldId){
+          
+         //  myconsole.log(newNodeIP);
+         //  io.emit('newNode',newNodeId,newNodeIP,oldId);
+          
+          
+          
+          
+         //});
+         
+         
+         
+         
+         ipc.of.mySensParse.on('gatewayConnected',function(nodeData){
+             gatewayStatus = nodeData['gatewayState'];
+             sendGatewayStatus();
+             
+             
+         });
+         
+         
+         ipc.of.mySensParse.on('nodeAlive',function(nodeData){
+             var timenow = new Date().getTime();
+             var  data = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:nodeData['NodeID']};
+             db.update("Nodes",data,function(err2,data_receive){
+                       
+                       
+                     
+                      if(data_receive){
+                         // myconsole.log(ID + " " + State);
+                          myconsole.log("Node state updated");
+                          
+                          
+                      }else
+                      {
+                         myconsole.log(err2); 
+                          
+                      }
+                     
+             }); 
+             updateNodeStatus(nodeData['NodeID']);
+             
+             
+         });
+        
+    });   //end IPC mysensor
+ 
+ 
 }
 
 
@@ -696,7 +1298,8 @@ function saveNode(data){
   
  }
  
- MQTTsocket.emit('newNode',nodedata);
+ //MQTTsocket.emit('newNode',nodedata);
+ ipc.of.MQTTParse.emit('newNode',nodedata);
 
  //'"Item_Name'+i+'":"'+ports[i,0]+'","Item_Port_Type'+i+'":'+ports[i,1]+',"Item_Toggle'+i+'":'+ports[i,2]+',"Item_Toggle_Val'+i+'":"'+ports[i,3]+'","Item_Default'+i+'":'+ports[i,4]+',"Item_Enable'+i+'":'+ports[i,5]+',"Node_Id'+i+'":'+id+',"Node_Name'+i+'":"'+name+'","Node_Port'+i+'":'+i
  
@@ -705,7 +1308,7 @@ function saveNode(data){
 
 function getLatestVirtualStatus(){
  myconsole.log('Get latest zone');
-  db.getdata('Items',{Select: 'Id,Item_Enabled_Value,Item_Current_Value',whereClause:'Id > 0 '},function(err,data_receive){
+  db.getdata('Items',{Select: 'Id,Item_Enabled_Value,Item_Current_Value',whereClause:'Id > 0 '},function(err2,data_receive){
  
     if(data_receive[0]){
      for(var i = 0;i<data_receive.length;i++){
@@ -717,7 +1320,7 @@ function getLatestVirtualStatus(){
      }
     }
     else{
-      myconsole.log(err); 
+      myconsole.log(err2); 
     }
   });
 }
@@ -726,7 +1329,7 @@ function getLatestVirtualStatus(){
 
 function getLatestAlarmStatus(){
  myconsole.log('Get latest alarm');
-  db.getdata('Alarm_Items',{Select: 'Name,Current_State',whereClause:'Id < 28 '},function(err,data_receive){
+  db.getdata('Alarm_Items',{Select: 'Name,Current_State',whereClause:'Id < 28 '},function(err2,data_receive){
  
     if(data_receive[0]){
      for(var i = 0;i<data_receive.length;i++){
@@ -741,7 +1344,7 @@ function getLatestAlarmStatus(){
      }
     }
     else{
-      myconsole.log(err); 
+      myconsole.log(err2); 
     }
   });
 }
@@ -754,14 +1357,14 @@ function virtualDeviceStatusChange(Id,State){
   //  var evaluate = require('../JSModules/Rule_Items_Evaluate');
    if(State > 0){State = 1;}
    
-     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Id = ' + Id},function(err,data_receive){
+     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Id = ' + Id},function(err2,data_receive){
         // myconsole.log(data_receive);
          if(data_receive[0]){
                     //myconsole.log(data_receive);
                     var ID = data_receive[0].Id;
                    var  enabledValue = data_receive[0].Item_Enabled_Value;
                    var   data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-                    db.update("Items",data,function(err,data_receive){
+                    db.update("Items",data,function(err2,data_receive){
                           
                           
                         
@@ -793,15 +1396,15 @@ function virtualDeviceStatusChange(Id,State){
                              
                          }else
                          {
-                            myconsole.log(err); 
+                            myconsole.log(err2); 
                              
                          }
                         
                     }); 
         }else 
-        if(err)
+        if(err2)
         {
-            myconsole.log(err);
+            myconsole.log(err2);
         }
          
      });
@@ -814,14 +1417,14 @@ function virtualDeviceStatusChangebyRule(Id,State){
   //  var evaluate = require('../JSModules/Rule_Items_Evaluate');
    if(State > 0){State = 1;}
    
-     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Id = ' + Id},function(err,data_receive){
+     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Id = ' + Id},function(err2,data_receive){
         // myconsole.log(data_receive);
          if(data_receive[0]){
                     //myconsole.log(data_receive);
                    var  ID = data_receive[0].Id;
                    var  enabledValue = data_receive[0].Item_Enabled_Value;
                  //    data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-                   // db.update("Items",data,function(err,data_receive){
+                   // db.update("Items",data,function(err2,data_receive){
                           
                           
                         
@@ -853,459 +1456,35 @@ function virtualDeviceStatusChangebyRule(Id,State){
                              
                      //    }else
                        //  {
-                       //     myconsole.log(err); 
+                       //     myconsole.log(err2); 
                              
                       //   }
                         
                  //   }); 
       //  }else 
-      //  if(err)
+      //  if(err2)
       //  {
-      //      myconsole.log(err);
+      //      myconsole.log(err2);
         }
          
      });
     
 }
 
-mySensorsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
-  //  myconsole.log("Device Status Change");
-   // myconsole.log(NodePort);
-  // var evaluate = require('../JSModules/Rule_Items_Evaluate');
-   if(State > 0){State = 1;}
-   
-     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
-        // myconsole.log(data_receive);
-         if(data_receive[0]){
-                    //myconsole.log(data_receive);
-                  var  ID = data_receive[0].Id;
-                var     enabledValue = data_receive[0].Item_Enabled_Value;
-                   var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-                    db.update("Items",data,function(err,data_receive){
-                          
-                          
-                        
-                         if(data_receive){
-                           // myconsole.log(ID + " " + State);
-                             io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
-                         
-                             rules.updateRuleStates(ID, State);
-                            
-                            /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
-                                 
-                                    eval(func);             
-                                 if(node && port && state){
-                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
-                                 }
-                                 
-                                 if(cancelTime){
-                                             
-                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                                 }
-                                 
-                                  if(virtual == 1){
-                                     virtualDeviceStatusChange(node,state);
-                                   
-                                     
-                                 }
-                             //myconsole.log(data_receive[0]);
-                             });*/
-                             
-                             
-                         }else
-                         {
-                            myconsole.log(err); 
-                             
-                         }
-                        
-                    }); 
-        }else 
-        if(err)
-        {
-            myconsole.log(err);
-        }
-         
-     });
-    
-   
-    
-    
-});
-
-
-
-mySensorsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
-    //myconsole.log("Device Status Change");
-   // myconsole.log(NodePort);
-   //var evaluate = require('../JSModules/Rule_Items_Evaluate');
-   
-   
-     db.getdata('Items',{Select: 'Id',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
-        // myconsole.log(data_receive);
-         if(data_receive[0]){
-                    //myconsole.log(data_receive);
-                 var   ID = data_receive[0].Id;
-                    
-                    var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-                    db.update("Items",data,function(err,data_receive){
-                          
-                          //	myconsole.log("Server: Sensor updated");
-                        
-                         if(data_receive){
-                            // myconsole.log(ID + " " + State);
-                             io.emit('SensorEvent', {Id:ID,Current_State:State});
-                             log.logger(Type, State);
-                             rules.updateRuleStates(ID, State);
-                             
-                            /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
-                                 
-                                    eval(func);             
-                                 if(node && port && state){
-                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
-                                 }
-                                 
-                                 if(cancelTime){
-                                             
-                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                                 }
-                                 
-                                  if(virtual == 1){
-                                     virtualDeviceStatusChange(node,state);
-                                  
-                                     
-                                 }
-                             //myconsole.log(data_receive[0]);
-                             });*/
-                             
-                             
-                         }else
-                         {
-                            myconsole.log(err); 
-                             
-                         }
-                        
-                    }); 
-        }else 
-        if(err)
-        {
-            myconsole.log(err);
-        }
-         
-     });
-    
-   
-    
-    
-});
-
-
-
-
-
-MQTTsocket.on('newNode',function(newNodeId,newNodeIP,oldId){
- 
-  myconsole.log(newNodeIP);
-  io.emit('newNode',newNodeId,newNodeIP,oldId);
- 
- 
- 
- 
-});
-
-
-MQTTsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
-    myconsole.log("Device Status Change4");
-   // State = parseInt(State);
-    myconsole.log(State);
-     
-  // var evaluate = require('../JSModules/Rule_Items_Evaluate');
-  // if(State > 0){State = 1;}
-   
-     db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
-        myconsole.log(data_receive);
-         if(data_receive[0]){
-                   // myconsole.log(data_receive);
-                  var  ID = data_receive[0].Id;
-                  var   enabledValue = data_receive[0].Item_Enabled_Value;
-                    
-                 var   data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-                    db.update("Items",data,function(err,data_receive){
-                          
-                          
-                        
-                         if(data_receive){
-                            // myconsole.log("data: " + ID + " " + State);
-                             io.emit('DeviceEvent', {Id:ID,Current_State:State,Item_Enabled_Value:enabledValue});
-                         
-                             rules.updateRuleStates(ID, State);
-                            
-                            /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
-                                 
-                                 eval(func);
-                                 
-                                 if(node && port && state){
-                                  mySensorsocket.emit('deviceSwitch',node,port,state,1);
-                                 }
-                                 
-                                 if(cancelTime){
-                                             
-                                     mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                                 }
-                                 
-                                  if(virtual == 1){
-                                     virtualDeviceStatusChange(node,state);
-                                   
-                                     
-                                 }
-                             //myconsole.log(data_receive[0]);
-                             });*/
-                             
-                             
-                         }else
-                         {
-                            myconsole.log(err); 
-                             
-                         }
-                        
-                    }); 
-        }else 
-        if(err)
-        {
-            myconsole.log(err);
-        }
-         
-     });
-    
-   
-    
-    
-});
-
-MQTTsocket.on('sensorStatusChange',function(NodeID,NodePort,State,Type){
-    //myconsole.log("Device Status Change");
-   // myconsole.log(NodePort);
-   //var evaluate = require('../JSModules/Rule_Items_Evaluate');
-   
-   
-     db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated,Item_Type',whereClause:'Node_Id = ' + NodeID.toString() + ' AND Node_Port = ' + NodePort.toString()},function(err,data_receive){
-        // myconsole.log(data_receive);
-         if(data_receive[0]){
-                    //myconsole.log(data_receive);
-                  var  ID = data_receive[0].Id;
-                  var currentValue = data_receive[0].Item_Current_Value;
-                  var updateTime = data_receive[0].Time_Updated;
-                  var doUpdate = false;
-                  var timediff = (new Date() - new Date(updateTime))/1000;
-                  myconsole.log("Time diff1: " + timediff);
-                  
-                  if((State <= currentValue - 0.3) || (State >= currentValue + 0.3) || (timediff >= 5*60) ){
-                    doUpdate = true;
-                  }
-                  
-                  if(doUpdate == true){
-                 //  myconsole.log("Updated: " + State + " " + (currentValue - 0.3) + " " + (currentValue + 0.3) + " " + (timediff >= 5*60)  );
-                  // var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-                   // db.update("Items",data,function(err,data_receive2){
-                   var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
-                   
-                   var time = (new Date(Date.now() - tzoffset)).toISOString().replace(/T/, ' ').replace(/\..+/, '');
-                   
-                  //  myconsole.log(time);
-                   db.getSQL("Update Items SET Item_Current_Value = " + State + " ,Time_Updated = '" + time + "' WHERE Id = " + ID,function(err,data_receive2){
-                          
-                          //	myconsole.log("Server: Sensor updated");
-                        
-                         if(data_receive2){
-                            // myconsole.log(ID + " " + State);
-                             io.emit('SensorEvent', {Id:ID,Current_State:State});
-                              log.logger(Type, '{"Item_Id":"'+ID+'","Node":"'+NodeID+'","Value":"'+State+'"}');
-                             rules.updateRuleStates(ID, State);
-                             
-                           
-                             
-                             
-                         }else
-                         {
-                            myconsole.log(err); 
-                             
-                         }
-                        
-                    }); 
-                   doUpdate = false;
-                  }
-        }else 
-        if(err)
-        {
-            myconsole.log(err);
-        }
-         
-     });
-    
-   
-    
-    
-});
-
-
-
-mySensorsocket.on('gatewayConnected',function(gatewayState){
-    gatewayStatus = gatewayState;
-    sendGatewayStatus();
-    
-    
-});
-
-
-mySensorsocket.on('nodeAlive',function(NodeID){
-    var timenow = new Date().getTime();
-    var  data = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
-    db.update("Nodes",data,function(err,data_receive){
-              
-              
-            
-             if(data_receive){
-                // myconsole.log(ID + " " + State);
-                 myconsole.log("Node state updated");
-                 
-                 
-             }else
-             {
-                myconsole.log(err); 
-                 
-             }
-            
-    }); 
-    updateNodeStatus(NodeID);
-    
-    
-});
-
-
-MQTTsocket.on('nodeAlive',function(NodeID,Status){
-     var timenow = new Date().getTime();
-   var   data = {Set:'Status',Current_State:Status.toLowerCase(),Where:"Node_Port",Name:NodeID};
-     db.update("Nodes",data,function(err,data_receive){
-              
-              
-            
-             if(data_receive){
-                 myconsole.log(NodeID + " " + State);
-               var   data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
-                 db.update("Nodes",data2,function(err2,data_receive2){
-                           
-                           
-                         
-                          if(data_receive2){
-                             // myconsole.log(ID + " " + State);
-                              myconsole.log("Node state updated");
-                              
-                              if(Status.toLowerCase() == "offline"){
-                               
-                              var  data3 = {Set:'Item_Current_Value',Current_State:3,Where:"Node_Id",Name:NodeID};
-                               db.update("Items",data3,function(err2,data_receive3){
-                           
-                           
-                         
-                                       if(data_receive3){
-                                          // myconsole.log(ID + " " + State);
-                                           myconsole.log("Node state updated2");
-                                           
-                                           db.getdata('Items',{Select: 'Id,Item_Current_Value,Item_Enabled_Value',whereClause:'Node_Id = ' + NodeID.toString() },function(err,data_receive4){
-                                              myconsole.log(data_receive4[0]);
-                                              if(data_receive4[0]){
-                                                         myconsole.log(data_receive4[0].Id);
-                                                       
-                                                         for(var i = 0;i<data_receive4.length;i++){
-                                                          
-                                                          
-                                                            io.emit('DeviceEvent', {Id:data_receive4[i].Id,Current_State:data_receive4[i].Item_Current_Value,Item_Enabled_Value:data_receive4[i].Item_Enabled_Value});
-                                          
-                                                          
-                                                          
-                                                         }
-                                                         
-                                                         
-                                             }else 
-                                             if(err)
-                                             {
-                                                 myconsole.log(err);
-                                             }
-                                              
-                                          });
-                                         
-                                          
-                                           
-                                           
-                                       }else
-                                       {
-                                          myconsole.log(err); 
-                                           
-                                       }
-                                      
-                              });
-                               
-                               
-                              }
-                              
-                              
-                          }else
-                          {
-                             myconsole.log(err); 
-                              
-                          }
-                         
-                 });
-                 updateNodeStatus(NodeID);
-                 
-             }else
-             {
-                myconsole.log(err); 
-                 
-             }
-            
-    }); 
-    
-    
-});
-
-
-MQTTsocket.on('updateNodeStatus',function(NodeID){
-   var timenow = new Date().getTime();
-   myconsole.log("MQTT: nodeupdate")
-   var  data2 = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:NodeID};
-    db.update("Nodes",data2,function(err2,data_receive2){
-              
-              
-            
-             if(data_receive2){
-                // myconsole.log(ID + " " + State);
-                 myconsole.log("Node state updated");
-                 
-                 
-             }else
-             {
-                myconsole.log(err); 
-                 
-             }
-            
-    });
-    updateNodeStatus(NodeID);
-    
-});
 
   
 function sendusers(){
     myconsole.log("Getting Users...");
-      db.getdata('users',{Select: 'id,username',whereClause:'id LIKE "%"'},function(err,data_receive){
+      db.getdata('users',{Select: 'id,username',whereClause:'id LIKE "%"'},function(err2,data_receive){
                       // myconsole.log('test1'); 
                if(data_receive[0]){
                // myconsole.log(data_receive);
                 io.emit("sendUsers",data_receive);
                 
             }else{
-                if (err) {
+                if (err2) {
                     // error handling code goes here
-                    myconsole.log("ERROR (GetUsers) : ",err);            
+                    myconsole.log("ERROR (GetUsers) : ",err2);            
                 }
             
                 
@@ -1319,16 +1498,16 @@ function sendusers(){
   
 function sendrules(){
     myconsole.log("Getting Rules...");
-      db.getdata('Rules',{Select: 'Id,Conditions,Result,Comments',whereClause:'Id LIKE "%"'},function(err,data_receive){
+      db.getdata('Rules',{Select: 'Id,Conditions,Result,Comments',whereClause:'Id LIKE "%"'},function(err2,data_receive){
                       // myconsole.log('test1'); 
            if(data_receive[0]){
            // myconsole.log(data_receive);
             io.emit("sendRules",data_receive);
             
         }else{
-            if (err) {
+            if (err2) {
                 // error handling code goes here
-                myconsole.log("ERROR (GetRules) : ",err);            
+                myconsole.log("ERROR (GetRules) : ",err2);            
             }
         
             
@@ -1342,7 +1521,7 @@ function sendrules(){
 function sendgraphs(Type,itemId){
     myconsole.log("Getting Graphs..."); 
      
-      db.getBackData('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:'Type LIKE "'+Type+'" ORDER BY Id DESC LIMIT 2500'},function(err,data_receive){
+      db.getBackData('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:'Type LIKE "'+Type+'" ORDER BY Id DESC LIMIT 2500'},function(err2,data_receive){
                       // myconsole.log(data_receive); 
            if(data_receive[0]){
             
@@ -1351,9 +1530,9 @@ function sendgraphs(Type,itemId){
             io.emit("sendGraphs",data_receive,itemId);
             
         }else{
-            if (err) {
+            if (err2) {
                 // error handling code goes here
-                myconsole.log("ERROR (GetRules) : ",err);            
+                myconsole.log("ERROR (GetRules) : ",err2);            
             }
         
             
@@ -1366,7 +1545,7 @@ function sendgraphs(Type,itemId){
 
 function deleteRule(rule){
     myconsole.log("Deleting Rules...");
-      db.getdata('Rules',{Select: 'Conditions',whereClause:'Id = ' + rule},function(err,result){
+      db.getdata('Rules',{Select: 'Conditions',whereClause:'Id = ' + rule},function(err2,result){
                       // myconsole.log('test1'); 
            if(result){
                 var res = result[0].Conditions.split(';');
@@ -1391,9 +1570,9 @@ function deleteRule(rule){
                   
                 
                      //delete rule_item
-                      db.deletedata('Rule_Items',{whereClause:'Rule_Id = ' + rule },function(err, result){
-                        if(err){
-                            myconsole.log(err);
+                      db.deletedata('Rule_Items',{whereClause:'Rule_Id = ' + rule },function(err2, result){
+                        if(err2){
+                            myconsole.log(err2);
                         }else
                         {
                         myconsole.log('Rule_Item Deleted: '  );
@@ -1409,9 +1588,9 @@ function deleteRule(rule){
                  
                
             
-                db.deletedata('Rules',{whereClause:'Id = ' + rule  },function(err, result){
-                    if(err){
-                        myconsole.log(err);
+                db.deletedata('Rules',{whereClause:'Id = ' + rule  },function(err2, result){
+                    if(err2){
+                        myconsole.log(err2);
                     }else
                     {
                         myconsole.log('Rule Deleted');
@@ -1425,11 +1604,11 @@ function deleteRule(rule){
                    
                   var  data = {'Select':'Second_Id,Rule_Id','whereClause':where };
             
-                    db.getdata('Rule_Items',data,function(err,result2){
+                    db.getdata('Rule_Items',data,function(err2,result2){
                        
-                       if(err){
+                       if(err2){
                            
-                           myconsole.log(err);
+                           myconsole.log(err2);
                            
                        }else if(result2){
                            myconsole.log(result2);
@@ -1455,7 +1634,7 @@ function deleteRule(rule){
                                  
                                 
                                var   data = {Set:'Rule_Id',Current_State:newRuleId,Where:"Second_Id",Name:res[i]};
-                                db.update("Rule_Items",data,function(err,data_receive){
+                                db.update("Rule_Items",data,function(err2,data_receive){
                                           
                                           
                                         
@@ -1466,7 +1645,7 @@ function deleteRule(rule){
                                              
                                          }else
                                          {
-                                            myconsole.log(err); 
+                                            myconsole.log(err2); 
                                              
                                          }
                                         
@@ -1487,9 +1666,9 @@ function deleteRule(rule){
             
             
         }else{
-            if (err) {
+            if (err2) {
                 // error handling code goes here
-                myconsole.log("ERROR (GetRules) : ",err);            
+                myconsole.log("ERROR (GetRules) : ",err2);            
             }
         
             
@@ -1503,11 +1682,11 @@ function deleteRule(rule){
 
 function senditems(){
     myconsole.log("Getting Items...");
-      db.getdata('Items',{Select: 'Id,Item_Name',whereClause:'Id LIKE "%"'},function(err,data_receive){
+      db.getdata('Items',{Select: 'Id,Item_Name',whereClause:'Id LIKE "%"'},function(err2,data_receive){
                       // myconsole.log('test1'); 
            if(data_receive[0]){
             myconsole.log(data_receive);
-                db.getdata('Alarm_Items',{Select: 'Id,Description',whereClause:'Id LIKE "%"'},function(err,data_receive2){
+                db.getdata('Alarm_Items',{Select: 'Id,Description',whereClause:'Id LIKE "%"'},function(err2,data_receive2){
                           // myconsole.log('test1'); 
                    if(data_receive2[0]){
                     myconsole.log(data_receive);
@@ -1515,9 +1694,9 @@ function senditems(){
                         io.emit("sendItems",data_receive,data_receive2);
                    
                      }else{
-                    if (err) {
+                    if (err2) {
                         // error handling code goes here
-                        myconsole.log("ERROR (GetItems) : ",err);            
+                        myconsole.log("ERROR (GetItems) : ",err2);            
                     }
                     
                      }
@@ -1526,9 +1705,9 @@ function senditems(){
             
             
         }else{
-            if (err) {
+            if (err2) {
                 // error handling code goes here
-                myconsole.log("ERROR (GetItems) : ",err);            
+                myconsole.log("ERROR (GetItems) : ",err2);            
             }
         
             
@@ -1541,16 +1720,16 @@ function senditems(){
 
 
 function getWeather(){
-     db.getdata('Items',{Select: 'Item_Current_Value',whereClause:'Item_Name = "Wind Speed" OR Item_Name = "Temperature" OR Item_Name = "Rain"'},function(err,data_receive){
+     db.getdata('Items',{Select: 'Item_Current_Value',whereClause:'Item_Name = "Wind Speed" OR Item_Name = "Temperature" OR Item_Name = "Rain"'},function(err2,data_receive){
                       // myconsole.log('test1'); 
            if(data_receive[0]){
             //myconsole.log(data_receive);
             io.emit("sendWeather",data_receive[2].Item_Current_Value,data_receive[0].Item_Current_Value,data_receive[1].Item_Current_Value );
             
         }else{
-            if (err) {
+            if (err2) {
                 // error handling code goes here
-                myconsole.log("ERROR (GetItems) : ",err);            
+                myconsole.log("ERROR (GetItems) : ",err2);            
             }
         
             
@@ -1566,7 +1745,7 @@ function getWeather(){
 
 function getPower(){
       // myconsole.log('test1'); 
-     db.getdata('Items',{Select: 'Id,Item_Current_Value',whereClause:'Item_Type = "10"'},function(err,data_receive){
+     db.getdata('Items',{Select: 'Id,Item_Current_Value',whereClause:'Item_Type = "10"'},function(err2,data_receive){
                       // myconsole.log('test1'); 
        
            if(data_receive[0]){
@@ -1583,9 +1762,9 @@ function getPower(){
           //  io.emit('SensorEvent', {Id:ID,Current_State:State2});
             
         }else{
-            if (err) {
+            if (err2) {
                 // error handling code goes here
-                myconsole.log("ERROR (GetItems) : ",err);            
+                myconsole.log("ERROR (GetItems) : ",err2);            
             }
         
             
@@ -1609,7 +1788,7 @@ function test(){
                     
 }
 
-eventsocket.on('connect', function() { 
+/*eventsocket.on('connect', function() { 
     myconsole.log('Connected to Event Handler');
    // io.emit('ConnectionStatus',{item: 'Event_Handler',status:'connected'});
     
@@ -1677,11 +1856,11 @@ eventsocket.on('connect', function() {
     
     });
 //});
-});
+});   */
 
 
 
-alarmsocket.on('connect', function() { 
+/*alarmsocket.on('connect', function() { 
     myconsole.log('Connected to Alarm Module');
     
     alarmsocket.emit('register',{type:'Alarm',client:'Server'},function(){
@@ -1731,11 +1910,11 @@ alarmsocket.on('connect', function() {
           rulessocket.on('deviceUpdate',function(Id){
              //myconsole.log(Id);
            
-               db.getdata('Items',{Select: 'Item_Type,Item_Current_Value',whereClause:'Id = "' + Id + '"'},function(err,data_receive){
+               db.getdata('Items',{Select: 'Item_Type,Item_Current_Value',whereClause:'Id = "' + Id + '"'},function(err2,data_receive){
                 
-                if(err){
+                if(err2){
                  
-                 myconsole.log(err);
+                 myconsole.log(err2);
                 }else{
              	  // myconsole.log(data_receive);
              	  if(data_receive){
@@ -1766,9 +1945,9 @@ alarmsocket.on('connect', function() {
     
         
         alarmsocket.on('keypadLedState',function(data){
-          getModeStatus(function(night,connect,err){
+          getModeStatus(function(night,connect,err2){
             
-             if(err){
+             if(err2){
               myconsole.log("Error occured during night mode status retrieval");                          
             }else{
                 if(data.Armed){
@@ -1798,7 +1977,7 @@ alarmsocket.on('connect', function() {
         alarmsocket.on('alarmTrigger',function(data,time){
             myconsole.log('Server Module: An alarm was triggered');
             //myconsole.log(data);
-             db.getdata('Alarm_Items',{Select: 'Description',whereClause:'Name = ' + '"' + 'Zone_' + data + '"'},function(err,data_receive){
+             db.getdata('Alarm_Items',{Select: 'Description',whereClause:'Name = ' + '"' + 'Zone_' + data + '"'},function(err2,data_receive){
                       // myconsole.log('test1'); 
                    if(data_receive[0]){
                     myconsole.log("Sending Email for Alarm Trigger, zone " + data_receive[0]['Description']);
@@ -1810,9 +1989,9 @@ alarmsocket.on('connect', function() {
                    
                     
                 }else{
-                    if (err) {
+                    if (err2) {
                         // error handling code goes here
-                        myconsole.log("ERROR (Alarm Trigger) : ",err);            
+                        myconsole.log("ERROR (Alarm Trigger) : ",err2);            
                     }
                 
                     myconsole.log("No zone retrieved for Alarm Trigger");
@@ -1893,7 +2072,7 @@ alarmsocket.on('connect', function() {
    //});
     });
 });
-
+*/
     
 
 
@@ -1901,10 +2080,10 @@ alarmsocket.on('connect', function() {
 
 function getState(requiredState,callback){
     //myconsole.log(requiredState);
-    db.getdata('Alarm_States',{Select: 'State',whereClause:'Id = ' + requiredState},function(err,data_receive){
-                        if (err) {
+    db.getdata('Alarm_States',{Select: 'State',whereClause:'Id = ' + requiredState},function(err2,data_receive){
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR1 : ",err);            
+                            myconsole.log("ERROR1 : ",err2);            
                         } else {            
                         // code to execute on data retrieval
                         if(data_receive[0]){
@@ -1925,12 +2104,12 @@ function getState(requiredState,callback){
 
 function getGraphButtons(){
  
-  db.getdatajoin('Items','Item_Types',{Select: 'T1.Id,T1.Item_Name,T2.Type',join1: 'Item_Type' ,join2: 'Id',whereClause:"T1.Id LIKE '%' AND T2.hasGraph = 1 ORDER BY T1.Item_Name ASC"},function(err,data_receive){
+  db.getdatajoin('Items','Item_Types',{Select: 'T1.Id,T1.Item_Name,T2.Type',join1: 'Item_Type' ,join2: 'Id',whereClause:"T1.Id LIKE '%' AND T2.hasGraph = 1 ORDER BY T1.Item_Name ASC"},function(err2,data_receive){
                       
                        
-                        if (err) {
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR2 : ",err);            
+                            myconsole.log("ERROR2 : ",err2);            
                         } else {       
                             
                            // myconsole.log(data_receive);         
@@ -1948,10 +2127,11 @@ function getGraphButtons(){
 
 function getAlarmStatus(sockets,newpage){  //newpage 1 if first load of page
     
-    db.getdatajoin('Alarm_Items','Alarm_Item_Types',{Select: 'Name,Current_State,Description,Alarm_Event,T1.Type',join1: 'Type' ,join2: 'Id',whereClause:"T1.Id LIKE '%' AND T2.ShowOnPage = 1 ORDER BY T1.Description ASC"},function(err,data_receive){
-                        if (err) {
+    try{
+     db.getdatajoin('Alarm_Items','Alarm_Item_Types',{Select: 'Name,Current_State,Description,Alarm_Event,T1.Type',join1: 'Type' ,join2: 'Id',whereClause:"T1.Id LIKE '%' AND T2.ShowOnPage = 1 ORDER BY T1.Description ASC"},function(err2,data_receive){
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR2 : ",err);            
+                            myconsole.log("ERROR2 : ",err2);            
                         } else {       
                             
                         // code to execute on data retrieval
@@ -2019,8 +2199,8 @@ function getAlarmStatus(sockets,newpage){  //newpage 1 if first load of page
                                    }
                                   var night = null;  
                                  
-                                 getModeStatus(function(night,connect,err){
-                                    if(err){
+                                 getModeStatus(function(night,connect,err2){
+                                    if(err2){
                                         myconsole.log("Error occured during night mode status retrieval");
                                     }else{
                                        // myconsole.log(bypass + " " + memory + " " + armed + " " + ready);
@@ -2055,35 +2235,46 @@ function getAlarmStatus(sockets,newpage){  //newpage 1 if first load of page
                        
                    });
                    
-             
+    }catch(e){myconsole.log(e);}
                
                return;
     
 }
 
 function sendPageTabs(sockets){
+         try {
+          db.getdatajoin2('Page_Tabs', 'Page_Containers', {
+           Select: 't1.Description D1,t2.Description D2',
+           whereClause: "t1.Id LIKE '%' ORDER BY t1.Id ASC, t2.Id",
+           field1: "Containers_ToShow",
+           field2: "Id"
+          }, function(err2, data_receive) {
+           if (err2) {
+            // error handling code goes here
+            myconsole.log("ERROR2 : ", err2);
+           }
+           else {
          
-             db.getdatajoin2('Page_Tabs','Page_Containers',{Select: 't1.Description D1,t2.Description D2',whereClause:"t1.Id LIKE '%' ORDER BY t1.Id ASC, t2.Id",field1:"Containers_ToShow",field2:"Id"},function(err,data_receive){
-                        if (err) {
-                        // error handling code goes here
-                            myconsole.log("ERROR2 : ",err);            
-                        } else {       
-                            
-                         sockets.emit('PageTabs',data_receive);
-                       //  myconsole.log(data_receive);  
-                           /*for(var i in data_receive){
-                               myconsole.log(data_receive[i]);  
-                               
-                                 
-                                
-                               
-                           }*/
-                             
-                            
-                             
-                        }
-                       
-                   });
+            sockets.emit('PageTabs', data_receive);
+           
+            //  myconsole.log(data_receive);  
+            /*for(var i in data_receive){
+                myconsole.log(data_receive[i]);  
+                
+                  
+                 
+                
+            }*/
+         
+         
+         
+           }
+         
+          });
+         }
+         catch (e) {
+          myconsole.log(e);
+         }
                    
              
                
@@ -2095,10 +2286,10 @@ function sendPageTabs(sockets){
 /*
 function sendPageContainers(sockets){
 //myconsole.log(sockets);
-             db.getdatajoin2('Page_Tabs','Page_Containers',{Select: 't1.Description D1,t2.Description D2',whereClause:"t1.Id LIKE '%' ORDER BY t1.Id ASC, t2.Id",field1:"Containers_ToShow",field2:"Id"},function(err,data_receive){
-                        if (err) {
+             db.getdatajoin2('Page_Tabs','Page_Containers',{Select: 't1.Description D1,t2.Description D2',whereClause:"t1.Id LIKE '%' ORDER BY t1.Id ASC, t2.Id",field1:"Containers_ToShow",field2:"Id"},function(err2,data_receive){
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR2 : "+err);            
+                            myconsole.log("ERROR2 : "+err2);            
                         } else {       
                             
                          sockets.emit('PageContainers',data_receive);
@@ -2128,11 +2319,11 @@ function sendPageContainers(sockets){
 function getDeviceStatus(sockets){
    
 
-    db.getdatajoin2('Page_Containers','Items',{Select: 't2.Id,t2.Item_Name,t2.Item_Current_Value,t2.Item_Type,t2.Node_Id,t2.Node_Port,t2.Item_Enabled_Value,t1.Description',whereClause:"t2.Id LIKE '%' ORDER BY t2.Item_Sort_Position ASC",field1:'ItemTypes_ToShow',field2:'Item_Type'},function(err,data_receive){
+    db.getdatajoin2('Page_Containers','Items',{Select: 't2.Id,t2.Item_Name,t2.Item_Current_Value,t2.Item_Type,t2.Node_Id,t2.Node_Port,t2.Item_Enabled_Value,t1.Description',whereClause:"t2.Id LIKE '%' ORDER BY t2.Item_Sort_Position ASC",field1:'ItemTypes_ToShow',field2:'Item_Type'},function(err2,data_receive){
 
-                        if (err) {
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR2 : "+err);            
+                            myconsole.log("ERROR2 : "+err2);            
                         } else {       
                             
                         // code to execute on data retrieval
@@ -2174,7 +2365,9 @@ function setStartupStatus(){
  
     myconsole.log("Items to unknown ");
     // data = {Set:'Item_Current_Value',Current_State:3,Where:"Id > 0"};
-     db.getSQL('UPDATE Items SET Item_Current_Value = 3 WHERE ID > 0 AND Item_IsVirtual = 0',function(err,data_receive){
+    try{
+     
+     db.getSQL('UPDATE Items SET Item_Current_Value = 3 WHERE ID > 0 AND Item_IsVirtual = 0',function(err2,data_receive){
                
                
              
@@ -2185,22 +2378,24 @@ function setStartupStatus(){
                   
               }else
               {
-                 myconsole.log(err); 
+                 myconsole.log(err2); 
                   
               }
              
      }); 
- 
+    }catch(e){
+     myconsole.log(e);
+    }
 }
 
 
 
 function getNodeStatus(sockets){
    
-    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
-    if (err) {
+    db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"'Id' LIKE '%' ORDER BY Node_Sort_Position ASC"},function(err2,data_receive){
+    if (err2) {
     // error handling code goes here
-        myconsole.log("ERROR2 : ",err);            
+        myconsole.log("ERROR2 : ",err2);            
     } else {       
         
     // code to execute on data retrieval
@@ -2247,11 +2442,11 @@ function updateNodeStatus(node){
        
        myconsole.log(node + " update requested");
       
-       db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"Node_Port = " + node + " ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
+       db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"Node_Port = " + node + " ORDER BY Node_Sort_Position ASC"},function(err2,data_receive){
        
-       if (err) {
+       if (err2) {
        // error handling code goes here
-           myconsole.log("ERROR4 : " + err);            
+           myconsole.log("ERROR4 : " + err2);            
        } else {       
            myconsole.log("Update Data " + data_receive[0]); 
             var data = {Id:data_receive[0]['Id'],Device: data_receive[0]['Name'],Current_State: data_receive[0]['Last_Seen'],Node_Port:data_receive[0]['Node_Port'],Item_Type:'Node',Status:data_receive[0]['Status'],RSSI:data_receive[0]['RSSI'],IPAddress:data_receive[0]['IPAddress'],Vcc:data_receive[0]['Vcc'],Uptime:data_receive[0]['UpTime']};
@@ -2268,11 +2463,11 @@ function updateNodeStatus(node){
      
        myconsole.log("all update requested");
       
-       db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"Node_Port > 0 ORDER BY Node_Sort_Position ASC"},function(err,data_receive){
+       db.getdata('Nodes',{Select: 'Id,Name,Last_Seen,Node_Port,Status,IPAddress,RSSI,Vcc,UpTime',whereClause:"Node_Port > 0 ORDER BY Node_Sort_Position ASC"},function(err2,data_receive){
        
-       if (err) {
+       if (err2) {
        // error handling code goes here
-           myconsole.log("ERROR4 : " + err);            
+           myconsole.log("ERROR4 : " + err2);            
        } else {      
         
         for(var i = 0;i<data_receive.length;i++){
@@ -2319,10 +2514,10 @@ function clearBypass(){
 function getEvents(numEvents){
    ROWS = 0;
    // console.log(numEvents);
-    db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Id LIKE '%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
-                        if (err) {
+    db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Id LIKE '%' ORDER BY Id DESC LIMIT " + numEvents},function(err2,data_receive){
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR3 : ",err);            
+                            myconsole.log("ERROR3 : ",err2);            
                         } else {            
                         // code to execute on data retrieval
                            for(var i = numEvents-1;i>=0;i--){
@@ -2370,10 +2565,10 @@ function getEvents(numEvents){
 
 function getImportantEvents(numEvents){
     ROWS = 0;
-    db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Event LIKE '%Important%' ORDER BY Id DESC LIMIT " + numEvents},function(err,data_receive){
-                        if (err) {
+    db.getdata('Event_Log',{Select: 'Id,Type,Event,Time',whereClause:"Event LIKE '%Important%' ORDER BY Id DESC LIMIT " + numEvents},function(err2,data_receive){
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR4 : ",err);            
+                            myconsole.log("ERROR4 : ",err2);            
                         }
                         else 
                         {            
@@ -2438,10 +2633,10 @@ function getImportantEvents(numEvents){
 
 function getLastAlarm(){
     ROWS = 0;
-    db.getdata('Event_Log',{Select: 'Id',whereClause:"Event LIKE '%12%' ORDER BY Id DESC LIMIT 1"},function(err,data_receive){
-                        if (err) {
+    db.getdata('Event_Log',{Select: 'Id',whereClause:"Event LIKE '%12%' ORDER BY Id DESC LIMIT 1"},function(err2,data_receive){
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR5 : ",err);            
+                            myconsole.log("ERROR5 : ",err2);            
                         } else {            
                         // code to execute on data retrieval
                         
@@ -2449,10 +2644,10 @@ function getLastAlarm(){
                         {
                         var newid = data_receive[0]['Id']-10;
 
-                          db.getdata('Event_Log',{Select: '*',whereClause:"Id > "+ newid +" limit 20"},function(err,data_receives){
-                        if (err) {
+                          db.getdata('Event_Log',{Select: '*',whereClause:"Id > "+ newid +" limit 20"},function(err2,data_receives){
+                        if (err2) {
                         // error handling code goes here
-                            myconsole.log("ERROR6 : ",err);            
+                            myconsole.log("ERROR6 : ",err2);            
                         } else {            
                         // code to execute on data retrieval
                         
@@ -2513,10 +2708,10 @@ function getLastAlarm(){
 
 function getAlarmTriggers(lastArmTime,sockets){
     
-    db.getLast('Alarm_Triggers',{Select: 'Zone,Time',whereClause:"'Zone' LIKE '%'" },function(err,data_receive){
+    db.getLast('Alarm_Triggers',{Select: 'Zone,Time',whereClause:"'Zone' LIKE '%'" },function(err2,data_receive){
         
-        if(err){
-            myconsole.log(err);    
+        if(err2){
+            myconsole.log(err2);    
         }else if(data_receive[0]){
            
             //myconsole.log( Date.parse(data_receive[0]['Time']) - Date.parse(lastArmTime));
@@ -2632,11 +2827,11 @@ function sendemail(data){
        to:      configure2.email[0].to[0],
        cc:      configure2.email[0].cc[0],
        subject: data
-        }, function(err, message) { 
-       // myconsole.log(err || message); 
+        }, function(err2, message) { 
+       // myconsole.log(err2 || message); 
         if(message){
 		myconsole.log("Email sent successfully");
-	}else if(err){
+	}else if(err2){
 		myconsole.log("An error occured while sending email");
 	}
 	
@@ -2648,7 +2843,7 @@ function sendemail(data){
 
 
 function getModeStatus(callback){
-    db.getdata('Alarm_Items',{Select: 'Current_State',whereClause:"Type LIKE '%11%' OR Type LIKE '%14%' ORDER BY Id ASC LIMIT 2"},function(err,data_receive){
+    db.getdata('Alarm_Items',{Select: 'Current_State',whereClause:"Type LIKE '%11%' OR Type LIKE '%14%' ORDER BY Id ASC LIMIT 2"},function(err2,data_receive){
           
          if(data_receive[0]){    
             if(data_receive[0]['Current_State']){
@@ -2741,8 +2936,8 @@ function getip(callback){
     res.on('end', function() {
      // ipAddress contains the external IP address
     });
-    }).on('error', function(err) {
-    throw err;
+    }).on('error', function(err2) {
+    throw err2;
 }).end();
    
 
@@ -2916,5 +3111,9 @@ function sendGatewayStatus(sockets){
     return;
     
 }
+
+
+
+
 
 exports.start = start;

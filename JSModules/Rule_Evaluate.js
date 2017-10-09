@@ -161,7 +161,7 @@ exports.checkRule = function(rule,callback){
 
 
 
-}
+};
 
 
                    

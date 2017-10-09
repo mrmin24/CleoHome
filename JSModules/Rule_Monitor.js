@@ -11,12 +11,12 @@ var intervaltime = 1000;
 //var timezone = 2;
 
 var latestId = 0;
-var mySensorio = require('socket.io-client');
-var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+//var mySensorio = require('socket.io-client');
+//var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 
-var MQTTio = require('socket.io-client');
-var MQTTsocket = MQTTio.connect('http://localhost:'+ 44607);
+//var MQTTio = require('socket.io-client');
+//var MQTTsocket = MQTTio.connect('http://localhost:'+ 44607, {'force new connection': true});
 
 
 var getconfig = require('../JSModules/GetConfig.js');
@@ -24,8 +24,11 @@ var writeXML = require('../JSModules/WriteConfig.js');
 var configure = getconfig.data;
 var configure2 = configure.xml;
 
-var alarmio = require('socket.io-client');
-var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0].port[0]);
+//var alarmio = require('socket.io-client');
+//var alarmsocket = alarmio.connect('http://localhost:'+ configure2.alarmmodule[0].port[0]);    ////////// add back
+
+
+
 var io = require('socket.io').listen(44603);
 //function getDate(){
 //var hour = '00';
@@ -35,6 +38,83 @@ var io = require('socket.io').listen(44603);
 //date =  new Date();
 //date.toLocaleTimeString();
 //myconsole.log(date);
+
+
+
+
+const ipc = require('node-ipc');
+   
+
+ipc.config.id = 'RuleMonitor';
+ipc.config.retry= 1500;
+//ipc.config.silent = true;
+
+
+
+ipc.connectTo(
+    'MQTTParse',
+    function(){
+        ipc.of.MQTTParse.on(
+            'connect',
+            function(){
+                
+                myconsole.log('RuleMon connected to MQTT Parser with IPC ##');
+                
+            }
+        );
+        ipc.of.MQTTParse.on(
+            'disconnect',
+            function(){
+               
+            }
+        );
+        
+        ipc.of.MQTTParse.on(
+            'deviceConnected',
+            function(){
+               
+                myconsole.log('rrrrrrrrrrrrrrrrrrrrrrr   ');
+               
+            }
+        );
+        
+  });   // end MQTT Parse
+
+
+ipc.connectTo(
+    'mySensParse',
+    function(){
+        ipc.of.mySensParse.on(
+            'connect',
+            function(){
+                
+                myconsole.log('RuleMon connected to mySensParse  with IPC ##');
+                
+            }
+        );
+        ipc.of.mySensParse.on(
+            'disconnect',
+            function(){
+               
+            }
+        );
+        
+        ipc.of.mySensParse.on(
+            'deviceConnected',
+            function(){
+               
+                myconsole.log('qqqqqqqqqqqqqqqqqqqqqqqqq   ');
+               
+            }
+        );
+        
+    });   // end Mysens Pars
+
+
+
+
+
+
 
 
 
@@ -56,9 +136,12 @@ function start() {
     //myconsole.log(debug);
     myconsole.log("Rule Monitor started");
    
-    clearRules();
-   
+    
   
+
+ 
+ 
+ clearRules();
 	
 	if(io)
 	{ 
@@ -74,6 +157,8 @@ function start() {
 	  
 	    });
 	    
+	    
+	   
 	
     
     ruleMonitor();
@@ -107,23 +192,63 @@ function ruleMonitor(){
                    // deviceSendUpdate(data_receive[i].Item_Id);   
                     latestId = data_receive[data_receive.length-1].Id;
                     
-                    // myconsole.log("ruleMONxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx222: " + latestId );
+                     myconsole.log("ruleMONxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx222: " + latestId );
                    
-                    evaluate.evaluateChange(data_receive[i].Item_Id,data_receive[i].State,function(node,port,state,virtual,cancelTime,func){
+                    evaluate.evaluateChange(data_receive[i].Item_Id,data_receive[i].State,function(node,nodePort,state,virtual,cancelTime,func){
                         
                           j++;
                         eval(func);             
-                       //  myconsole.log("rule items are: " + node + "   " + port + "    " + state );
-                         if(node && port && state){
-                         
-                         	    mySensorsocket.emit('deviceSwitch',node,port,state,1,0);
-                         	    MQTTsocket.emit('deviceSwitch',node,port,state,1,0);
+                       //  myconsole.log("rule items are: " + node + "   " + nodePort + "    " + state );
+                         if(node && nodePort && state){
+                        //  myconsole.log("rule items are2: " + node + "   " + nodePort + "    " + state );
+                         	  //  mySensorsocket.emit('deviceSwitch',node,port,state,1,0);
+                         	  
+                         	  myconsole.log("ruleMONxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv222: ");
+                         	  myconsole.log( node + "    " + nodePort + "    " + state);
+                         	    
+                         	    
+                         	     ipc.of.mySensParse.emit('deviceSwitch',
+                                 {
+                                  "NodeID":node,
+                                  "NodePort":nodePort,
+                                  "State":state,
+                                  "RuleReq":1,
+                                  "NodeTimeOn":0
+                                  
+                                 }
+                                );
+                         	
+                         	
+                         	
+                         	
+                         	      ipc.of.MQTTParse.emit('deviceSwitch',
+                                 {
+                                  "NodeID":node,
+                                  "NodePort":nodePort,
+                                  "State":state,
+                                  "RuleReq":1,
+                                  "NodeTimeOn":0
+                                  
+                                 }
+                                );
+
                          
                          }
                         //myconsole.log(cancelTime);
                          if(cancelTime != null){
                                      
-                             mySensorsocket.emit('switchOff',node,port,0,virtual,cancelTime);
+                           //  mySensorsocket.emit('switchOff',node,nodePort,0,virtual,cancelTime);
+                             
+                              ipc.of.mySensParse.emit('switchOff',
+                                 {
+                                  "NodeID":node,
+                                  "NodePort":nodePort,
+                                  "State":0,
+                                  "virtual":virtual,
+                                  "offTime":cancelTime
+                                  
+                                 }
+                                );
                          }
                          
                          

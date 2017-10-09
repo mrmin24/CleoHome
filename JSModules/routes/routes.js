@@ -9,7 +9,8 @@ var myconsole = require('../myconsole.js');
 var config2 = config.data.xml.database[0];
 
 
-
+try {
+	
 var pool = mysql.createPool({
 
 
@@ -21,6 +22,8 @@ var pool = mysql.createPool({
 
 
 });
+/* code */
+} catch (e) {myconsole.log(e);}
 
 
 // app/routes.js
@@ -42,6 +45,7 @@ module.exports = function(app, passport) {
 			}else{
 				res.redirect('/home');
 			}*/ 
+			
 		if(req.cookies.Username && req.cookies.Token){
 			
 		
@@ -67,11 +71,17 @@ module.exports = function(app, passport) {
 		
 		var token = req.cookies.Token;
 		var validlogin = false;
-		pool.getConnection(function(err, connection){
-                connection.query("select Token from user_logins where Username = '" + req.cookies.Username +  "'",function(err, rows){
+		
+	
+		try{
+		
+		pool.getConnection(function(err2, connection){
+		//	myconsole.log(connection);
+		if(err2){	myconsole.log(err2);}
+                connection.query("select Token from user_logins where Username = '" + req.cookies.Username +  "'",function(err2, rows){
                     connection.release();
-                    if (err)
-                        return done(err);
+                    if (err2)
+                        return done(err2);
                     if (!rows.length) {
                         myconsole.log("Invalid Login: User not found in login list");
                         req.cookies.Username = false;
@@ -104,21 +114,23 @@ module.exports = function(app, passport) {
                     callback(validlogin);
                 });
             });
+		}
+		catch(e){myconsole.log(e);}
             
 		
 	}
 	
 	function clearusertokens(user,token){
-		pool.getConnection(function(err, connection){
+		pool.getConnection(function(err2, connection){
 			if(!token)
                 connection.query("DELETE from user_logins where Username = '" + user +  "'",cleartoken);
            else
            		connection.query("DELETE from user_logins where Token = '" + token +  "' AND Username = '" + user + "'" ,cleartoken);
            		
-           		function cleartoken(err, rows){
+           		function cleartoken(err2, rows){
            		connection.release();
-           			if (err)
-                        return done(err);
+           			if (err2)
+                        return done(err2);
                     else
                     {
                     	myconsole.log("User tokens deleted for user " + user);
@@ -172,12 +184,12 @@ module.exports = function(app, passport) {
 					res.cookie('Token', token, { maxAge: timeout,httpOnly: true });
 				//	res.cookie('Session_id', 3, { maxAge: timeout });
 					
-					pool.getConnection(function(err, connection){
+					pool.getConnection(function(err2, connection){
                 
     
                         var insertQuery = "INSERT INTO user_logins ( Username, Token ) values ('" + req.user.username + "','" + token  + "')";
     
-                        connection.query(insertQuery,function(err, rows) {
+                        connection.query(insertQuery,function(err2, rows) {
                             newUserMysql.id = rows.insertId;
     
                             return done(null, newUserMysql);

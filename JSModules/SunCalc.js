@@ -11,7 +11,7 @@ var isDark = 1;
 var rules = require('./Rule_UpdateStates.js');
 
 var mySensorio = require('socket.io-client');
-var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+//var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 
 function start() {
@@ -19,7 +19,7 @@ function start() {
     myconsole.log("SunCalc started");
    
     checkSunCalc();
-    suntimer = setInterval(function(){
+   var suntimer = setInterval(function(){
 
 
         checkSunCalc();
@@ -100,7 +100,7 @@ function checkSunCalc(){
                  //myconsole.log(data_receive[0]);
                  });*/
                     
-                myconsole.log("At time: " + timenow + " IsDark is: " + isDark);    
+            //    myconsole.log("At time: " + timenow + " IsDark is: " + isDark);    
                 
                 
             }

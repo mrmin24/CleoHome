@@ -5,7 +5,7 @@ var io = require('socket.io')(http);
 var rules = require('../JSModules/Rule_UpdateStates.js');
 //var evaluate = require('../JSModules/Rule_Items_Evaluate');
 var mySensorio = require('socket.io-client');
-var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+//var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 var myconsole = require('../JSModules/myconsole.js');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 
@@ -20,7 +20,7 @@ exports.logger = function(type,event) {
 	
 	
 	return null;
-}
+};
 
 
 exports.ownDb = function(type,data) {
@@ -34,7 +34,7 @@ exports.ownDb = function(type,data) {
 	 getID(data.Name,function(ID){
 	     
 	     
-	      rules.updateRuleStates(ID, Current_State);
+	      rules.updateRuleStates(ID, data.Current_State);
      /*   evaluate.evaluateChange(ID,data.Current_State,function(node,port,state,cancelTime,func){
            
                 if(func){eval(func);}
@@ -49,7 +49,7 @@ exports.ownDb = function(type,data) {
     return null;
 	
 
-}
+};
 
 
 function getID(name,callback){

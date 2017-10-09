@@ -19,29 +19,32 @@ var pool = mysql.createPool({
 exports.insert = function(table,data) {
 
     //myconsole.log(data);
-      pool.getConnection(function(err, connection){
-    connection.query('INSERT INTO '+ table +' SET ?', data, function(err, result) {
+    try{ 
+     pool.getConnection(function(err2, connection){
+      connection.query('INSERT INTO '+ table +' SET ?', data, function(err2, result) {
         connection.release();
-        if(err) {
-            myconsole.log(err);
+        if(err2) {
+            myconsole.log(err2);
             }
             else {
                 //myconsole.log(result);
             }
             
-    });
+        });
    
        });
-}
+    }catch(e){myconsole.log(e)}
+};
 
 exports.update = function(table,data) {
 
     //myconsole.log(data);
-        pool.getConnection(function(err, connection){
-            connection.query('UPDATE '+ table +' SET ' + data.Set + '=? WHERE ' + data.Where + '= ?', [data.Current_State,data.Name], function(err, result) {
+     try{ 
+        pool.getConnection(function(err2, connection){
+            connection.query('UPDATE '+ table +' SET ' + data.Set + '=? WHERE ' + data.Where + '= ?', [data.Current_State,data.Name], function(err2, result) {
                connection.release();
-                if(err) {
-                    myconsole.log(err);
+                if(err2) {
+                    myconsole.log(err2);
                     }
                     else {
                        //myconsole.log(result);
@@ -49,47 +52,50 @@ exports.update = function(table,data) {
                     
             });
        });
+     }catch(e){myconsole.log(e)}
  
-}
+};
 
 
 exports.getdata = function(table,data,callback) {
 
-   pool.getConnection(function(err, connection){
+   try{ 
+   pool.getConnection(function(err2, connection){
     
    // myconsole.log(data.whereClause);
    
-    connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause, [table], function(err, result) {
+    connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause, [table], function(err2, result) {
       
-  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err2, result) {
        
        connection.release();
-        if(err) {
-             callback(err,null);
+        if(err2) {
+             callback(err2,null);
             }
             else {
                 // myconsole.log(data.whereClause);
              callback(null,result);
             }
             
-    });
+            });
    
-    });
-}
+        });
+   }catch(e){myconsole.log(e)}
+};
 
 exports.getJoinData = function(table,table2,data,callback) {
 
-   pool.getConnection(function(err, connection){
+   pool.getConnection(function(err2, connection){
     
    // myconsole.log(data.whereClause);
    
-        connection.query('SELECT ' + data.Select + ' FROM ?? T1 INNER JOIN ?? T2 ON ' + data.Join  + 'WHERE ' + data.whereClause, [table],[table2], function(err, result) {
+        connection.query('SELECT ' + data.Select + ' FROM ?? T1 INNER JOIN ?? T2 ON ' + data.Join  + 'WHERE ' + data.whereClause, [table],[table2], function(err2, result) {
           
-      // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+      // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err2, result) {
            
            connection.release();
-            if(err) {
-                 callback(err,null);
+            if(err2) {
+                 callback(err2,null);
                 }
                 else {
                     // myconsole.log(data.whereClause);
@@ -99,22 +105,22 @@ exports.getJoinData = function(table,table2,data,callback) {
         });
    
     });
-}
+};
 
 
 exports.getLast = function(table,data,callback) {
 
-   pool.getConnection(function(err, connection){
+   pool.getConnection(function(err2, connection){
     
     //myconsole.log(data);
    
-    connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause + ' ORDER BY Id DESC LIMIT 1', [table], function(err, result) {
+    connection.query('SELECT ' + data.Select + ' FROM ?? WHERE ' + data.whereClause + ' ORDER BY Id DESC LIMIT 1', [table], function(err2, result) {
       
-  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err, result) {
+  // connection.query("SELECT Id FROM Alarm_States WHERE State = 'Ready'", function(err2, result) {
        
        connection.release();
-        if(err) {
-             callback(err,null);
+        if(err2) {
+             callback(err2,null);
             }
             else {
              callback(null,result);
@@ -123,7 +129,7 @@ exports.getLast = function(table,data,callback) {
     });
    
     });
-}
+};
 
 
 

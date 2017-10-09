@@ -1,0 +1,24 @@
+Controller active, delay for router is 1 seconds, please wait...
+starting....
+Initialising config
+Config Initialised
+Mysensors: Trying to connect to Gateway @ 192.168.2.22:5003
+Server on PORT: 8080
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+Alarm test
+Alarm Module Listening on 44601
+Event Module Listening on 44602
+MQTT Module Listening on 44607
+Client connected to mysensor Parser
+Items to unknown 
+ioXXXXXXXXXXXXXXXXXXX
+SunCalc started
+TimeUpdate started
+Waiting to zero time. Can take up to 1 min
+Check local weather
+Mysensors: Gateway connected
+Alarm Module: Alarm connected
+Alarm Status 18
+Server: Client Connected
+MQTT MQTTclient new connection
+Server connected to MQTT Parser

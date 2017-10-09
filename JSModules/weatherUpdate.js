@@ -9,7 +9,7 @@ var rules = require('./Rule_UpdateStates.js');
 
 var log = require('./logger.js');
 var mySensorio = require('socket.io-client');
-var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+//var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 var backup = 0;
 const wingate = 939493;
@@ -21,14 +21,14 @@ function start() {
    // myconsole.log(debug);
     checkWeather(wingate);
     checkLocalWeather();
-    timerweather = setInterval(function(){
+   var  timerweather = setInterval(function(){
 
         checkWeather(wingate);
        
 
     },intervaltime);
     
-    timerweather2 = setInterval(function(){
+   var timerweather2 = setInterval(function(){
 
         
         checkLocalWeather();
@@ -64,7 +64,7 @@ function checkWeather(city){
   	res.on('data', function (chunk) {
   	    //myconsole.log(chunk);
   	    
-  	    chunk = JSON.parse(chunk)
+  	    chunk = JSON.parse(chunk);
         if(chunk['cod'] == 200){
     		myconsole.log('Weather Update: ' + chunk["main"]['temp_max']);
     		
@@ -99,7 +99,7 @@ function checkLocalWeather(){
     
     myconsole.log("Check local weather");
     
-     data = {'Select':'Id,Item_Current_Value','whereClause':'Item_Name = ' + '"LocalRainCurrent"'};   // can only be one LocalRainCurrent in system
+    var data = {'Select':'Id,Item_Current_Value','whereClause':'Item_Name = ' + '"LocalRainCurrent"'};   // can only be one LocalRainCurrent in system
         
         db.getdata('Items',data,function(err,result){
            
@@ -149,7 +149,7 @@ function error(){
 function logData(item,weatherData){
     
     
-     data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + item + '"'};
+     var data = {'Select':'Id','whereClause':'Item_Name = ' + '"' + item + '"'};
         
         db.getdata('Items',data,function(err,result){
            

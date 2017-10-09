@@ -25,7 +25,7 @@ exports.power = function(state,type,port){
       return '{"CMD":"POWER' + port.toString() + '","MSG":"'+type+'"}';
       
     }else if(type == "pulse"){
-      myconsole.log('{"CMD":"PulseTime' + port.toString() + '","MSG":"'+type+'"}');
+      myconsole.log('{"CMD":"PulseTime' + port.toString() + '","MSG":"'+type + '","time":"'+state+'"}');
       return '{"CMD":"PulseTime' + port.toString() + '","MSG":"'+state+'"}';
       
       
@@ -44,12 +44,12 @@ exports.getPowerState = function(port){
   //  Power<x>         | 3 | blink    | Blink power of relay<x>
   //  Power<x>         | 4 | blinkoff | Stop blinking power of relay<x>
     
-    return '{"CMD":"POWER' + port.toString() + '","MSG":""}';;
+    return '{"CMD":"POWER' + port.toString() + '","MSG":""}';
     
     
 }
 
-exports.newNodeSend = function(){
+exports.newNodeSend = function(port){
     
   //  Power<x>         |              | Show current power state of relay<x> as On or Off
   //  Power<x>         | 0 | off      | Turn relay<x> power Off
@@ -58,7 +58,7 @@ exports.newNodeSend = function(){
   //  Power<x>         | 3 | blink    | Blink power of relay<x>
   //  Power<x>         | 4 | blinkoff | Stop blinking power of relay<x>
     
-    return '{"CMD":"TOPIC' + port.toString() + '","MSG":""}';;
+    return '{"CMD":"TOPIC' + port.toString() + '","MSG":""}';
     
     
 }

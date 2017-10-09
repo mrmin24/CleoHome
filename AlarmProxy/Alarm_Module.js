@@ -1,5 +1,5 @@
 var nap = require('./nodealarmproxy.js');
-var config = require('./config.js'); //comment this out
+//var config = require('./config.js'); //comment this out
 var log = require('./logger.js');
 var db = require('./dbhandler');
 var myconsole = require('../JSModules/myconsole.js');
@@ -18,14 +18,14 @@ var lastzone;
 var alarm = null;
 var oldconnectionstatus = null;
 var mySensorio = require('socket.io-client');
-var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
+//var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 //var retrycount = 0;
 //var retryrequest = false;
 var disarmRetry = 10;
-disarmTimer = null;
+var disarmTimer = null;
 
 function start() {
-   // myconsole.log(debug);
+    myconsole.log("Alarm test");
 
     var io = require('socket.io').listen(port);
     if (io) {
@@ -686,7 +686,7 @@ function pollAlarm() {
    var alarmPollTimer =  setInterval(function() {
         nap.manualCommand('000', false, function(ack, nack, retry) {
 
-        })
+        });
     }, 60000);
     
 }
@@ -715,7 +715,7 @@ function getState(requiredState, callback) {
 
 function updateStatus(item,state){
     
-    data = {'Select':'Id','whereClause':'Name = ' + '"' + item + '"'};
+    var data = {'Select':'Id','whereClause':'Name = ' + '"' + item + '"'};
         
         db.getdata('Alarm_Items',data,function(err,result){
            
@@ -904,7 +904,7 @@ function speak(msg){
         sockets.emit('speak',msg);
     }
 
-var nextzone, nextzone, bypassedZones = [];
+var nextzone, nextzones, bypassedZones = [];
 
 function bypassOne(zone, zones, callback) {
     //myconsole.log(zones);
@@ -957,7 +957,7 @@ function bypassOne(zone, zones, callback) {
 
 function sleep(time, callback) {
     var stop = new Date().getTime();
-    while (new Date().getTime() < stop + time) {;
+    while (new Date().getTime() < stop + time) {
     }
     callback();
 }

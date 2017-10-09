@@ -20,62 +20,134 @@ var offTimeInterval = 1000;
 //var alarmio = require('socket.io-client');
 //var actual = alarmio.connect(gatewayip + gatewayport);
 
+	connect();
+
+	function connect(){
+  		myconsole.log('Mysensors: Trying to connect to Gateway @ ' + gatewayip + ':' + gatewayport);
+  		
+			actual.connect({port: gatewayport, host:gatewayip}, function() {
+			    myconsole.log('Mysensors: Gateway connected');
+			    
+		      //  ipc.server.broadcast("gatewayConnected",1);
+            	if(retrytimer)clearInterval(retrytimer);      
+            	
+            	
+			});
+			
+			
+			
+  
+  	}
+
+
+
+const ipc = require('node-ipc');
+
+//const ipc=require('../../../node-ipc');
+
+/***************************************\
+ *
+ * You should start both hello and world
+ * then you will see them communicating.
+ *
+ * *************************************/
+
+ipc.config.id = 'mySensParse';
+ipc.config.retry= 1500;
+//ipc.config.silent = true;
+//ipc.config.rawBuffer=true;
+
+//ipc.config.maxConnections=1;
+
+ipc.serve(
+    function(){
+        
+        ipc.server.on(
+            'socket.disconnected',
+            function(data,socket){
+                myconsole.log('DISCONNECTED\n\n',arguments);
+            }
+        );
+        
+        
+        ipc.server.on(
+            'connect',
+            function(socket){
+            	myconsole.log('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz');
+                
+            }
+        );
+        
+    }
+);
+
+ipc.server.on(
+    'error',
+    function(err){
+       myconsole.log('Error occured' + err);
+    }
+);
+
+ipc.server.start();
+
+
+
 
 function start() {
    // myconsole.log(debug);
-	var io = require('socket.io').listen(44606);
+	//var io = require('socket.io').listen(44606);
 	
-	if(io)
-	{ myconsole.log('MySensor Module Listening on ' + '44606');}
+//	if(io)
+//	{ myconsole.log('MySensor Module Listening on ' + '44606');}
 	
 
 	
-	io.sockets.on('connection', function(socket){
+//	io.sockets.on('connection', function(socket){
 	  myconsole.log('Client connected to mysensor Parser');
-	 
-		connect();
+
+		
 		checkOffTimes();
 		var offTimeTimer = setInterval(checkOffTimes,offTimeInterval);
 		
-		 socket.on('deviceSwitch',function(NodeId,NodePort,State,rulereq,timeOn){
+		 	ipc.server.on('deviceSwitch',function(nodeData){   //NodeId,NodePort,State,rulereq,timeOn
 		 	
 		 	
-		 //	myconsole.log("is array " + Array.isArray(NodeId));
-		 	if(Array.isArray(NodeId))
-			 	for(var i in NodeId)
+		 	myconsole.log("is array " + Array.isArray(nodeData['NodeID']));
+		 	if(Array.isArray(nodeData['NodeID']))
+			 	for(var i in nodeData['NodeID'])
 			 	{
-			 		myconsole.log("mysens1 " + NodeId[i] + " " + NodePort[i] + " " + State[i] + " " + rulereq[i] );
+			 		myconsole.log("mysens1 " + nodeData['NodeID'][i] + " " + nodeData['NodePort'][i] + " " + nodeData['State'][i] + " " + nodeData['RuleReq'][i] );
 			 		setTimeout(function() {
-					    sendData(NodeId[i],NodePort[i],State[i],rulereq[i],timeOn)	;
+					    sendData(nodeData['NodeID'][i],nodeData['NodePort'][i],nodeData['State'][i],nodeData['RuleReq'][i],nodeData['NodeTimeOn'])	;
 					}, 250);
 			 	}
 		 	else
-		 	{   myconsole.log("mysens2 " + NodeId + " " + NodePort + " " + State + " " + rulereq );
+		 	{   myconsole.log("mysens2 " + nodeData['NodeID'] + " " + nodeData['NodePort'] + " " + nodeData['State'] + " " + nodeData['RuleReq'] );
 		 	
 		 	
-		 		sendData(NodeId,NodePort,State,rulereq,timeOn)	;
+		 		sendData(nodeData['NodeID'],nodeData['NodePort'],nodeData['State'],nodeData['RuleReq'],nodeData['NodeTimeOn'])	;
 		 	
 		 			
 		 	}
 		 });
 		 
 		 
-		 socket.on('switchOff',function(NodeId,NodePort,State,virtual,offTime){
+		 ipc.server.on('switchOff',function(nodeData){   //NodeId,NodePort,State,virtual,offTime
 		 	
 		 	var foundIndex = 0;
 
 		 	//	myconsole.log("Switch off: " + NodeId + " " + NodePort + " " + virtual);
-		 	if(NodePort == null){NodePort = 1;}
+		 	if(nodeData['NodePort'] == null){nodeData['NodePort'] = 1;}
 		 
 
 		 //	myconsole.log(offTimes);
 
 		 	for(var i = 0;i<offTimes.length;i++){
 		 		
-		 		if(offTimes[i]['data']['node'] == NodeId && offTimes[i]['data']['port'] == NodePort  ){
+		 		if(offTimes[i]['data']['node'] == nodeData['NodeID'] && offTimes[i]['data']['port'] == nodeData['NodePort']  ){
 		 			
-		 			offTimes[i]['data']['offTime'] = offTime;
-		 			offTimes[i]['data']['state'] = State;
+		 			offTimes[i]['data']['offTime'] = nodeData['offTime'];
+		 			offTimes[i]['data']['state'] = nodeData['State'];
 
 		 	
 		 			foundIndex = 1;
@@ -87,11 +159,11 @@ function start() {
 		 	
 		 	if(foundIndex == 0)
 		 	{
-			 	offTimesObjects.node =parseInt(NodeId);
-			 	offTimesObjects.port = NodePort;
-			 	offTimesObjects.state = State;
-			 	offTimesObjects.offTime = offTime;
-			 	offTimesObjects.virtual = virtual;
+			 	offTimesObjects.node = parseInt(nodeData['NodeID']);
+			 	offTimesObjects.port = nodeData['NodePort'];
+			 	offTimesObjects.state = nodeData['State'];
+			 	offTimesObjects.offTime = nodeData['offTime'];
+			 	offTimesObjects.virtual = nodeData['virtual'];
 			 	
 			 	
 			 	offTimes.push({data: offTimesObjects});
@@ -110,7 +182,7 @@ function start() {
 		 
 		 
 		function processData(data){
-	    	socket.emit("nodeAlive",data[0]);
+	    	ipc.server.broadcast("nodeAlive",{'NodeID':data[0]});
 	    	var sensorTypes = ['17','0','8','38','39','7'];// ['0','1','17','18','35','38','39'];
 	    	if(data[2] == 1 && sensorTypes.indexOf(data[4]) == -1 ){
 	    	   myconsole.log("Mysensor: Device updated");
@@ -121,13 +193,24 @@ function start() {
 	    			if(data_receive){
 	    				
 	    				if(data_receive[0].Item_Current_Value - data[5] > 0.3 || data_receive[0].Item_Current_Value - data[5] < -0.3){
-	    					socket.emit("deviceStatusChange",data[0],data[1],data[5]);
+	    					ipc.server.broadcast("deviceStatusChange",{
+	    						'NodeID':data[0],
+	    						'NodePort':data[1],   //NodeID,NodePort,State
+	    						'State':data[5]
+	    						});
 	    					//	log.logger('Device', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
 	    						log.logger('Device', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');	
 	    				}
 	    			}else
 	    			{
-	    					socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
+	    					ipc.server.broadcast("sensorStatusChange",{
+	    						'NodeID':data[0],
+	    						'NodePort':data[1],   //NodeID,NodePort,State
+	    						'State':data[5],
+	    						'Type':data[4]
+	    						});
+	    						
+	    					
     					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
     					log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
 	    				myconsole.log(err);
@@ -150,7 +233,12 @@ function start() {
 	    				if(data_receive2){
 	    				//	myconsole.log(data_receive2);
 			    			if(data_receive[0].Item_Current_Value - data[5] > 0.3 || data_receive[0].Item_Current_Value - data[5] < -0.3){
-			    					socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
+			    			ipc.server.broadcast("sensorStatusChange",{
+			    				'NodeID':data[0],
+	    						'NodePort':data[1],   //NodeID,NodePort,State
+	    						'State':data[5],
+	    						'Type':data[4]
+			    			});
 			    					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
 			    					log.logger(data_receive2[0].Type, '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
 			    				}
@@ -159,7 +247,7 @@ function start() {
 	    				}
 	    			
 	    			//else{
-	    			//	socket.emit("sensorStatusChange",data[0],data[1],data[5],data[4]);
+	    			//	ipc.server.broadcast("sensorStatusChange",data[0],data[1],data[5],data[4]);
     					//log.logger('Sensor', '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data_receive[0].Item_Current_Value + '"}');
     				//	log.logger(data_receive2[0].Type, '{"node":"' + data[0] + '","port":"' + data[1] + '","value":"' + data[5] + '"}');
 	    			//}
@@ -200,22 +288,7 @@ function start() {
 			
 		
 	   
-		  	function connect(){
-		  		myconsole.log('Mysensors: Trying to connect to Gateway @ ' + gatewayip + ':' + gatewayport);
-		  		
-					actual.connect({port: gatewayport, host:gatewayip}, function() {
-					    myconsole.log('Mysensors: Gateway connected');
-					    
-				        socket.emit("gatewayConnected",1);
-	                	if(retrytimer)clearInterval(retrytimer);      
-	                	
-	                	
-					});
-					
-					
-					
 		  
-		  	}
 		
 	
 	   
@@ -223,9 +296,9 @@ function start() {
 	    process.on('uncaughtException', function(err) {
 	    if(err.code == 'EHOSTUNREACH'){
 	        //retryconnect();
-	        socket.emit("gatewayConnected",0);
+	        ipc.server.broadcast("gatewayConnected",{'gatewayState':0});
 	        	if(retrytimer)clearInterval(retrytimer);    
-		  		retrytimer = setInterval(function() {connect()},5000);
+		  	//	retrytimer = setInterval(function() {connect()},5000);
 	    }
 	    
 	   
@@ -238,9 +311,9 @@ function start() {
 			/*	if(e.code == 'ECONNREFUSED') {}  */
 				
 			myconsole.log("Mysensors: Gateway connection error = " + e);	
-				socket.emit("gatewayConnected",0);
+				ipc.server.broadcast("gatewayConnected",{'gatewayState':0});
 				if(retrytimer)clearInterval(retrytimer);    
-		  		retrytimer = setInterval(function() {connect()},5000);
+		  	//	retrytimer = setInterval(function() {connect()},5000);
 	
 			 
 		});
@@ -248,9 +321,9 @@ function start() {
 		actual.on('close', function() {
 				
 			myconsole.log("Mysensors: Gateway connection closed" );
-				socket.emit("gatewayConnected",0);
+				ipc.server.broadcast("gatewayConnected",{'gatewayState':0});
 				if(retrytimer)clearInterval(retrytimer);    
-		  		retrytimer = setInterval(function() {connect()},5000);
+		  	//	retrytimer = setInterval(function() {connect()},5000);
 	
 				
 		});
@@ -258,9 +331,9 @@ function start() {
 		actual.on('timeout', function() {
 				
 			myconsole.log("Mysensors: Gateway connection timeout" );
-				socket.emit("gatewayConnected",0);
+				ipc.server.broadcast("gatewayConnected",{'gatewayState':0});
 				if(retrytimer)clearInterval(retrytimer);    
-		  		retrytimer = setInterval(function() {connect()},5000);
+		  	//	retrytimer = setInterval(function() {connect()},5000);
 		
 				
 		});
@@ -269,9 +342,9 @@ function start() {
 		actual.on('disconnect', function() {
 			
 		myconsole.log("Mysensors: Gateway connection disconnected" );	
-			socket.emit("gatewayConnected",0);
+			ipc.server.broadcast("gatewayConnected",{'gatewayState':0});
 			if(retrytimer)clearInterval(retrytimer);    
-		  	retrytimer = setInterval(function() {connect()},5000);
+		 // 	retrytimer = setInterval(function() {connect()},5000);
 	
 				
 		});
@@ -392,7 +465,7 @@ function start() {
 		}
 		
 		function checkOffTimes(){
-		 var time = new Date().getTime()	
+		 var time = new Date().getTime()	;
 		//	myconsole.log(time);
 		//	myconsole.log(offTimes);
         	//return t.setSeconds(t.getSeconds() + onTime);
@@ -424,7 +497,7 @@ function start() {
 	
 		
 	
-	});
+	//});
 	
 
 }

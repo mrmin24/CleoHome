@@ -29,9 +29,22 @@ var connected = 0;
 var alarmip = '192.168.2.20';
 var alarmport = '4025';
 
+
+function connectAlarm(){
+		//	actual.connect({port: configure2.alarm[0].port[0], host:configure2.alarm[0].ip[0]}, function() {
+		actual.connect({port: alarmport, host:alarmip}, function() {
+		myconsole.log('Alarm Module: Alarm connected');
+		connected = 1;
+		eventEmitter.emit('Alarms_connection_status',18,1);
+ 		logdata('{"Status":"Alarm connected"}');
+
+		});
+  	}
+  	
+  	
 function checkAlarmConnected(){
 		
-		ping(function(err,answer){
+		ping(function(err2,answer){
 			
 			if(!answer){
 				connected = 0;
@@ -52,6 +65,31 @@ function checkAlarmConnected(){
 		
 	}	
 	
+exports.manualCommand = function(command,passwordRequired,callback) {
+	if (actual) {
+	    if(passwordRequired){
+		    sendcommand(actual,command+password,function(ack,nack,retry){
+		        if(acktimer1){clearInterval(acktimer1);} 
+		        callback(ack,nack,retry);
+		        
+		        
+		    });
+	    }
+	    else{
+	      sendcommand(actual,command,function(ack,nack,retry){
+	          if(acktimer1){clearInterval(acktimer1);} 
+	          callback(ack,nack,retry);
+	          
+	      });
+	        
+	    }
+	} else {
+	    
+	     callback(false,false,false);
+		//not initialized
+	}
+};
+	
 exports.initConfig = function(initconfig) {
  
 	
@@ -70,26 +108,17 @@ exports.initConfig = function(initconfig) {
 	
 	setInterval(checkAlarmConnected,5000);
 		
-	connect();
-//	ping(function(err,answer){
+	connectAlarm();
+//	ping(function(err2,answer){
   	//	if(answer){
-  	function connect(){
-		//	actual.connect({port: configure2.alarm[0].port[0], host:configure2.alarm[0].ip[0]}, function() {
-		actual.connect({port: alarmport, host:alarmip}, function() {
-		myconsole.log('Alarm Module: Alarm connected');
-		connected = 1;
-		eventEmitter.emit('Alarms_connection_status',18,1);
- 		logdata('{"Status":"Alarm connected"}');
-
-		});
-  	}
+  	
 
   	//	}
 //	});
    
     
-    process.on('uncaughtException', function(err) {
-    if(err.code == 'EHOSTUNREACH'){
+    process.on('uncaughtException', function(err2) {
+    if(err2.code == 'EHOSTUNREACH'){
         //retryconnect();
     }
     
@@ -108,7 +137,7 @@ exports.initConfig = function(initconfig) {
 		 
 	//	  client.setInterval(function() {
 		  	
-	//	  	ping(function(err,answer){
+	//	  	ping(function(err2,answer){
 	//	  		if(answer){
 	//	            client.connect(config.actualport, config.actualhost, function(){
 	//	                myconsole.log('Alarm Module: Alarm connected2');
@@ -389,30 +418,7 @@ function sendcommand(addressee,command,callback) {
 	
 }
 
-exports.manualCommand = function(command,passwordRequired,callback) {
-	if (actual) {
-	    if(passwordRequired){
-		    sendcommand(actual,command+password,function(ack,nack,retry){
-		        if(acktimer1){clearInterval(acktimer1);} 
-		        callback(ack,nack,retry);
-		        
-		        
-		    });
-	    }
-	    else{
-	      sendcommand(actual,command,function(ack,nack,retry){
-	          if(acktimer1){clearInterval(acktimer1);} 
-	          callback(ack,nack,retry);
-	          
-	      });
-	        
-	    }
-	} else {
-	    
-	     callback(false,false,false);
-		//not initialized
-	}
-};
+
 
 exports.getCurrent = function() {
 	eventEmitter.emit('data',alarmdata);

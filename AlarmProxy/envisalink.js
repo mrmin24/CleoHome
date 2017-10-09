@@ -167,7 +167,7 @@ exports.applicationcommands = {
     'send':'500200',
     'action':'forward'
   }
-}
+};
  
 exports.tpicommands = {
   '500' : {
@@ -738,4 +738,4 @@ exports.tpicommands = {
     'send':'',
     'action':'coderequired'
   }
-}
+};

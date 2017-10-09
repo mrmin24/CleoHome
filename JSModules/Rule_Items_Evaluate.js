@@ -6,13 +6,13 @@ exports.evaluateChange = function(itemId,itemValue,callback){
     myconsole.log("evaluate itemid1: " + itemId);
     //myconsole.log(itemValue);
     
-    data = {'Select':'Second_Id,Rule_Id,Equals,Greater_Than,Less_Than,Not_Equal,Secondary_Item','whereClause':'Item_Id = ' + itemId };
+   var  data = {'Select':'Second_Id,Rule_Id,Equals,Greater_Than,Less_Than,Not_Equal,Secondary_Item','whereClause':'Item_Id = ' + itemId };
     
-    db.getdata('Rule_Items',data,function(err,result){
+    db.getdata('Rule_Items',data,function(err2,result){
        
-       if(err){
+       if(err2){
            
-           myconsole.log(err);
+           myconsole.log(err2);
        }else if(result){
            
           // myconsole.log(result);
@@ -44,7 +44,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    var rulechanged = 0;
                    data = {'Set':'Status','Where':'Second_Id','Current_State':1,'Name':results.Second_Id};
                 
-                   db.update('Rule_Items',data,function(err,result2){
+                   db.update('Rule_Items',data,function(err2,result2){
                        
                        if(result2){
                         if(result2.changedRows >= 1){
@@ -133,7 +133,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                    // }
                }else
                {
-                   data2 = {'Set':'Status','Where':'Second_Id','Current_State':0,'Name':result[i].Second_Id};
+                  var data2 = {'Set':'Status','Where':'Second_Id','Current_State':0,'Name':result[i].Second_Id};
                 
                    db.update('Rule_Items',data2,function(){});
                    status = 0;
@@ -160,4 +160,4 @@ exports.evaluateChange = function(itemId,itemValue,callback){
     
     
     
-}
+};
