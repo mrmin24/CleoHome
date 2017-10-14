@@ -129,7 +129,7 @@ try{
 
  //myconsole.log(io);
  
- myconsole.log("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+ 
 function start() {
     //log(debug);
     
@@ -146,7 +146,7 @@ ipc.connectTo(
             'connect',
             function(){
                 
-                myconsole.log(' CleoServer connected to MQTT Parser with IPC ##');
+                myconsole.log('CleoServer connected to MQTT Parser with IPC ##');
                 
             }
         );
@@ -258,7 +258,7 @@ ipc.connectTo(
           //var evaluate = require('../JSModules/Rule_Items_Evaluate');
           
           
-            db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated,Item_Type',whereClause:'Node_Id = ' + nodeData['NodeID.toString()'] + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
+            db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated,Item_Type',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
                // myconsole.log(data_receive);
                 if(data_receive[0]){
                            //myconsole.log(data_receive);
@@ -451,8 +451,12 @@ ipc.connectTo(
     } ,1000*60*configure2.server[0].dnsinterval[0]);
     
   
-  myconsole.log("ioXXXXXXXXXXXXXXXXXXX");
+  //myconsole.log("ioXXXXXXXXXXXXXXXXXXX");
 
+ });   //end mymqtt parse ipc
+ 
+ 
+ 
 io.on('connection', function(Websocket){
    myconsole.log('Server: Client Connected');
 
@@ -621,7 +625,14 @@ io.on('connection', function(Websocket){
  Websocket.on('armDisarmAlarm',function(type){
     
    myconsole.log(type + " requested") ;
-   alarmsocket.emit('armDisarmAlarm',type);
+    ipc.of.AlarmModule.emit('armDisarmAlarm',
+     {
+      "type":type
+     
+      
+     });
+   
+   
     
     
 });
@@ -631,8 +642,12 @@ io.on('connection', function(Websocket){
     
     var cancelBypass = [];
     cancelBypass.length = 0;
-   
-     alarmsocket.emit('bypassZones',zones,function(err2,ack,zones){
+    ipc.of.AlarmModule.emit('bypassZones',
+                     {
+                      "zones":zones
+                     
+                      
+                     },function(err2,ack,zones){
          //myconsole.log(zones);
         
         for(var i in zones){
@@ -1059,7 +1074,363 @@ io.on('connection', function(Websocket){
 });     /////////////////////////////////////////////////////////////////////////////////////////////////////////end of webpage socket connection
 
 
- });   //end mymqtt parse ipc
+ ipc.connectTo(
+    'RuleMonitor',
+    function(){
+     ipc.of.RuleMonitor.on(
+            'speak',
+            function(data){
+             
+              myconsole.log("rules: speak requested");
+              speak(data['msg']);
+             
+             
+            });
+            
+            
+       ipc.of.RuleMonitor.on(
+            'deviceUpdate',
+            function(data){
+             
+             
+               db.getdata('Items',{Select: 'Item_Type,Item_Current_Value',whereClause:'Id = "' + data['Id'] + '"'},function(err2,data_receive){
+                
+                if(err2){
+                 
+                 myconsole.log(err2);
+                }else{
+             	  // myconsole.log(data_receive);
+             	  if(data_receive){
+             	      
+             	   if(data_receive[0].Item_Current_Value == 1 )
+             	   {
+                 	     if(data_receive[0].Item_Type == Virtual_Item_Type ||  data_receive[0].Item_Type == Virtual_Alarm_Item_Type || data_receive[0].Item_Type == Phone_Item_Type)
+                 	    { // myconsole.log("test virtual");
+                 	       virtualDeviceStatusChangebyRule(data['Id'],1);
+                 	    }//else
+                 	  //  {
+                      //  mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
+                 	   // }
+                   }else
+                   {    if(data_receive[0].Item_Type == Virtual_Item_Type || data_receive[0].Item_Type == Virtual_Alarm_Item_Type || data_receive[0].Item_Type == Phone_Item_Type)
+             	        {
+             	          // myconsole.log("test virtual");
+             	            virtualDeviceStatusChangebyRule(data['Id'],0);
+             	        }//else
+             	      //  {
+                       //    mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
+             	       // }
+                   } 
+             	  }
+                }
+               });
+             
+             
+            });     
+            
+            
+            
+    });
+
+
+
+        
+    
+        
+
+
+
+
+
+
+ ipc.connectTo(
+    'AlarmModule',
+    function(){
+      ipc.of.AlarmModule.on(
+            'connect',
+            function(){
+                
+                myconsole.log('CleoServer connected to AlarmModule with IPC ##');
+                           
+             
+                
+                ipc.of.AlarmModule.emit('register',{type:'Alarm',client:'Server'});
+
+                 
+               
+            }
+        );
+        
+     ipc.of.AlarmModule.on(
+            'power',
+            function(data){
+                
+              myconsole.log("Server: Power:Sending Email");
+              switch(data['Code']){
+         		    case 800: 
+         		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '12' ,Current_State: 0 });
+         		        io.emit("battery",false);
+         		        sendemail("Battery Trouble");
+         		        break;
+         		        
+         		    case 801: 
+         		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '12' ,Current_State: 1 });
+         		        io.emit("battery",true);
+         		        sendemail("Battery Trouble Restored");
+         		        break;
+         		        
+         		    
+         		    case 802: 
+         		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 0 });
+         		        io.emit("ac",false);
+         		        sendemail("AC Trouble");
+         		        break;
+         		        
+         		    case 803: 
+         		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
+         		        io.emit("ac",true);
+         		        sendemail("AC Trouble Restored");
+         		        break;
+         		       
+         		    default: {}
+         		    break;
+                     
+                     }
+                
+            }
+        );   // end power command
+        
+        ipc.of.AlarmModule.on(
+            'trouble',
+            function(data){
+                
+              if(data['Code'] == '8411'){
+                io.emit("ac",true);
+               // sendemail("Trouble Event Restored");
+               
+                log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 0 });
+             }else if(data['Code'] == '8401'){
+                 io.emit("ac",false);
+                 sendemail("Trouble Event");
+                   pushOver.push('AC Power Off');
+                 myconsole.log("Server: Trouble Condition: Sending Email");
+                 log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
+             }
+                
+            }
+        );   // end trouble command
+        
+        
+        ipc.of.AlarmModule.on(
+            'AlarmEvent',
+            function(data){
+        
+        
+          // myconsole.log("Alarm event")
+           if(data['Partition'])
+           {   // myconsole.log("this1 " + data['Current_State']);
+           
+               getState(data['Current_State'],function(realState){
+                   
+                   
+               io.emit('AlarmPartitionEvent', {Partition: '1', Current_State: realState});   
+                   
+               });
+               
+           }else
+           {
+              // myconsole.log(data);
+                io.emit('AlarmZoneEvent', data);
+            
+           }
+     
+    });
+    
+       ipc.of.AlarmModule.on(
+          'speak',
+          function(data){
+  
+            myconsole.log("rules: speak requested");
+            speak(data['msg']);
+            
+           
+         });//speak
+         
+         ipc.of.AlarmModule.on(
+          'keypadLedState',
+          function(data){
+         
+          getModeStatus(function(night,connect,err2){
+            
+             if(err2){
+              myconsole.log("Error occured during night mode status retrieval");                          
+            }else{
+                if(data['Armed']){
+                    lastArmTime = Date();
+                }else{
+                   lastArmTime = null; 
+                }
+                
+               if(data['Ready'] && !data['Bypass']){
+                 //  clearBypass();
+                } 
+                // myconsole.log(data.Bypass + " " + data.Memory + " " + data.Armed + " " + data.Ready);
+             io.emit("keypadLedState",{Bypass:data['Bypass'], Memory:data['Memory'],Armed:data['Armed'],Ready:data['Ready'],Night:night,Connected:connect});
+            }
+          });
+        });   //keypadLEDstate
+        
+        
+        
+        ipc.of.AlarmModule.on(
+          'AlarmConnectionState',
+         function(data){
+       
+         
+            io.emit("AlarmConnectionState",{Connected:data['Connected'],Status:data['Status']});
+            
+           
+         });  //AlarmConnectionState
+          
+          
+          
+        ipc.of.AlarmModule.on(
+          'alarmTrigger',
+         function(data){
+         
+            myconsole.log('Server Module: An alarm was triggered');
+            //myconsole.log(data);
+             db.getdata('Alarm_Items',{Select: 'Description',whereClause:'Name = ' + '"' + 'Zone_' + data['zone'] + '"'},function(err2,data_receive){
+                      // myconsole.log('test1'); 
+                   if(data_receive[0]){
+                    myconsole.log("Sending Email for Alarm Trigger, zone " + data_receive[0]['Description']);
+                     sendemail("An alarm has been triggered by zone " + data_receive[0]['Description']);
+                       pushOver.push("An alarm has been triggered by zone " + data_receive[0]['Description']);
+                     db.insert('Alarm_Triggers', {Zone: data_receive[0]['Description'], Time: Date().toString()  });
+                    io.emit("alarmTrigger",{Event:data_receive[0]['Description'],Time:data['time']});
+                    
+                   
+                    
+                }else{
+                    if (err2) {
+                        // error handling code goes here
+                        myconsole.log("ERROR (Alarm Trigger) : ",err2);            
+                    }
+                
+                    myconsole.log("No zone retrieved for Alarm Trigger");
+                    io.emit("alarmTrigger",{Event:"unknown",Time:data['time']});
+                    db.insert('Alarm_Triggers', {Zone: "unknown", Time: Date().toString()  });
+                    
+                    sendemail("An alarm has been triggered by unknown zone " + data['zone']);
+                    pushOver.push("An alarm has been triggered by unknown zone " + data['zone']);
+                }
+		
+       
+            });
+            
+        });
+        
+        
+          ipc.of.AlarmModule.on(
+          'clearBypassZone',
+          function(){
+         
+              clearBypass();
+          });
+          
+        
+    
+ });   //alarmmodule IPC
+ 
+  ipc.connectTo(
+    'EventModule',
+    function(){
+        ipc.of.EventModule.on(
+            'connect',
+            function(){
+                
+                myconsole.log('CleoServer connected to EventModule with IPC ##');
+                           
+                io.emit('ConnectionStatus',{item: 'Event_Handler',status:'connected'});
+                
+                ipc.of.EventModule.emit('register',{type:'Alarm',client:'Server'});
+                ipc.of.EventModule.emit('register',{type:'Motion',client:'Server'}); 
+                 
+                 
+               
+            }
+        );
+        
+        
+        
+        
+        
+        //myconsole.log("testing");
+    ipc.of.EventModule.on('Event',function(data){
+         //myconsole.log(data);
+        if(data['result']['Event'].indexOf('Partition') > -1) 
+        {
+    
+           var eventdata = JSON.parse(data['result']['Event']);
+            
+             constructEvent(eventdata,data['result']['Time'],data['result']['Type'],function(eventstring,alarm,time,type){
+                if(eventstring)
+                {
+                    var datatosend = {Type: type,Event:eventstring,Time:time};
+               
+                    io.emit('AlarmPartitionEventHandler', datatosend);
+                    
+        
+                }
+            });
+        }
+        else if(data['result']['Event'].indexOf('Important') > -1)
+        {
+            var eventdata = JSON.parse(data['result']['Event']);
+            
+            constructEvent(eventdata,data['result']['Time'],data['result']['Type'],function(eventstring,alarm,time,type){
+                if(eventstring)
+                {
+                    var datatosend = {Type: type,Event:eventstring,Time:time};
+           
+                    io.emit('ImportantEventHandler', datatosend);
+                    
+                }
+            });
+        }
+        else if(data['result']['Event'].indexOf('Zone') > -1)
+        {
+            var eventdata = JSON.parse(data['result']['Event']);
+           // myconsole.log(eventdata);
+            constructEvent(eventdata,data['result']['Time'],data['result']['Type'],function(eventstring,alarm,time,type){
+                if(eventstring)
+                {
+                    var datatosend = {Type: type,Event:eventstring,Time:time};
+          
+                    io.emit('AlarmZoneEventHandler', datatosend);
+                    
+                    
+                }
+            });
+        }
+    });
+    
+    
+    
+    ipc.of.EventModule.on('connectstatus', function() { 
+    
+        io.emit('ConnectionStatus',{item: 'Event_Handler',status:'Connected'});
+    
+    
+    });
+
+    ipc.of.EventModule.on('disconnect', function() { 
+     io.emit('ConnectionStatus',{item: 'Event_Handler',status:'Disconnected'});
+    
+    });
+        
+ });   //ipc event module
+ 
  
  
   
@@ -1788,291 +2159,9 @@ function test(){
                     
 }
 
-/*eventsocket.on('connect', function() { 
-    myconsole.log('Connected to Event Handler');
-   // io.emit('ConnectionStatus',{item: 'Event_Handler',status:'connected'});
-    
-    eventsocket.emit('register',{type:'Alarm',client:'Server'},function(){});
-    eventsocket.emit('register',{type:'Motion',client:'Server'},function(){});
-    
-    //myconsole.log("testing");
-    eventsocket.on('Event',function(data){
-         //myconsole.log(data);
-        if(data['Event'].indexOf('Partition') > -1) 
-        {
-    
-           var eventdata = JSON.parse(data['Event']);
-            
-             constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
-                if(eventstring)
-                {
-                    var datatosend = {Type: type,Event:eventstring,Time:time};
-               
-                    io.emit('AlarmPartitionEventHandler', datatosend);
-                    
+     
         
-                }
-            });
-        }
-        else if(data['Event'].indexOf('Important') > -1)
-        {
-            var eventdata = JSON.parse(data['Event']);
-            
-            constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
-                if(eventstring)
-                {
-                    var datatosend = {Type: type,Event:eventstring,Time:time};
-           
-                    io.emit('ImportantEventHandler', datatosend);
-                    
-                }
-            });
-        }
-        else if(data['Event'].indexOf('Zone') > -1)
-        {
-            var eventdata = JSON.parse(data['Event']);
-           // myconsole.log(eventdata);
-            constructEvent(eventdata,data['Time'],data['Type'],function(eventstring,alarm,time,type){
-                if(eventstring)
-                {
-                    var datatosend = {Type: type,Event:eventstring,Time:time};
-          
-                    io.emit('AlarmZoneEventHandler', datatosend);
-                    
-                    
-                }
-            });
-        }
-    });
-    eventsocket.on('connectstatus', function() { 
-    
-        io.emit('ConnectionStatus',{item: 'Event_Handler',status:'Connected'});
-    
-    
-    });
-
-    eventsocket.on('disconnect', function() { 
-     io.emit('ConnectionStatus',{item: 'Event_Handler',status:'Disconnected'});
-    
-    });
-//});
-});   */
-
-
-
-/*alarmsocket.on('connect', function() { 
-    myconsole.log('Connected to Alarm Module');
-    
-    alarmsocket.emit('register',{type:'Alarm',client:'Server'},function(){
-    
-    
-    
-        alarmsocket.on('AlarmEvent',function(data){
-           //myconsole.log("Alarm event")
-           if(data['Partition'])
-           {   // myconsole.log("this1 " + data['Current_State']);
-           
-               getState(data['Current_State'],function(realState){
-                   
-                   
-               io.emit('AlarmPartitionEvent', {Partition: '1', Current_State: realState});   
-                   
-               });
-               
-           }else
-           {
-               //myconsole.log(data);
-                io.emit('AlarmZoneEvent', data);
-            
-           }
-            
-        });
-        
-        
-        alarmsocket.on('speak',function(msg){
-            myconsole.log("rules: speak requested");
-            speak(msg);
-            
-           
-         });
-         
-         
-         
-        rulessocket.on('speak',function(msg){
-            myconsole.log("rules: speak requested");
-            speak(msg);
-            
-           
-         });
-         
-         
-         
-          rulessocket.on('deviceUpdate',function(Id){
-             //myconsole.log(Id);
-           
-               db.getdata('Items',{Select: 'Item_Type,Item_Current_Value',whereClause:'Id = "' + Id + '"'},function(err2,data_receive){
-                
-                if(err2){
-                 
-                 myconsole.log(err2);
-                }else{
-             	  // myconsole.log(data_receive);
-             	  if(data_receive){
-             	      
-             	   if(data_receive[0].Item_Current_Value == 1 )
-             	   {
-                 	     if(data_receive[0].Item_Type == Virtual_Item_Type ||  data_receive[0].Item_Type == Virtual_Alarm_Item_Type || data_receive[0].Item_Type == Phone_Item_Type)
-                 	    { // myconsole.log("test virtual");
-                 	       virtualDeviceStatusChangebyRule(Id,1);
-                 	    }//else
-                 	  //  {
-                      //  mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,0);
-                 	   // }
-                   }else
-                   {    if(data_receive[0].Item_Type == Virtual_Item_Type || data_receive[0].Item_Type == Virtual_Alarm_Item_Type || data_receive[0].Item_Type == Phone_Item_Type)
-             	        {
-             	          // myconsole.log("test virtual");
-             	            virtualDeviceStatusChangebyRule(Id,0);
-             	        }//else
-             	      //  {
-                       //    mySensorsocket.emit('deviceSwitch',data_receive[0].Node_Id,data_receive[0].Node_Port,1);
-             	       // }
-                   } 
-             	  }
-                }
-               });
-         });
-    
-        
-        alarmsocket.on('keypadLedState',function(data){
-          getModeStatus(function(night,connect,err2){
-            
-             if(err2){
-              myconsole.log("Error occured during night mode status retrieval");                          
-            }else{
-                if(data.Armed){
-                    lastArmTime = Date();
-                }else{
-                   lastArmTime = null; 
-                }
-                
-               if(data.Ready && !data.Bypass){
-                 //  clearBypass();
-                } 
-                // myconsole.log(data.Bypass + " " + data.Memory + " " + data.Armed + " " + data.Ready);
-             io.emit("keypadLedState",{Bypass:data.Bypass, Memory:data.Memory,Armed:data.Armed,Ready:data.Ready,Night:night,Connected:connect});
-            }
-          });
-        });
-        
-        alarmsocket.on('AlarmConnectionState',function(status,connected){
-          
-             io.emit("AlarmConnectionState",{Connected:connected,Status:status});
-             
-            
-          });
-        
-        
-        
-        alarmsocket.on('alarmTrigger',function(data,time){
-            myconsole.log('Server Module: An alarm was triggered');
-            //myconsole.log(data);
-             db.getdata('Alarm_Items',{Select: 'Description',whereClause:'Name = ' + '"' + 'Zone_' + data + '"'},function(err2,data_receive){
-                      // myconsole.log('test1'); 
-                   if(data_receive[0]){
-                    myconsole.log("Sending Email for Alarm Trigger, zone " + data_receive[0]['Description']);
-                     sendemail("An alarm has been triggered by zone " + data_receive[0]['Description']);
-                       pushOver.push("An alarm has been triggered by zone " + data_receive[0]['Description']);
-                     db.insert('Alarm_Triggers', {Zone: data_receive[0]['Description'], Time: Date().toString()  });
-                    io.emit("alarmTrigger",{Event:data_receive[0]['Description'],Time:time});
-                    
-                   
-                    
-                }else{
-                    if (err2) {
-                        // error handling code goes here
-                        myconsole.log("ERROR (Alarm Trigger) : ",err2);            
-                    }
-                
-                    myconsole.log("No zone retrieved for Alarm Trigger");
-                    io.emit("alarmTrigger",{Event:"unknown",Time:time});
-                    db.insert('Alarm_Triggers', {Zone: "unknown", Time: Date().toString()  });
-                    
-                    sendemail("An alarm has been triggered by unknown zone " + data);
-                    pushOver.push("An alarm has been triggered by unknown zone " + data);
-                }
-		
-       
-            });
-            
-        });
-        
-         alarmsocket.on('clearBypassZone',function(){
-             clearBypass();
-         });
-        
-       
-        
-        alarmsocket.on('power',function(code){
-             myconsole.log("Server: Power:Sending Email");
-            switch(code){
-		    case 800: 
-		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '12' ,Current_State: 0 });
-		        io.emit("battery",false);
-		        sendemail("Battery Trouble");
-		        break;
-		        
-		    case 801: 
-		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '12' ,Current_State: 1 });
-		        io.emit("battery",true);
-		        sendemail("Battery Trouble Restored");
-		        break;
-		        
-		    
-		    case 802: 
-		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 0 });
-		        io.emit("ac",false);
-		        sendemail("AC Trouble");
-		        break;
-		        
-		    case 803: 
-		        log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
-		        io.emit("ac",true);
-		        sendemail("AC Trouble Restored");
-		        break;
-		       
-		    default: {}
-		    break;
-            
-            }
-           
-           
-       
-        });
-        
-        
-        alarmsocket.on('trouble',function(code){
-             
-             
-             if(code == '8411'){
-                io.emit("ac",true);
-               // sendemail("Trouble Event Restored");
-               
-                log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 0 });
-             }else if(code == '8401'){
-                 io.emit("ac",false);
-                 sendemail("Trouble Event");
-                   pushOver.push('AC Power Off');
-                 myconsole.log("Server: Trouble Condition: Sending Email");
-                 log.ownDb('Alarm_Items',{Set: 'Current_State',Where: 'Type',Name: '13' ,Current_State: 1 });
-             }
-             
-        });
-    
-   //});
-    });
-});
-*/
+ 
     
 
 
@@ -3067,11 +3156,9 @@ callback2();
 
 
 function panic(){
-    alarmsocket.emit('panic',function(){
-         myconsole.log('Panic');
-        
-       
-     });
+    
+      myconsole.log('Panic');
+      ipc.of.AlarmModule.emit('panic');
     
 }
 
@@ -3082,7 +3169,7 @@ function panic(){
 function speak(msg){
     
     
-    io.emit("speak",msg);
+    io.emit("speak",msg['msg']);
     
 }
 

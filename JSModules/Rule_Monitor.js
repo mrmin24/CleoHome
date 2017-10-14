@@ -145,17 +145,6 @@ function start() {
 	
 	if(io)
 	{ 
-	    myconsole.log('RuleMonitor Module Listening on ' + '44603');
-	
-	
-	    io.sockets.on('connection', function(socket){
-	        
-	        myconsole.log('Client connected to ruleMonitor');
-	  
-            socket2 = socket;	  
-        	      	  
-	  
-	    });
 	    
 	    
 	   
@@ -197,7 +186,7 @@ function ruleMonitor(){
                     evaluate.evaluateChange(data_receive[i].Item_Id,data_receive[i].State,function(node,nodePort,state,virtual,cancelTime,func){
                         
                           j++;
-                        eval(func);             
+                       try{ eval(func);} catch(e){myconsole.dumpError(e);}             
                        //  myconsole.log("rule items are: " + node + "   " + nodePort + "    " + state );
                          if(node && nodePort && state){
                         //  myconsole.log("rule items are2: " + node + "   " + nodePort + "    " + state );
@@ -333,36 +322,52 @@ function clearRules(){
 }
 
 function sendPanic(){
-    alarmsocket.emit('panic',function(){
-         myconsole.log('Panic');
-        
-       
-     });
+    ipc.server.broadcast("panic",
+		{
+          
+          
+         }
+     );
+     myconsole.log('Panic');
+   
     
 }
 
 
 function armDisarm(type){
-    
-    alarmsocket.emit('armDisarmAlarm',type);
+    ipc.server.broadcast("armDisarmAlarm",
+		{
+          "type":type
+          
+         }
+     );
 }
                    
          
 
 
 function speak(msg){
-           myconsole.log('speak');
-      
-       socket2.emit("speak",msg);
+         ipc.server.broadcast("speak",
+		{
+          "msg":msg
+          
+         }
+     );
+   
         
     
 }
     
     
 function deviceSendUpdate(Id){
+           ipc.server.broadcast("deviceUpdate",
+		{
+          "Id":Id
           
+         }
+     );
       
-       socket2.emit("deviceUpdate",Id);
+      
         
 }    
     

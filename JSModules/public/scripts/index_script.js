@@ -1109,7 +1109,7 @@
      socket.on('NodeStatusEvent', function(data) {
          //console.log(new Date().getTime() - data['Current_State']);
          var time = new Date().getTime() - data['Current_State'];
-          lastseen = (time/1000/60).toString();
+          var lastseen = (time/1000/60).toString();
           lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
          console.log("Node Update " +data['Device'] + " " + data['Status']);
          
@@ -1192,7 +1192,7 @@
     
      socket.on('AlarmZoneEvent', function(data) {
     
-    
+       // console.log('zone' + data['Zone'] + " " + data['Current_State']);
          checkUncheck('zone' + data['Zone'], data['Current_State']);
         
     

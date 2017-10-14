@@ -54,7 +54,7 @@ ipc.serve(
                 
             }
         );
-        
+        //
     }
 );
 
@@ -394,11 +394,12 @@ function MQTTstart() {
 		
 		
 			//	myconsole.log(MQTTsocket);
-			ipc.server.broadcast("nodeAlive", {
-                      "NodeID":topic[topic.length - 2],
-                       "Status":jsonMessage    
-                      
-                     } );
+			ipc.server.broadcast("nodeAlive", 
+				{
+                  "NodeID":topic[topic.length - 2],
+                   "Status":jsonMessage    
+                  
+                 } );
 		
 		}
 		

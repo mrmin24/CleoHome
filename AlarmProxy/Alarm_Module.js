@@ -17,23 +17,85 @@ var sockets;
 var lastzone;
 var alarm = null;
 var oldconnectionstatus = null;
-var mySensorio = require('socket.io-client');
+//var mySensorio = require('socket.io-client');
 //var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 //var retrycount = 0;
 //var retryrequest = false;
 var disarmRetry = 10;
 var disarmTimer = null;
 
+
+
+const ipc = require('node-ipc');
+
+//const ipc=require('../../../node-ipc');
+
+/***************************************\
+ *
+ * You should start both hello and world
+ * then you will see them communicating.
+ *
+ * *************************************/
+
+ipc.config.id = 'AlarmModule';
+ipc.config.retry= 1500;
+//ipc.config.silent = true;
+//ipc.config.rawBuffer=true;
+
+//ipc.config.maxConnections=1;
+
+ipc.serve(
+    function(){
+        
+        ipc.server.on(
+            'socket.disconnected',
+            function(data,socket){
+                myconsole.log('DISCONNECTED\n\n',arguments);
+            }
+        );
+        
+        
+        ipc.server.on(
+            'connect',
+            function(socket){
+            //	myconsole.log('Alarmmmmmmmmmmmmmmmmmmmmmm');
+                
+            }
+        );
+        
+    }
+);
+
+ipc.server.on(
+    'error',
+    function(err){
+       myconsole.log('Error occured' + err);
+    }
+);
+
+ipc.server.start();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function start() {
     myconsole.log("Alarm test");
 
-    var io = require('socket.io').listen(port);
-    if (io) {
-        myconsole.log('Alarm Module Listening on ' + port.toString());
-    }
+   
 
 
-    var https = require('https');
+   
     pollAlarm();
 
     log.ownDb('Alarm_Items', {
@@ -59,20 +121,22 @@ function start() {
             }
           
   
-
-        io.sockets.on('connection', function(socket) {
-            //myconsole.log('Client connected to Alarm Module');
-            // var data = 'Alarm';
-            sockets = socket;
-            socket.on('register', function(data, callback) {
-                myconsole.log(data.client + ' registered for ' + data.type + ' updates');
+       
+               
+           
+            ipc.server.on(
+                'register',
+                function(data){
+          
+                myconsole.log(data['client'] + ' registered for ' + data['type'] + ' updates');
                 client = 1;
                 
-                callback();
+                
             });
 
-
-            socket.on('disconnect', function() {
+            ipc.server.on(
+                    'disconnect',
+                    function(){
 
                 myconsole.log('Alarm Module: Client Disconnected from alarm updates');
 
@@ -82,24 +146,32 @@ function start() {
                 }
             });
 
+            ipc.server.on(
+                'armDisarmAlarm',
+                function(data){
+            
 
-            socket.on('armDisarmAlarm', function(type) {
-
-                armDisarm(type);
+                armDisarm(data['type']);
 
             });
 
+             ipc.server.on(
+                'bypassZones',
+                function(zones,callback){
+           
 
-            socket.on('bypassZones', function(zones, callback) {
 
-
-
-                bypassZones(zones, callback);
+                bypassZones(zones['zones'], callback);
 
 
             });
             
-            socket.on('panic', function() {
+            
+            
+             ipc.server.on(
+                'panic',
+                function(){
+           
 
 
                 sendPanic();
@@ -107,9 +179,6 @@ function start() {
 
             });
 
-
-
-        });
 
        
 
@@ -148,13 +217,19 @@ function start() {
         });
 
         alarm.on('power', function(code) {
-
-            sockets.emit('power', code);
+            ipc.server.broadcast("power", 
+				{
+                  "Code":code
+                } );
+            
         });
 
         alarm.on('trouble', function(code) {
-
-            sockets.emit('trouble', code);
+             ipc.server.broadcast("trouble", 
+				{
+                  "Code":code
+                } );
+            
         });
 
         alarm.on('other', function(data) {
@@ -169,7 +244,12 @@ function start() {
             if (oldconnectionstatus != status){
                 
                 if(sockets){
-                 sockets.emit('AlarmConnectionState', status,connected);
+                    ipc.server.broadcast("AlarmConnectionState", 
+				{
+                  "Status":status,
+                  "Connected":connected
+                } );
+               
             }
             
                  myconsole.log("Alarm Status " + status);
@@ -314,14 +394,17 @@ function logdata(data) {
                 //myconsole.log("GettingID");
                 
 
-                //myconsole.log(data.zone + " test 1");
+               // myconsole.log(data.zone + " test 1");
                 if (client) {
                   //   myconsole.log(data.send + " test 1");
-                    sockets.emit('AlarmEvent', {
+                  
+                  ipc.server.broadcast("AlarmEvent", 
+        			{
                         Zone: data.zone,
                         Current_State: data.send,
                         Alarm_Event: Date()
-                    });
+                    } );
+                    
                 }
             }
             else if(armDisarmZone.indexOf(data.zone) > -1 && data.code == zoneOpenedCode){
@@ -402,11 +485,12 @@ function logdata(data) {
                 // myconsole.log(data.zone + " test 3");
                 if (client) {
                     // myconsole.log(data.send + " test 2");
-                    
-                    sockets.emit('AlarmEvent', {
-                        Zone: data.zone,
+                    ipc.server.broadcast("AlarmEvent", 
+        			{
+                         Zone: data.zone,
                         Current_State: data.send
-                    });
+                    } );
+                    
                 }
             }
 
@@ -430,10 +514,12 @@ function logdata(data) {
                             });
 
                             if (client) {
-                                sockets.emit('AlarmEvent', {
+                                ipc.server.broadcast("AlarmEvent", 
+                    			{
                                     Partition: data.partition,
                                     Current_State: result
-                                });
+                                } );
+                                
                             }
 
                         }
@@ -455,10 +541,12 @@ function logdata(data) {
 
                             if (client) {
                                 // myconsole.log(result + " test 3");
-                                sockets.emit('AlarmEvent', {
+                                ipc.server.broadcast("AlarmEvent", 
+                    			{
                                     Partition: data.partition,
                                     Current_State: result
-                                });
+                                } );
+                                
                             }
                         }
                     });
@@ -478,10 +566,12 @@ function logdata(data) {
                             });
 
                             if (client) {
-                                sockets.emit('AlarmEvent', {
+                                ipc.server.broadcast("AlarmEvent", 
+                    			{
                                     Partition: data.partition,
                                     Current_State: result
-                                });
+                                } );
+                                
                             }
                         }
                     });
@@ -500,10 +590,12 @@ function logdata(data) {
                             });
 
                             if (client) {
-                                sockets.emit('AlarmEvent', {
+                                 ipc.server.broadcast("AlarmEvent", 
+                    			{
                                     Partition: data.partition,
                                     Current_State: result
-                                });
+                                } );
+                                
                             }
                         }
                     });
@@ -526,7 +618,14 @@ function logdata(data) {
                 });
                  updateStatus('Partition_1',data.send);
                 myconsole.log('Alarm Module: An alarm was triggered');
-                sockets.emit('alarmTrigger', lastzone,Date.now());
+                
+                
+                 ipc.server.broadcast("alarmTrigger", 
+        			{
+                        zone: lastzone,
+                        time: Date.now()
+                    } );
+               
                 
             }else if (data.code == '655') {    //disarmed code
              
@@ -549,8 +648,11 @@ function logdata(data) {
                 });
                  updateStatus('Partition_1',data.send);
                  
-                 
-                sockets.emit('clearBypassZone');
+                  ipc.server.broadcast("clearBypassZone", 
+        			{
+                       
+                    } );
+                
                 myconsole.log('Alarm Module: The alarm was disarmed');
                 
                 
@@ -604,10 +706,12 @@ function logdata(data) {
                  updateStatus('Partition_1',data.send);
                 if (client) {
                   //  myconsole.log(data.send + " test 4");
-                    sockets.emit('AlarmEvent', {
+                   ipc.server.broadcast("AlarmEvent", 
+        			{
                         Partition: data.partition,
                         Current_State: data.send
-                    });
+                    } );
+                    
                 }
             }
         }
@@ -651,11 +755,13 @@ function logdata(data) {
             }
 
 
-            // myconsole.log('Partition_' + data.partition + '_ledState');
+          //   myconsole.log('Partition_' + data.partition + '_ledState');
            // myconsole.log(code);
            // myconsole.log(client);
             if (client) {
-                sockets.emit('keypadLedState', {
+                ipc.server.broadcast("keypadLedState", 
+				{
+                  
                     Bypass: bypass,
                     Memory: memory,
                     Armed: armed,
@@ -900,8 +1006,11 @@ function sendPanic(){
 }
 
 function speak(msg){
-    
-        sockets.emit('speak',msg);
+     ipc.server.broadcast("speak", 
+    	{
+            msg: msg
+            
+        } );
     }
 
 var nextzone, nextzones, bypassedZones = [];

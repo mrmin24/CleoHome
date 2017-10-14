@@ -86,7 +86,7 @@ exports.evaluateChange = function(itemId,itemValue,callback){
                                 
                                 // myconsole.log(node);
                                 //myconsole.log(port);
-                                // myconsole.log(state);
+                                 //myconsole.log(state);
                                 callback(node,port,state,virtual,cancelTime,func);
                                 
                             }/*else if(node && state && ruleValid ){

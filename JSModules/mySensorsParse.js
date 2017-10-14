@@ -73,7 +73,7 @@ ipc.serve(
         ipc.server.on(
             'connect',
             function(socket){
-            	myconsole.log('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz');
+            	//myconsole.log('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz');
                 
             }
         );

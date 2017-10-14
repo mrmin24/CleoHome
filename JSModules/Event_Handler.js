@@ -19,53 +19,105 @@ var myconsole = require('./myconsole.js');
 var lastId = 0;
 var timer1;
 
-function start() {
+
     //myconsole.log(debug);
 
-var io = require('socket.io').listen(port);
-if(io)
-{ myconsole.log('Event Module Listening on ' + port.toString());}
 
+const ipc = require('node-ipc');
 
+//const ipc=require('../../../node-ipc');
 
+/***************************************\
+ *
+ * You should start both hello and world
+ * then you will see them communicating.
+ *
+ * *************************************/
 
+ipc.config.id = 'EventModule';
+ipc.config.retry= 1500;
+//ipc.config.silent = true;
+//ipc.config.rawBuffer=true;
 
+//ipc.config.maxConnections=1;
 
+ipc.serve(
+    function(){
+        
+        ipc.server.on(
+            'socket.disconnected',
+            function(data,socket){
+                myconsole.log('DISCONNECTED\n\n',arguments);
+            }
+        );
+        
+        
+        ipc.server.on(
+            'connect',
+            function(socket){
+            	//myconsole.log('EVENTSSSSSSSSSSSSSSSSSSSSSSSS');
+                
+            }
+        );
+        
+    }
+);
 
+ipc.server.on(
+    'error',
+    function(err){
+       myconsole.log('Error occured' + err);
+    }
+);
 
+ipc.server.start();
 
+function start() {
 
-io.sockets.on('connection', function(socket){
-  myconsole.log('Event Handler: Client connected');
- // var data = 'Alarm';
-  
-  socket.on('register',function(data,callback){
-      myconsole.log(data.client + ' registered for ' + data.type + ' events');
+    ipc.server.on(
+            'register',
+            function(data){
+    
+         myconsole.log(data['client'] + ' registered for ' + data['type'] + ' events');
       
-    getLast("'"+data.type+"'",function(result){
+        getLast("'"+ data['type'] +"'",function(result){
         
-        if(result.length > 0)
-        {  // myconsole.log(result[0]['Id']);
-            lastId = result[0]['Id']; 
-            socket.emit('Event', result[0]);
-         //   myconsole.log(result[0]);
-        }
-       
-        setListen("'"+data.type+"'",lastId,function(result){
-        for(var i in result){
-         // lastId = result[i]['Id'];
-         socket.emit('Event', result[i]);
-        //myconsole.log(result[i]);
-        }
-       socket.emit('connectstatus');
-        
+            if(result.length > 0)
+            {  // myconsole.log(result[0]['Id']);
+                lastId = result[0]['Id']; 
+                ipc.server.broadcast("Event", 
+				{
+                  "result":result[0]
+                } );
+              //  socket.emit('Event', result[0]);
+             //   myconsole.log(result[0]);
+            }
+            
+            setListen("'"+ data['type'] +"'",lastId,function(result){
+            for(var i in result){
+             // lastId = result[i]['Id'];
+             ipc.server.broadcast("Event", 
+				{
+                  "result":result[i]
+                } );
+            // socket.emit('Event', result[i]);
+            //myconsole.log(result[i]);
+            }
+            ipc.server.broadcast("connectstatus" );
+            
+            
+            });
+            callback();
         });
-        callback();
     });
-    
-    });
-    
- socket.on('disconnect',function(){
+
+
+
+
+
+
+
+  ipc.server.on('disconnect',function(){
      
      
      
@@ -80,9 +132,8 @@ io.sockets.on('connection', function(socket){
      
  });   
     
-});
   
-}
+
   
 /*
  
@@ -129,7 +180,7 @@ function setListen(type,lastId,callback){
     
     // if(timer2){clearInterval(timer2);}
    
-   vartimer2 =  setInterval(function() {
+   var timer2 =  setInterval(function() {
        
        // myconsole.log(type + " " + lastId);
        
@@ -176,7 +227,7 @@ function getLast(type,callback){
 }
 
 
-
+}
 
 
 exports.start = start;
