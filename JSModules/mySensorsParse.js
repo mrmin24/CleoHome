@@ -182,7 +182,7 @@ function start() {
 		 
 		 
 		function processData(data){
-	    	ipc.server.broadcast("nodeAlive",{'NodeID':data[0]});
+	    	ipc.server.broadcast("nodeAlive",{'NodeID':data[0],'Status':'Online'});
 	    	var sensorTypes = ['17','0','8','38','39','7'];// ['0','1','17','18','35','38','39'];
 	    	if(data[2] == 1 && sensorTypes.indexOf(data[4]) == -1 ){
 	    	   myconsole.log("Mysensor: Device updated");

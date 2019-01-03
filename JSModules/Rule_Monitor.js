@@ -6,7 +6,8 @@ var rules = require('../JSModules/Rule_UpdateStates');
 var pushOver = require('../JSModules/public/scripts/pushOver.js');
 var myconsole = require('../JSModules/myconsole.js');
 
-var intervaltime = 1000;
+//var updateIP = require('./public/scripts/updateIP.js');
+var intervaltime = 350;
 
 //var timezone = 2;
 
@@ -29,7 +30,7 @@ var configure2 = configure.xml;
 
 
 
-var io = require('socket.io').listen(44603);
+//var io = require('socket.io').listen(44603);
 //function getDate(){
 //var hour = '00';
 //var date;
@@ -50,6 +51,58 @@ ipc.config.retry= 1500;
 //ipc.config.silent = true;
 
 
+
+
+
+
+
+//date = date.getUTCFullYear() + '-' +
+ //  ('00' + (date.getUTCMonth()+1)).slice(-2) + '-' +
+  // ('00' + date.getUTCDate()).slice(-2) + ' ' + 
+//   ('00' + date.getUTCHours()).slice(-2) + ':' + 
+ //  ('00' + date.getUTCMinutes()).slice(-2) + ':' + 
+  //  ('00' + date.getUTCSeconds()).slice(-2);
+  //  return date;
+//}   
+    
+//var last_check;
+// myconsole.log(last_check);
+ var socket2;
+ 
+function start() {
+    //myconsole.log(debug);
+    myconsole.log("Rule Monitor started");
+   
+    ipc.connectTo(
+    'Server',
+    function(){
+        ipc.of.Server.on(
+            'connect',
+            function(){
+                
+                myconsole.log('RuleMon connected to Server with IPC ##');
+                
+            }
+        );
+        ipc.of.Server.on(
+            'disconnect',
+            function(){
+               
+            }
+        );
+        
+        ipc.of.Server.on(
+            'deviceConnected',
+            function(){
+               
+                myconsole.log('rrrrrrrrrrrrrrrrrrrrrrr   ');
+               
+            }
+        );
+        
+  });   // end MQTT Parse
+  
+  
 
 ipc.connectTo(
     'MQTTParse',
@@ -111,40 +164,43 @@ ipc.connectTo(
     });   // end Mysens Pars
 
 
+ipc.connectTo(
+    'AlarmModule',
+    function(){
+        ipc.of.AlarmModule.on(
+            'connect',
+            function(){
+                
+                myconsole.log('RuleMon connected to AlarmModule  with IPC ##');
+                
+            }
+        );
+        ipc.of.AlarmModule.on(
+            'disconnect',
+            function(){
+               
+            }
+        );
+        
+        ipc.of.AlarmModule.on(
+            'deviceConnected',
+            function(){
+               
+                myconsole.log('qqqqqqqqqqqqqqqqqqqqqqqqq   ');
+               
+            }
+        );
+        
+    });   // end alarmmodule
 
 
-
-
-
-
-
-
-//date = date.getUTCFullYear() + '-' +
- //  ('00' + (date.getUTCMonth()+1)).slice(-2) + '-' +
-  // ('00' + date.getUTCDate()).slice(-2) + ' ' + 
-//   ('00' + date.getUTCHours()).slice(-2) + ':' + 
- //  ('00' + date.getUTCMinutes()).slice(-2) + ':' + 
-  //  ('00' + date.getUTCSeconds()).slice(-2);
-  //  return date;
-//}   
-    
-//var last_check;
-// myconsole.log(last_check);
- var socket2;
- 
-function start() {
-    //myconsole.log(debug);
-    myconsole.log("Rule Monitor started");
-   
-    
   
 
  
  
  clearRules();
 	
-	if(io)
-	{ 
+
 	    
 	    
 	   
@@ -161,7 +217,7 @@ function start() {
      
     }, intervaltime);
     
-	}
+	
     
 }
 
@@ -322,12 +378,11 @@ function clearRules(){
 }
 
 function sendPanic(){
-    ipc.server.broadcast("panic",
-		{
-          
-          
-         }
-     );
+    
+     ipc.of.AlarmModule.emit('panic');
+        
+        
+   
      myconsole.log('Panic');
    
     
@@ -335,19 +390,18 @@ function sendPanic(){
 
 
 function armDisarm(type){
-    ipc.server.broadcast("armDisarmAlarm",
-		{
+    
+    ipc.of.AlarmModule.emit('armDisarmAlarm',{
           "type":type
           
-         }
-     );
+         });
 }
                    
          
 
 
 function speak(msg){
-         ipc.server.broadcast("speak",
+          ipc.of.Server.emit("speak",
 		{
           "msg":msg
           
@@ -360,7 +414,7 @@ function speak(msg){
     
     
 function deviceSendUpdate(Id){
-           ipc.server.broadcast("deviceUpdate",
+          ipc.of.Server.emit("deviceUpdate",
 		{
           "Id":Id
           

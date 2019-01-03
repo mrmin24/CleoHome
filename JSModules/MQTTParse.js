@@ -236,6 +236,7 @@ function MQTTstart() {
 			if (MQTTclient) {
 				MQTT_Subscribe('ctrlIn/#');
 				MQTT_Subscribe('tele/#');
+				MQTT_Subscribe('ctrlOut/Motion/#');
 				MQTT_Publish('ctrlOut/0/status', 'online', 1, true);
 				MQTT_Publish('ctrlOut/sonoffs/status', '11', 1, false);
 	
@@ -306,7 +307,7 @@ function MQTTstart() {
 				}
 			}
 			else {
-				myconsole.log("mysensMQTT2 " + nodeData['NodeID'] + " " + nodeData['NodePort'] + " " + nodeData['State'] + " " + nodeData['RuleReq']);
+				myconsole.log("myMQTT2 " + nodeData['NodeID'] + " " + nodeData['NodePort'] + " " + nodeData['State'] + " " + nodeData['RuleReq']);
 
 
 				sendData(nodeData['NodeID'], nodeData['NodePort'], nodeData['State'], nodeData['RuleReq'], nodeData['NodeTimeOn']);
@@ -386,20 +387,25 @@ function MQTTstart() {
 		
 		
 		if (topic[topic.length - 1] == "LWT" && (jsonMessage == 'Online' || jsonMessage == 'Offline')) {
-			myconsole.log("setting " + topic[topic.length - 2] + " to " + jsonMessage);
-			if (jsonMessage == 'Online') {
-				MQTT_Publish('ctrlOut/' + topic[topic.length - 2] + '/status', '11', 1, false);
-		
-			}
-		
-		
+			myconsole.log("1: setting " + topic[topic.length - 2] + " to " + jsonMessage);
+			
+	
 			//	myconsole.log(MQTTsocket);
-			ipc.server.broadcast("nodeAlive", 
-				{
-                  "NodeID":topic[topic.length - 2],
-                   "Status":jsonMessage    
-                  
-                 } );
+			try{ipc.server.broadcast("nodeAlive2", 
+			{
+              'NodeID':topic[topic.length - 2],
+               'Status':jsonMessage    
+              
+             } );
+             
+			}catch(e){myconsole.dumpError(e);}
+                 
+                 
+             if (jsonMessage == 'Online') {
+				MQTT_Publish('ctrlOut/' + topic[topic.length - 2] + '/status', '11', 1, false);
+	
+			}
+	
 		
 		}
 		
@@ -470,7 +476,7 @@ function MQTTstart() {
 		
 		
 		
-		if (topic[topic.length - 1].indexOf("POWER") > -1) {
+		if (topic[topic.length - 1].indexOf("POWER") > -1 && topic[topic.length - 3].indexOf("Motion") == -1) {
 		
 			myconsole.log(jsonMessage);
 		
@@ -510,11 +516,50 @@ function MQTTstart() {
 		
 		
 		}
+		if (topic[topic.length - 1].indexOf("POWER") > -1 &&  topic[topic.length - 3].indexOf("Motion") > -1) {     //if motion is sent   //Add 20 when motion to port
 		
+			myconsole.log("Motion received - " + jsonMessage);
+		
+			var trimmedStr = '2' + topic[topic.length - 1].split("POWER").pop() ; //Add 20 when motion to port
+		
+			if (!trimmedStr) {
+				trimmedStr = 1
+			}
+			if (jsonMessage == "ON") {
+		
+				myconsole.log("MQTT sensor: Device updated4 " + node + " " + trimmedStr + " " + message);   //Add 20 when motion to port
+			//	var txData = "{'NodeID':'"+node+"','NodePort':'"+trimmedStr+"','State':'"+message+"}"  ;  
+				ipc.server.broadcast("deviceStatusChange",
+					{
+                      "NodeID":node,
+                      "NodePort":trimmedStr,		//Add 20 when motion to port
+                      "State":1
+                      
+                     }
+                 );
+			}
+			else if (jsonMessage == "OFF") {
+				myconsole.log("MQTT sensor: Device updated " + node + " " + trimmedStr + " " + message);   //Add 20 when motion to port
+				ipc.server.broadcast("deviceStatusChange",
+				
+				{
+                      "NodeID":node,
+                      "NodePort":trimmedStr,     //Add 20 when motion to port
+                      "State":0
+                      
+                     }
+                );
+			}
+		
+		
+		
+		
+		
+		}
 		
 		if (topic[topic.length - 1].indexOf("STATUS11") > -1) {
 		
-			for (var i = 0; i < 9; i++) {
+			for (var i = 0; i < 100; i++) {
 		
 		
 				//var trimmedStr = topic[topic.length-1].split("POWER").pop();
@@ -550,7 +595,7 @@ function MQTTstart() {
 			                );
 						}
 		
-						i = 10;
+						i = 100;
 		
 					}
 				}
@@ -591,7 +636,7 @@ function MQTTstart() {
 		
 					}
 					else {
-						i = 10;
+						i = 100;
 					}
 				}
 		

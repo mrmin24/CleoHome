@@ -32,7 +32,7 @@ exports.push = function(message){
         
         // A callback function is defined:
       //  console.log("debug = " + debug);
-        if(debug == 0)
+        if(debug == 3 || debug == 0)
         {
             push.send(user, "Cleopatra", message, function (err, res){
                 if(err){

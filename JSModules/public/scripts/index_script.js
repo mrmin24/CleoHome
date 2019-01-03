@@ -1111,7 +1111,7 @@
          var time = new Date().getTime() - data['Current_State'];
           var lastseen = (time/1000/60).toString();
           lastseen =  lastseen.substring(0, lastseen.indexOf('.'));
-         console.log("Node Update " +data['Device'] + " " + data['Status']);
+         console.log("Node Update " + data['Device'] + " " + data['Status']);
          
          if ( !$('#node'+data['Node_Port'] ).length ){
            //  console.log(data['Id']);
@@ -1124,15 +1124,18 @@
          
          $('#node'+data['Node_Port']).removeClass('panel panel-custom-green').addClass('panel panel-custom-red');
          
+         console.log("set " + '#node'+data['Node_Port'] + ' ' + 'offline')
          
          var newHtml = '<div class="panel-heading"> '+ data['Device'] + ' (' + data['Node_Port'].toString() + ') </div><div class="panel-body"><strong>IP Address:</strong> N/A</br><strong>Vcc:</strong> N/A</br><strong>RSSI:</strong> N/A</br><strong>UPTime:</strong> N/A</br><strong>Last Seen: </strong>'+lastseen+'</div>';
          
          
         }
-        
+        console.log(data['Status'])
         if(data['Status'] == 'online')
         {
          $('#node'+data['Node_Port']).removeClass("panel panel-custom-red").addClass('panel panel-custom-green ');
+         
+         console.log("set " + '#node'+data['Node_Port'] + ' ' + 'online')
          
          var newHtml = '<div class="panel-heading"> '+ data['Device'] + ' ('+ data['Node_Port'].toString() +')</div><div class="panel-body"><strong>IP Address:</strong> <a href=http://'+data['IPAddress']+'>'+ data['IPAddress'] +"</a></br><strong>Vcc:</strong> " + data['Vcc'] + "</br><strong>RSSI:</strong> " + data['RSSI'] + "</br><strong>UPTime:</strong> " + data['Uptime']  +'</br><strong>Last Seen: </strong>'+lastseen+'</div> ';
         }
@@ -1220,7 +1223,7 @@
     
     
     
-    socket.on('AlarmPartitionStatusEvent', function(data){
+        socket.on('AlarmPartitionStatusEvent', function(data){
     
         document.getElementById('partition1').innerHTML = data['Current_State'];
         

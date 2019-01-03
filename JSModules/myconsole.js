@@ -9,9 +9,15 @@ process.argv.forEach(function (val, index, array) {
 
 function log(data) {
    // console.log(debug);
-    if(debug > 0)
-        console.log(data);
-    
+    if(debug > 0 ){
+     var date =  new Date().toISOString().
+      replace(/T/, ' ').      // replace T with a space
+      replace(/\..+/, '')     // delete the dot and everything after
+      
+      
+        console.log(date + " : " + data);
+       
+    }
 }
 
 

@@ -10,7 +10,7 @@ var intervaltime = 5 * 60 * 1000;
 var isDark = 1;
 var rules = require('./Rule_UpdateStates.js');
 
-var mySensorio = require('socket.io-client');
+//var mySensorio = require('socket.io-client');
 //var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 

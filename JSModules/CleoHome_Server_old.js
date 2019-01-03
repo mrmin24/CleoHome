@@ -28,6 +28,7 @@ require('./public/scripts/passport.js')(passport); // pass passport for configur
 
 var email = require('./public/scripts/email.js');
 var pushOver = require('./public/scripts/pushOver.js');
+var updateIP = require('./public/scripts/updateIP.js');
 var path = require('path'); 
 var db = require('./dbhandler');
 
@@ -136,14 +137,14 @@ function start() {
  
  
     setStartupStatus(); 
-  //  updateIP();
+    updateIP.update();
   
     var nodeinterval = setInterval(updateNodeStatus,nodeCheckInterval);
     var dnsinterval = setInterval(function() {
       
    
    
-   // updateIP();
+    updateIP.update();
         
      
     
@@ -378,7 +379,7 @@ io.on('connection', function(Websocket){
     });    
     
  Websocket.on('refreshIP',function(){
-    
+     updateIP.update();
         getip(function(ip){
             
             if(ip){
@@ -1634,6 +1635,7 @@ function test(){
     
     myconsole.log("testing triggers");
       pushOver.push('test');
+     
                     
                     
 }
@@ -2731,13 +2733,13 @@ function getModeStatus(callback){
                                  
 }
 
-function updateIP(){
+/*function updateIP(){
  
   getip(function(ip){
         
         if(ip){
         externalip = ip;
-        
+        pushOver.push(ip);
         	if(oldip != externalip)
         	{
              if(configure2.server[0].dnsupdate[0] == 'true')  {
@@ -2762,7 +2764,7 @@ function updateIP(){
  
  
  
-}
+}*/
 
 function getip(callback){
    
@@ -2778,7 +2780,8 @@ function getip(callback){
     var ipAddress = '';
     res.on('data', function(chunk) {
         ipAddress += chunk;
-     // myconsole.log(chunk);
+      myconsole.log(chunk);
+     pushOver.push(ipAddress);
      callback(ipAddress); 
         
     });
@@ -2795,7 +2798,7 @@ function getip(callback){
 }
 
 function updatedns(ip,callback2){
-    
+    pushOver.push(ip);
     var http2 = require('http'), https = require('https');
     var username = configure2.server[0].dnsusername[0];
     var password = configure2.server[0].dnspassword[0];
@@ -2804,8 +2807,10 @@ function updatedns(ip,callback2){
     //'Host': 'https://ydns.eu/api/v1/update/?host=example.ydns.eu&ip='+ip,
    
     var options = {
-      host: 'https://ydns.eu',
-      path: '/api/v1/update/?host=cleohome.ydns.eu',//&ip='+ip.substring(0,15),
+      host: 'https://api.dynu.com',  //wget "http://api.dynu.com/nic/update?myip=198.144.117.32&myipv6=2604:4400:a:8a::f4&username=someusername&password=098f6bcd4621d373cade4e832627b4f6"
+      path: '/v2/dns \
+        -H "accept: application/json" \
+        -H "API-Key: cK8MRDSS9cKv97729gNM1DNX1aU98hUK"',//&ip='+ip.substring(0,15),
       port: '80',
       //This is the only line that is new. `headers` is an object with the headers to request
       headers: header 
@@ -2816,12 +2821,12 @@ function updatedns(ip,callback2){
   //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		myconsole.log('DNS Update1 - YDNS: ' + chunk);
+    		myconsole.log('DNS Update1 - DYNU: ' + chunk);
   	});
   });
 
 req.on('error', function(e) {
-  myconsole.log('YDNS: problem with request: ' + e.message);
+  myconsole.log('DYNU: problem with request: ' + e.message);
 });
 
 // write data to request body
@@ -2833,7 +2838,7 @@ callback2();
 }
 
 function updatednshome(ip,callback2){
-    
+    pushOver.push(ip);
     var http2 = require('http');
     //var username = configure2.server[0].dnsusername[0];
    // var password = configure2.server[0].dnspassword[0];

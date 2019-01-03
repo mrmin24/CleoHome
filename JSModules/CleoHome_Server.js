@@ -21,7 +21,7 @@ var email = require('./public/scripts/email.js');
 var pushOver = require('./public/scripts/pushOver.js');
 var path = require('path'); 
 var db = require('./dbhandler');
-
+//var updateIP = require('./public/scripts/updateIP.js');
 var bypassedZones = [];
 
 var lastArmTime = Date();
@@ -113,8 +113,10 @@ try{
  myconsole.log(e);
 }
 
-  const ipc = require('node-ipc');
-   
+  
+  const ipcRaw = require('node-ipc').IPC;
+  const ipc = new ipcRaw;
+  const serveripc= new ipcRaw;
 //const ipc=require('../../../node-ipc');
 
 /***************************************\
@@ -123,6 +125,15 @@ try{
  * then you will see them communicating.
  *
  * *************************************/
+ipc.config.id = 'Server';
+ipc.config.retry= 1500;
+
+serveripc.config.id = 'Server';
+serveripc.config.retry= 1500;
+//ipc.config.silent = true;
+
+
+
 
 
  var oldip = externalip;  
@@ -134,10 +145,43 @@ function start() {
     //log(debug);
     
  //myconsole.log(io);
-  
-ipc.config.id = 'Server';
-ipc.config.retry= 1500;
-//ipc.config.silent = true;
+try{
+ serveripc.serve(
+    function(){
+        
+        serveripc.server.on(
+            'socket.disconnected',
+            function(data,socket){
+                myconsole.log('DISCONNECTED\n\n',arguments);
+            }
+        );
+        
+        
+        serveripc.server.on(
+            'connect',
+            function(socket){
+            //	myconsole.log('Alarmmmmmmmmmmmmmmmmmmmmmm');
+                
+            }
+        );
+        
+        serveripc.server.on(
+          'error',
+          function(err){
+             myconsole.log('Error occured' + err);
+          }
+      );
+        
+    }
+    
+    
+);
+
+
+
+serveripc.server.start();
+}catch(e){myconsole.dumpError(e);}
+
 
 ipc.connectTo(
     'MQTTParse',
@@ -166,163 +210,15 @@ ipc.connectTo(
             }
         );
         
-        ipc.of.MQTTParse.on('deviceStatusChange',function(nodeData){
-           myconsole.log("Device Status Change4" + " " + nodeData['NodeID'] + " " + nodeData['NodePort'] + " " + nodeData['State']);
-          // State = parseInt(State);
-          // myconsole.log(nodeData['State']);
-            
-         // var evaluate = require('../JSModules/Rule_Items_Evaluate');
-          if(nodeData['State'] > 0){nodeData['State'] = 1;}
-          
-            db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
-              // myconsole.log(err2);
-               myconsole.log(data_receive);
-                if(data_receive[0]){
-                           
-                         var  ID = data_receive[0].Id;
-                         var   enabledValue = data_receive[0].Item_Enabled_Value;
-                           
-                        var   data = {Set:'Item_Current_Value',Current_State:nodeData['State'],Where:"Id",Name:ID};
-                           db.update("Items",data,function(err2,data_receive2){
-                                 
-                                 
-                               
-                                if(data_receive2){
-                                   // myconsole.log("data: " + ID + " " + enabledValue);
-                                    io.emit('DeviceEvent', {Id:ID,Current_State:nodeData['State'],Item_Enabled_Value:enabledValue});
-                                
-                                    rules.updateRuleStates(ID, nodeData['State']);
-                                   
-                                   /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
-                                        
-                                        eval(func);
-                                        
-                                        if(node && port && state){
-                                         mySensorsocket.emit('deviceSwitch',node,port,state,1);
-                                        }
-                                        
-                                        if(cancelTime){
-                                                    
-                                            mySensorsocket.emit('switchOff',node,port,0,cancelTime);
-                                        }
-                                        
-                                         if(virtual == 1){
-                                            virtualDeviceStatusChange(node,state);
-                                          
-                                            
-                                        }
-                                    //myconsole.log(data_receive[0]);
-                                    });*/
-                                    
-                                    
-                                }else
-                                {
-                                   myconsole.log(err2); 
-                                    
-                                }
-                               
-                           }); 
-               }else 
-               if(err2)
-               {
-                   myconsole.log(err2);
-               }
-                
-            });
-           
-          
-           
-           
-       });    //devicestatuschange
-    
-
-   
-       ipc.of.MQTTParse.on('newNode',function(nodeData){
-        
-         myconsole.log(nodeData['newNodeIP']);
-         io.emit('newNode',nodeData['newNodeId'],nodeData['newNodeIP'],nodeData['oldId']);
         
         
-        
-        
-       });   //newNode
+        ipc.of.MQTTParse.on('nodeAlive2',function(nodeData){       //NodeID,Status
        
-       
-       //MQTTsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
-       
-       
-       
-       ipc.of.MQTTParse.on('sensorStatusChange',function(nodeData){   //NodeID,NodePort,State,Type
-           //myconsole.log("Device Status Change");
-          // myconsole.log(NodePort);
-          //var evaluate = require('../JSModules/Rule_Items_Evaluate');
+          myconsole.log("2: Setting " + nodeData['NodeID'] + ' to ' + nodeData['Status']);
           
-          
-            db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated,Item_Type',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
-               // myconsole.log(data_receive);
-                if(data_receive[0]){
-                           //myconsole.log(data_receive);
-                         var  ID = data_receive[0].Id;
-                         var currentValue = data_receive[0].Item_Current_Value;
-                         var updateTime = data_receive[0].Time_Updated;
-                         var doUpdate = false;
-                         var timediff = (new Date() - new Date(updateTime))/1000;
-                         myconsole.log("Time diff1: " + timediff);
-                         
-                         if((nodeData['State'] <= currentValue - 0.3) || (nodeData['State'] >= currentValue + 0.3) || (timediff >= 5*60) ){
-                           doUpdate = true;
-                         }
-                         
-                         if(doUpdate == true){
-                        //  myconsole.log("Updated: " + State + " " + (currentValue - 0.3) + " " + (currentValue + 0.3) + " " + (timediff >= 5*60)  );
-                         // var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
-                          // db.update("Items",data,function(err2,data_receive2){
-                          var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
-                          
-                          var time = (new Date(Date.now() - tzoffset)).toISOString().replace(/T/, ' ').replace(/\..+/, '');
-                          
-                         //  myconsole.log(time);
-                          db.getSQL("Update Items SET Item_Current_Value = " + nodeData['State'] + " ,Time_Updated = '" + time + "' WHERE Id = " + ID,function(err2,data_receive2){
-                                 
-                                 //	myconsole.log("Server: Sensor updated");
-                               
-                                if(data_receive2){
-                                   // myconsole.log(ID + " " + State);
-                                    io.emit('SensorEvent', {Id:ID,Current_State:nodeData['State']});
-                                     log.logger(nodeData['Type'], '{"Item_Id":"'+ID+'","Node":"'+nodeData['NodeID'] +'","Value":"'+ nodeData['State'] +'"}');
-                                    rules.updateRuleStates(ID, nodeData['State']);
-                                    
-                                  
-                                    
-                                    
-                                }else
-                                {
-                                   myconsole.log(err2); 
-                                    
-                                }
-                               
-                           }); 
-                          doUpdate = false;
-                         }
-               }else 
-               if(err2)
-               {
-                   myconsole.log(err2);
-               }
-                
-            });
-           
-          
-           
-           
-       });   //sensorstatuschange
-
- 
-
-     ipc.of.MQTTParse.on('nodeAlive',function(nodeData){   //NodeID,Status
           var timenow = new Date().getTime();
         var   data = {Set:'Status',Current_State:nodeData['Status'].toLowerCase(),Where:"Node_Port",Name:nodeData['NodeID']};
-          db.update("Nodes",data,function(err2,data_receive){
+         try{ db.update("Nodes",data,function(err2,data_receive){
                    
                    
                  
@@ -401,10 +297,165 @@ ipc.connectTo(
                       
                   }
                  
-         }); 
+         });  }catch(e){myconsole.dumpError(e);} 
          
          
      });   //nodeAlive
+     
+     
+     
+        ipc.of.MQTTParse.on('deviceStatusChange',function(nodeData){
+           myconsole.log("Device Status Change4" + " " + nodeData['NodeID'] + " " + nodeData['NodePort'] + " " + nodeData['State']);
+          // State = parseInt(State);
+          // myconsole.log(nodeData['State']);
+            
+         // var evaluate = require('../JSModules/Rule_Items_Evaluate');
+          if(nodeData['State'] > 0){nodeData['State'] = 1;}
+          
+            db.getdata('Items',{Select: 'Id,Item_Enabled_Value',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
+              // myconsole.log(err2);
+               myconsole.log(data_receive);
+                if(data_receive[0]){
+                           
+                         var  ID = data_receive[0].Id;
+                         var   enabledValue = data_receive[0].Item_Enabled_Value;
+                           
+                        var   data = {Set:'Item_Current_Value',Current_State:nodeData['State'],Where:"Id",Name:ID};
+                           db.update("Items",data,function(err2,data_receive2){
+                                 
+                                 
+                               
+                                if(data_receive2){
+                                   // myconsole.log("data: " + ID + " " + enabledValue);
+                                    io.emit('DeviceEvent', {Id:ID,Current_State:nodeData['State'],Item_Enabled_Value:enabledValue});
+                                
+                                    rules.updateRuleStates(ID, nodeData['State']);
+                                   
+                                   /* evaluate.evaluateChange(ID,State,function(node,port,state,virtual,cancelTime,func){
+                                        
+                                        eval(func);
+                                        
+                                        if(node && port && state){
+                                         mySensorsocket.emit('deviceSwitch',node,port,state,1);
+                                        }
+                                        
+                                        if(cancelTime){
+                                                    
+                                            mySensorsocket.emit('switchOff',node,port,0,cancelTime);
+                                        }
+                                        
+                                         if(virtual == 1){
+                                            virtualDeviceStatusChange(node,state);
+                                          
+                                            
+                                        }
+                                    //myconsole.log(data_receive[0]);
+                                    });*/
+                                    
+                                    
+                                }else
+                                {
+                                   myconsole.log(err2); 
+                                    
+                                }
+                               
+                           }); 
+               }else 
+               if(err2)
+               {
+                   myconsole.log(err2);
+               }
+                
+            });
+           
+          
+           
+           
+       });    //devicestatuschange
+    
+   
+       ipc.of.MQTTParse.on('newNode',function(nodeData){
+        
+         myconsole.log(nodeData['newNodeIP']);
+         io.emit('newNode',nodeData['newNodeId'],nodeData['newNodeIP'],nodeData['oldId']);
+        
+        
+        
+        
+       });   //newNode
+       
+       //MQTTsocket.on('deviceStatusChange',function(NodeID,NodePort,State){
+       
+       
+       
+       ipc.of.MQTTParse.on('sensorStatusChange',function(nodeData){   //NodeID,NodePort,State,Type
+           //myconsole.log("Device Status Change");
+          // myconsole.log(NodePort);
+          //var evaluate = require('../JSModules/Rule_Items_Evaluate');
+          
+          
+            db.getdata('Items',{Select: 'Id,Item_Current_Value,Time_Updated,Item_Type',whereClause:'Node_Id = ' + nodeData['NodeID'].toString() + ' AND Node_Port = ' + nodeData['NodePort'].toString()},function(err2,data_receive){
+               // myconsole.log(data_receive);
+                if(data_receive[0]){
+                           //myconsole.log(data_receive);
+                         var  ID = data_receive[0].Id;
+                         var currentValue = data_receive[0].Item_Current_Value;
+                         var updateTime = data_receive[0].Time_Updated;
+                         var doUpdate = false;
+                         var timediff = (new Date() - new Date(updateTime))/1000;
+                         myconsole.log("Time diff1: " + timediff);
+                         
+                         if((nodeData['State'] <= currentValue - 0.3) || (nodeData['State'] >= currentValue + 0.3) || (timediff >= 5*60) ){
+                           doUpdate = true;
+                         }
+                         
+                         if(doUpdate == true){
+                        //  myconsole.log("Updated: " + State + " " + (currentValue - 0.3) + " " + (currentValue + 0.3) + " " + (timediff >= 5*60)  );
+                         // var data = {Set:'Item_Current_Value',Current_State:State,Where:"Id",Name:ID};
+                          // db.update("Items",data,function(err2,data_receive2){
+                          var tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+                          
+                          var time = (new Date(Date.now() - tzoffset)).toISOString().replace(/T/, ' ').replace(/\..+/, '');
+                          
+                         //  myconsole.log(time);
+                          db.getSQL("Update Items SET Item_Current_Value = " + nodeData['State'] + " ,Time_Updated = '" + time + "' WHERE Id = " + ID,function(err2,data_receive2){
+                                 
+                                 //	myconsole.log("Server: Sensor updated");
+                               
+                                if(data_receive2){
+                                   // myconsole.log(ID + " " + State);
+                                    io.emit('SensorEvent', {Id:ID,Current_State:nodeData['State']});
+                                     log.logger(nodeData['Type'], '{"Item_Id":"'+ID+'","Node":"'+nodeData['NodeID'] +'","Value":"'+ nodeData['State'] +'"}');
+                                    rules.updateRuleStates(ID, nodeData['State']);
+                                    
+                                  
+                                    
+                                    
+                                }else
+                                {
+                                   myconsole.log(err2); 
+                                    
+                                }
+                               
+                           }); 
+                          doUpdate = false;
+                         }
+               }else 
+               if(err2)
+               {
+                   myconsole.log(err2);
+               }
+                
+            });
+           
+          
+           
+           
+       });   //sensorstatuschange
+
+ 
+
+     
 
 
           ipc.of.MQTTParse.on('updateNodeStatus',function(nodeData){
@@ -437,14 +488,14 @@ ipc.connectTo(
  
  
     setStartupStatus(); 
-  //  updateIP();
+    updateIP2();
   
     var nodeinterval = setInterval(updateNodeStatus,nodeCheckInterval);
     var dnsinterval = setInterval(function() {
       
    
    
-   // updateIP();
+    updateIP2();
         
      
     
@@ -694,22 +745,8 @@ io.on('connection', function(Websocket){
     });    
     
  Websocket.on('refreshIP',function(){
-    
-        getip(function(ip){
-            
-            if(ip){
-               
-    		    updatedns(ip,function(){});
-    		    updatednshome(ip,function(){});
-    		 
-    		    sendemail("Your current IP is http://" + ip);   
-    		    
-    		
-    		    updatednsproxy(function(){});   
-    		  
-        	}
-            
-        });
+     updateIP2();
+        
    
     }); 
     
@@ -1077,7 +1114,7 @@ io.on('connection', function(Websocket){
  ipc.connectTo(
     'RuleMonitor',
     function(){
-     ipc.of.RuleMonitor.on(
+     serveripc.server.on(
             'speak',
             function(data){
              
@@ -1088,7 +1125,7 @@ io.on('connection', function(Websocket){
             });
             
             
-       ipc.of.RuleMonitor.on(
+       serveripc.server.on(
             'deviceUpdate',
             function(data){
              
@@ -1619,6 +1656,7 @@ io.on('connection', function(Websocket){
          
          
          ipc.of.mySensParse.on('nodeAlive',function(nodeData){
+           myconsole.log("3: Setting " + nodeData['NodeID'] + ' to ' + nodeData['Status']);
              var timenow = new Date().getTime();
              var  data = {Set:'Last_Seen',Current_State:timenow,Where:"Node_Port",Name:nodeData['NodeID']};
              db.update("Nodes",data,function(err2,data_receive){
@@ -2491,7 +2529,7 @@ function getNodeStatus(sockets){
    // var device = [1 , 2 , 3 , 4 , 5,6,7,11,15];
     
        for(var i in data_receive){
-          // myconsole.log(data_receive[i]['Item_Name']);  
+           myconsole.log(data_receive[i]['Item_Name']);  
            // if(device.indexOf(data_receive[i]['Item_Type']) != -1 )
             //{
                 var data = {Id:data_receive[i]['Id'],Device: data_receive[i]['Name'],Current_State: data_receive[i]['Last_Seen'],Node_Port:data_receive[i]['Node_Port'],Item_Type:'Node',Status:data_receive[i]['Status'],RSSI:data_receive[i]['RSSI'],IPAddress:data_receive[i]['IPAddress'],Vcc:data_receive[i]['Vcc'],Uptime:data_receive[i]['UpTime']};
@@ -2537,7 +2575,7 @@ function updateNodeStatus(node){
        // error handling code goes here
            myconsole.log("ERROR4 : " + err2);            
        } else {       
-           myconsole.log("Update Data " + data_receive[0]); 
+           myconsole.log("Update Data " + data_receive[0]['Id']); 
             var data = {Id:data_receive[0]['Id'],Device: data_receive[0]['Name'],Current_State: data_receive[0]['Last_Seen'],Node_Port:data_receive[0]['Node_Port'],Item_Type:'Node',Status:data_receive[0]['Status'],RSSI:data_receive[0]['RSSI'],IPAddress:data_receive[0]['IPAddress'],Vcc:data_receive[0]['Vcc'],Uptime:data_receive[0]['UpTime']};
                   
             io.emit('NodeStatusEvent',data);
@@ -2970,25 +3008,28 @@ function getModeStatus(callback){
                                  
 }
 
-function updateIP(){
+function updateIP2(){
  
   getip(function(ip){
         
         if(ip){
+        // pushOver.push(ip);
         externalip = ip;
         
         	if(oldip != externalip)
         	{
+        	 pushOver.push(ip);
+        	  myconsole.log("Ip Sent");
              if(configure2.server[0].dnsupdate[0] == 'true')  {
-        		    updatedns(ip,function(){});
-        		    updatednshome(ip,function(){});  
+        		    //updatedns(ip,function(){});
+        		   // updatednshome(ip,function(){});  
              }
     		 
     		 if(configure2.server[0].dnsemail[0] == 'true')  
     		    sendemail("Your current IP is http://" + ip);   
     		    
     		 if(configure2.server[0].dnsproxy[0] == 'true')  
-    		   updatednsproxy(function(){});   
+    		   //updatednsproxy(function(){});   
 		       
 		      oldip = externalip;   
         	
@@ -3082,8 +3123,10 @@ function updatednshome(ip,callback2){
     //curl "http://dyn.example.com:password@dyn.dns.he.net/nic/update?hostname=dyn.example.com&myip=192.168.0.1
   // myconsole.log(pass);
     var options = {
-      host: 'http://minny.co.za',
-      path: ':' + pass + '@dyn.dns.he.net/nic/update?hostname=minny.co.za&myip=' + ip,//&ip='+ip.substring(0,15),
+      host: 'https://api.dynu.com',  //wget "http://api.dynu.com/nic/update?myip=198.144.117.32&myipv6=2604:4400:a:8a::f4&username=someusername&password=098f6bcd4621d373cade4e832627b4f6"
+      path: '/v2/dns \
+        -H "accept: application/json" \
+        -H "API-Key: cK8MRDSS9cKv97729gNM1DNX1aU98hUK"',//&ip='+ip.substring(0,15),
       port: '80',
       //This is the only line that is new. `headers` is an object with the headers to request
     //  headers: header 
@@ -3094,12 +3137,12 @@ function updatednshome(ip,callback2){
   //	myconsole.log('HEADERS: ' + JSON.stringify(res.headers));
   	res.setEncoding('utf8');
   	res.on('data', function (chunk) {
-    		myconsole.log('HE DNS Update2: ' + chunk);
+    		myconsole.log('DynU DNS Update2: ' + chunk);
   	});
   });
 
 req.on('error', function(e) {
-  myconsole.log('problem with request: ' + e.message);
+  myconsole.log('problem with DynU request: ' + e.message);
 });
 
 // write data to request body

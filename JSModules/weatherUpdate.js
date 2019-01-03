@@ -8,7 +8,7 @@ var intervaltime2 = 15 * 1000;
 var rules = require('./Rule_UpdateStates.js');
 
 var log = require('./logger.js');
-var mySensorio = require('socket.io-client');
+//var mySensorio = require('socket.io-client');
 //var mySensorsocket = mySensorio.connect('http://localhost:'+ 44606);
 
 var backup = 0;

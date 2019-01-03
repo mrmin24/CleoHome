@@ -2,6 +2,12 @@ var myconsole = require('./myconsole.js');
 var sleep = require('sleep');
 var debug = 0;
 
+//debug 0 = no output
+//debug 1 = output normal no push message
+//debug 2 = no rules
+//debug 3 = output and  push message
+
+
 process.argv.forEach(function (val, index, array) {
   if(index == 2){
      
@@ -15,7 +21,7 @@ process.argv.forEach(function (val, index, array) {
     
 
 
-const startup_delay = 1000; 
+const startup_delay = 1*1000; 
 const startup_delay2 = 30 * 1000; 
 
 myconsole.log('Controller active, delay for router is ' + startup_delay/1000  + ' seconds, please wait...');
@@ -60,7 +66,7 @@ var timer = setTimeout(function() {
    
    // Health.start();
     
-     if(debug < 2)
+     if(debug < 2 || debug == 3)
        delayStart();
     
   
